@@ -2,6 +2,6 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
-#pragma link C++ class PPAC+;
-#pragma link C++ class SinglePPAC+;
+#pragma link C++ class DALIHit+;
+#pragma link C++ class DALI+;
 #endif

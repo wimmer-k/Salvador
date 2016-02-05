@@ -25,7 +25,7 @@ CFLAGS += -Wl,--no-as-needed
 LFLAGS += -Wl,--no-as-needed
 CFLAGS += -Wno-unused-variable -Wno-write-strings
 
-LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o 
+LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o build/DALI.o build/DALIDictionary.o 
 
 Salvator: Salvator.cc $(LIB_DIR)/libSalvator.so
 	@echo "Compiling $@"

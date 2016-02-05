@@ -12,18 +12,28 @@ using namespace std;
 /*!
   Container for the PPAC information
 */
-class PPAC : public TObject {
+
+/*!
+  Container for the information of a single PPAC
+*/
+class SinglePPAC : public TObject {
 public:
   //! default constructor
-  PPAC(){
+  SinglePPAC(){
     Clear();
   };
-  //! Clear the music information
+  //! Clear the ppac information
   void Clear(Option_t *option = ""){
+    fID = -1;
     fx = sqrt(-1.);
     fy = sqrt(-1.);
     ftsumx = sqrt(-1.);
     ftsumy = sqrt(-1.);
+  }
+  //! Set the ID
+  void SetID(short id){
+    if(id>0 && id <NPPACS+1) // id runs from 1
+      fID = id-1; //fID runs from 0
   }
   //! Set the x position
   void SetX(double x){fx = x;}
@@ -44,13 +54,16 @@ public:
     ftsumy = tsumy;
   }
   //! Set everything
-  void Set(double x, double y, double tsumx, double tsumy){
+  void Set(short id, double x, double y, double tsumx, double tsumy){
+    fID = id;
     fx = x;
     fy = y;
     ftsumx = tsumx;
     ftsumy = tsumy;
   }
 
+  //! Get the ID
+  short GetID(){return fID;}
   //! Get the x position
   double GetX(){return fx;}
   //! Get the y position
@@ -61,6 +74,8 @@ public:
   double GetTsumY(){return ftsumy;}
   
 protected:
+  //! ID
+  short fID;
   //! x position
   double fx;
   //! y position
@@ -69,6 +84,42 @@ protected:
   double ftsumx;
   //! timing sum y
   double ftsumy;
+
+  /// \cond CLASSIMP
+  ClassDef(SinglePPAC,1);
+  /// \endcond
+};
+class PPAC : public TObject {
+public:
+  //! default constructor
+  PPAC(){
+    Clear();
+  };
+  //! Clear all ppac information
+  void Clear(Option_t *option = ""){
+    fnppacs = 0;
+    for(vector<SinglePPAC*>::iterator ppac=fppacs.begin(); ppac!=fppacs.end(); ppac++){
+      delete *ppac;
+    }
+    fppacs.clear();
+  }
+  //! Add a ppac
+  void AddPPAC(SinglePPAC* ppac){
+    fppacs.push_back(ppac);
+    fnppacs++;
+  }
+  //! Returns the number of hit ppacs
+  unsigned short GetN(){return fnppacs;}
+  //! Returns the whole vector of ppacs
+  vector<SinglePPAC*> GetPPACS(){return fppacs;}
+  //! Returns the ppacs number n
+  SinglePPAC* GetPPAC(unsigned short n){return fppacs[n];}
+
+protected:
+  //! number of ppacs hit
+  unsigned short fnppacs;
+  //! vector of ppacs
+  vector<SinglePPAC*> fppacs;
 
   /// \cond CLASSIMP
   ClassDef(PPAC,1);

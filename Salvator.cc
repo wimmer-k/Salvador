@@ -35,6 +35,7 @@
 #include "FocalPlane.hh"
 #include "PPAC.hh"
 #include "Beam.hh"
+#include "DALI.hh"
 using namespace TMath;
 using namespace std;
 int fpID[6] = {3,5,7,8,9,11};
@@ -146,25 +147,27 @@ int main(int argc, char* argv[]){
   // Create CalibDALI to get and calibrate raw data
   TArtCalibDALI *dalicalib = new TArtCalibDALI();
 
-  std::cout<<"para"<<std::endl;
+  // output tree
   TTree *tr = new TTree("tr","Data Tree");
-
+  //branch for trig bit
   int trigbit = 0;
   tr->Branch("trigbit",&trigbit,"trigbit/I");
-  
+  //branches for each focal plane
   FocalPlane *fp[NFPLANES];
   for(unsigned short f=0;f<NFPLANES;f++){
     fp[f] = new FocalPlane;
     tr->Branch(Form("fp%d",fpID[f]),&fp[f],320000);
   }
+  //branch for the beam, beta, a/q, z
   Beam *beam = new Beam;
   tr->Branch("beam",&beam,320000);
-
-  PPAC *ppac[NPPACS];
-  for(unsigned short p=0;p<NPPACS;p++){
-    ppac[p] = new PPAC;
-    tr->Branch(Form("ppac%d",p),&ppac[p],320000);
-  }
+  //branch for the PPACs
+  PPAC *ppacs = new PPAC;
+  tr->Branch("ppacs",&ppacs,320000);
+  //branch for DALI
+  DALI *dali = new DALI;
+  tr->Branch("dali",&dali,320000);
+  
 
   int ctr =0;
   while(estore->GetNextEvent()){
@@ -173,7 +176,9 @@ int main(int argc, char* argv[]){
     for(int f=0;f<NFPLANES;f++){
       fp[f]->Clear();
     }
+    ppacs->Clear();
     beam->Clear();
+    dali->Clear();
 
     //Making the BigRIPS tree calibration
     brcalib->ClearData();
@@ -200,10 +205,12 @@ int main(int argc, char* argv[]){
     
     TArtPPAC *tppac;
     for(unsigned short p=0;p<NPPACS;p++){
-      ppac[p]->Clear();
+      SinglePPAC *dppac = new SinglePPAC;
       tppac = ppaccalib->GetPPAC(p);
       if(tppac){
-	ppac[p]->Set(tppac->GetX(),tppac->GetY(),tppac->GetTSumX(),tppac->GetTSumY());
+	dppac->Set(tppac->GetID(),tppac->GetX(),tppac->GetY(),tppac->GetTSumX(),tppac->GetTSumY());
+	if(tppac->IsFiredX()||tppac->IsFiredY())
+	  ppacs->AddPPAC(dppac);
       }
     }
 
@@ -270,7 +277,7 @@ int main(int argc, char* argv[]){
     for(unsigned short b=0;b<4;b++)
       beam->SetDelta(b ,recorips[b]->GetDelta());
 
-    /*
+    
     //dali
     dalicalib->ClearData();
     dalicalib->SetPlTime(beam->GetTOF(2));
@@ -279,12 +286,20 @@ int main(int argc, char* argv[]){
     //Add above to remove F8plastic tof.
     dalicalib->ReconstructData();
 
-    cout << "dalicalib->GetNumNaI() " << dalicalib->GetNumNaI() << endl;
+    //cout << "dalicalib->GetNumNaI() " << dalicalib->GetNumNaI() << endl;
     for(unsigned short g=0; g<dalicalib->GetNumNaI()-2; g++){//last two are junk?
       TArtDALINaI* hit = (TArtDALINaI*)dalicalib->GetNaIArray()->At(g);
-      cout << "hit("<<g<<")->GetEnergy() " <<hit->GetEnergy() << endl;
+      DALIHit *dhit = new DALIHit();
+      dhit->SetID(hit->GetID());
+      dhit->SetEnergy(hit->GetEnergy());
+      dhit->SetPos(hit->GetXPos(),hit->GetYPos(),hit->GetZPos());
+      dhit->SetDCEnergy(hit->GetDoppCorEnergy());	
+      dhit->SetTime(hit->GetTime());  
+      dhit->SetTOffset(hit->GetTimeOffseted());
+      if(dhit->GetEnergy()>0)
+	dali->AddHit(dhit);
     }
-    */
+    
 
     //fill the tree
     tr->Fill();
@@ -292,11 +307,11 @@ int main(int argc, char* argv[]){
     //output
     if(ctr%10000 == 0){
       double time_end = get_time();
-      cout << setw(5) << setiosflags(ios::fixed) << setprecision(1) << (Float_t)ctr/(time_end - time_start) << " events/s \r" << flush;
+      cout << setw(5) << ctr << " events done " << setiosflags(ios::fixed) << setprecision(1) << (Float_t)ctr/(time_end - time_start) << " events/s \r" << flush;
     }
     ctr++;
 
-    if(ctr>nmax)
+    if(nmax>0 && ctr>nmax)
       break;
   }
   tr->Write("",TObject::kOverwrite);
