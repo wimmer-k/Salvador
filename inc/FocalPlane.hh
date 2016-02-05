@@ -104,22 +104,22 @@ protected:
 };
 
 /*!
-  Container for the PPAC information
+  Container for the Track information
 */
-class PPAC : public TObject {
+class Track : public TObject {
 public:
   //! default constructor
-  PPAC(){
+  Track(){
     Clear();
   };
-  //! Clear the ppac information
+  //! Clear the track information
   void Clear(Option_t *option = ""){
     fx = sqrt(-1.);
     fy = sqrt(-1.);
     fa = sqrt(-1.);
     fb = sqrt(-1.);
   }
-  //! Set the ppac information
+  //! Set the track information
   void Set(double x, double y, double a, double b){
     fx = x;
     fy = y;
@@ -155,7 +155,7 @@ protected:
   double fb;
 
   /// \cond CLASSIMP
-  ClassDef(PPAC,1);
+  ClassDef(Track,1);
   /// \endcond
 };
 
@@ -169,16 +169,16 @@ public:
   FocalPlane(){
     Clear();
   };
-  //! Clear the ppac information
+  //! Clear the track information
   void Clear(Option_t *option = ""){
-    fppac.Clear();
+    ftrack.Clear();
     fplastic.Clear();
     fmusic.Clear();
   }
-  //! set the ppac
-  void SetPPAC(PPAC ppac){fppac = ppac;}
-  //! return the ppac
-  PPAC* GetPPAC(){return &fppac;}
+  //! set the track
+  void SetTrack(Track track){ftrack = track;}
+  //! return the track
+  Track* GetTrack(){return &ftrack;}
   //! set the plastic
   void SetPlastic(Plastic plastic){fplastic = plastic;}
   //! return the plastic
@@ -189,8 +189,8 @@ public:
   MUSIC* GetMUSIC(){return &fmusic;}
   
 protected:
-  //! PPAC of that focal plane
-  PPAC fppac;
+  //! Track of that focal plane
+  Track ftrack;
   //! Plastic for that focal plane
   Plastic fplastic;
   //! Ionchamber for that focal plane

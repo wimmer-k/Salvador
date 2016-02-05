@@ -33,6 +33,7 @@
 #include "TStopwatch.h"
 #include "CommandLineInterface.hh"
 #include "FocalPlane.hh"
+#include "PPAC.hh"
 #include "Beam.hh"
 using namespace TMath;
 using namespace std;
@@ -152,12 +153,18 @@ int main(int argc, char* argv[]){
   tr->Branch("trigbit",&trigbit,"trigbit/I");
   
   FocalPlane *fp[NFPLANES];
-  for(int f=0;f<NFPLANES;f++){
+  for(unsigned short f=0;f<NFPLANES;f++){
     fp[f] = new FocalPlane;
     tr->Branch(Form("fp%d",fpID[f]),&fp[f],320000);
   }
   Beam *beam = new Beam;
   tr->Branch("beam",&beam,320000);
+
+  PPAC *ppac[NPPACS];
+  for(unsigned short p=0;p<NPPACS;p++){
+    ppac[p] = new PPAC;
+    tr->Branch(Form("ppac%d",p),&ppac[p],320000);
+  }
 
   int ctr =0;
   while(estore->GetNextEvent()){
@@ -190,21 +197,31 @@ int main(int argc, char* argv[]){
         }
       }
     }
+    
+    TArtPPAC *tppac;
+    for(unsigned short p=0;p<NPPACS;p++){
+      ppac[p]->Clear();
+      tppac = ppaccalib->GetPPAC(p);
+      if(tppac){
+	ppac[p]->Set(tppac->GetX(),tppac->GetY(),tppac->GetTSumX(),tppac->GetTSumY());
+      }
+    }
 
     //focal plane detector information
     TArtFocalPlane *tfpl;
     TArtPlastic *tpla;
     TArtIC *tic;
     TVectorD *vec;
-    PPAC ppac;
+    Track track;
     Plastic plastic;
     MUSIC music;
     for(unsigned short f=0;f<NFPLANES;f++){
-      ppac.Clear();
+      fp[f]->Clear();
+      track.Clear();
       tfpl = cfpl->FindFocalPlane(fpID[f]);
       if(tfpl){
 	vec=tfpl->GetOptVector(); 
-	ppac.Set((*vec)(0), (*vec)(2), (*vec)(1), (*vec)(3));
+	track.Set((*vec)(0), (*vec)(2), (*vec)(1), (*vec)(3));
       }
 
       plastic.Clear();
@@ -223,7 +240,7 @@ int main(int argc, char* argv[]){
 	music.SetEnergy(tic->GetEnergyAvSum(),tic->GetEnergySqSum());
       }
 
-      fp[f]->SetPPAC(ppac);
+      fp[f]->SetTrack(track);
       fp[f]->SetPlastic(plastic);
       fp[f]->SetMUSIC(music);
     }
@@ -237,22 +254,23 @@ int main(int argc, char* argv[]){
     for(unsigned short b=0;b<6;b++)
       beam->SetAQZ(b,recobeam[b]->GetAoQ(),recobeam[b]->GetZet());
 
-    beam->CorrectAQ(1, +0.00034002 *fp[fpNr(5)]->GetPPAC()->GetA()
-		       -6.089e-05  *fp[fpNr(5)]->GetPPAC()->GetX()
-		       +0.000413889*fp[fpNr(7)]->GetPPAC()->GetA() 
-                       +0.000460512*fp[fpNr(7)]->GetPPAC()->GetX());
+    beam->CorrectAQ(1, +0.00034002 *fp[fpNr(5)]->GetTrack()->GetA()
+		       -6.089e-05  *fp[fpNr(5)]->GetTrack()->GetX()
+		       +0.000413889*fp[fpNr(7)]->GetTrack()->GetA() 
+                       +0.000460512*fp[fpNr(7)]->GetTrack()->GetX());
     
-    beam->CorrectAQ(5, +8.53643e-05*fp[fpNr(5)]->GetPPAC()->GetA()
-		       -6.57149e-05*fp[fpNr(5)]->GetPPAC()->GetX()
-		       +0.000158604*fp[fpNr(7)]->GetPPAC()->GetA() 
-                       +0.000212333*fp[fpNr(7)]->GetPPAC()->GetX()
-                       -9.46977e-05*fp[fpNr(9)]->GetPPAC()->GetA()
-		       +1.46503e-06*fp[fpNr(9)]->GetPPAC()->GetX()
-		       -2.54913e-06*fp[fpNr(11)]->GetPPAC()->GetA() 
-                       -0.00010038 *fp[fpNr(11)]->GetPPAC()->GetX());
+    beam->CorrectAQ(5, +8.53643e-05*fp[fpNr(5)]->GetTrack()->GetA()
+		       -6.57149e-05*fp[fpNr(5)]->GetTrack()->GetX()
+		       +0.000158604*fp[fpNr(7)]->GetTrack()->GetA() 
+                       +0.000212333*fp[fpNr(7)]->GetTrack()->GetX()
+                       -9.46977e-05*fp[fpNr(9)]->GetTrack()->GetA()
+		       +1.46503e-06*fp[fpNr(9)]->GetTrack()->GetX()
+		       -2.54913e-06*fp[fpNr(11)]->GetTrack()->GetA() 
+                       -0.00010038 *fp[fpNr(11)]->GetTrack()->GetX());
     for(unsigned short b=0;b<4;b++)
       beam->SetDelta(b ,recorips[b]->GetDelta());
 
+    /*
     //dali
     dalicalib->ClearData();
     dalicalib->SetPlTime(beam->GetTOF(2));
@@ -266,6 +284,7 @@ int main(int argc, char* argv[]){
       TArtDALINaI* hit = (TArtDALINaI*)dalicalib->GetNaIArray()->At(g);
       cout << "hit("<<g<<")->GetEnergy() " <<hit->GetEnergy() << endl;
     }
+    */
 
     //fill the tree
     tr->Fill();
