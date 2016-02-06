@@ -113,7 +113,7 @@ public:
   //! Returns the whole vector of ppacs
   vector<SinglePPAC*> GetPPACS(){return fppacs;}
   //! Returns the ppacs number n
-  SinglePPAC* GetPPAC(unsigned short n){return fppacs[n];}
+  SinglePPAC* GetPPAC(unsigned short n){return fppacs.at(n);}
 
 protected:
   //! number of ppacs hit

@@ -31,11 +31,14 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TStopwatch.h"
+
+
 #include "CommandLineInterface.hh"
 #include "FocalPlane.hh"
 #include "PPAC.hh"
 #include "Beam.hh"
 #include "DALI.hh"
+#include "Globaldefs.h"
 using namespace TMath;
 using namespace std;
 int fpID[6] = {3,5,7,8,9,11};
@@ -170,7 +173,7 @@ int main(int argc, char* argv[]){
   
 
   int ctr =0;
-  while(estore->GetNextEvent()){
+  while(estore->GetNextEvent() && !signal_received){
     //clearing
     trigbit = 0;
     for(int f=0;f<NFPLANES;f++){
@@ -311,15 +314,19 @@ int main(int argc, char* argv[]){
     }
     ctr++;
 
-    if(nmax>0 && ctr>nmax)
+    if(nmax>0 && ctr>nmax-1)
       break;
   }
-  tr->Write("",TObject::kOverwrite);
-  outfile->Close();
 
   double time_end = get_time();
-  cout << "Run time " << time_end - time_start << " s." << endl;
- 
+  cout << "Program Run time: " << time_end - time_start << " s." << endl;
+  cout << "Total of " << ctr << " events processed, " << ctr/(time_end - time_start) << " events/s." << endl;
+  cout << BLUE << tr->GetEntries() << DEFCOLOR << " entries written to tree ("<<BLUE<<tr->GetZipBytes()/(1024*1024)<< DEFCOLOR<<" MB)"<< endl;
+  tr->Write("",TObject::kOverwrite);
+  outfile->Close();
+  timer.Stop();
+  cout << "CPU time: " << timer.CpuTime() << "\tReal time: " << timer.RealTime() << endl;
+
   return 0;
 }
 void signalhandler(int sig){

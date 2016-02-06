@@ -141,13 +141,13 @@ public:
   //! Returns the whole vector of hits
   vector<DALIHit*> GetHits(){return fhits;}
   //! Returns the hit number n
-  DALIHit* GetHit(unsigned short n){return fhits[n];}
+  DALIHit* GetHit(unsigned short n){return fhits.at(n);}
   //! Returns the multiplicity of the event after addback
   int GetMultAB(){return fmultAB;}
   //! Returns the whole vector of hits after addback
   vector<DALIHit*> GetHitsAB(){return fhitsAB;}
   //! Returns the hit number n after addback
-  DALIHit* GetHitAB(int n){return fhitsAB[n];}
+  DALIHit* GetHitAB(int n){return fhitsAB.at(n);}
 
   //! Printing information
   void Print(Option_t *option = "") const {
