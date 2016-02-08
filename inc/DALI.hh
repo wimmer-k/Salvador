@@ -31,8 +31,8 @@ public:
   }
   //! Set the detector ID
   void SetID(short id){
-    if(id>-1 && id <MAXNCRYSTAL)
-      fID = id;
+    if(id>0 && id <MAXNCRYSTAL-1)//id is from 1
+      fID = id-1;
   }
   //! Set the position by vector
   void SetPos(TVector3 pos){fpos = pos;}
@@ -48,6 +48,10 @@ public:
   void SetTime(double time){ftime = time;}
   //! Set the time after offset correction
   void SetTOffset(double toffset){ftoffset = toffset;}
+  //! Set the raw ADC value
+  void SetADC(int adc){fadc = adc;}
+  //! Set the raw TDC value
+  void SetTDC(int tdc){ftdc = tdc;}
 
   //! Get the ID
   short GetID(){return fID;}
@@ -61,7 +65,11 @@ public:
   double GetTime(){return ftime;}
   //! Get the time after offset correction
   double GetTOffset(){return ftoffset;}
-
+  //! Get the raw ADC value
+  int GetADC(){return fadc;}
+  //! Get the raw TDC value
+  int GetTDC(){return ftdc;}
+  
 
   //! Apply the Doppler correction with the given beta, assuming motion in the +z direction.
   void DopplerCorrect(double beta){
@@ -90,6 +98,10 @@ protected:
   double ftime;
   //! the time after offset correction
   double ftoffset;
+  //! the raw adc value
+  int fadc;
+  //! the raw tdc value
+  int ftdc;
 
   /// \cond CLASSIMP
   ClassDef(DALIHit,1);

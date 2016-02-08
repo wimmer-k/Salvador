@@ -294,13 +294,15 @@ int main(int argc, char* argv[]){
       TArtDALINaI* hit = (TArtDALINaI*)dalicalib->GetNaIArray()->At(g);
       DALIHit *dhit = new DALIHit();
       dhit->SetID(hit->GetID());
+      dhit->SetADC(hit->GetRawADC());
+      dhit->SetTDC(hit->GetRawTDC());
       dhit->SetEnergy(hit->GetEnergy());
       dhit->SetPos(hit->GetXPos(),hit->GetYPos(),hit->GetZPos());
       dhit->SetDCEnergy(hit->GetDoppCorEnergy());	
       dhit->SetTime(hit->GetTime());  
       dhit->SetTOffset(hit->GetTimeOffseted());
-      if(dhit->GetEnergy()>0)
-	dali->AddHit(dhit);
+      //      if(dhit->GetEnergy()>0)
+      dali->AddHit(dhit);
     }
     
 

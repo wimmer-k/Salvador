@@ -64,6 +64,7 @@ int main(int argc, char* argv[]){
   }
 
   //dali
+  TH2F* adc_id = new TH2F("adc_id","adc_id",200,0,200,5000,0,5000);hlist->Add(adc_id);
   TH2F* en_id = new TH2F("en_id","en_id",200,0,200,500,0,2000);hlist->Add(en_id);
   TH2F* enDC_id = new TH2F("enDC_id","enDC_id",200,0,200,500,0,2000);hlist->Add(enDC_id);
   TH2F* time_id = new TH2F("time_id","time_id",200,0,200,2000,-2000,0);hlist->Add(time_id);
@@ -131,6 +132,7 @@ int main(int argc, char* argv[]){
     for(unsigned short g=0;g<dali->GetMult();g++){
       DALIHit * hit = dali->GetHit(g);
       short id = hit->GetID();
+      adc_id->Fill(id,hit->GetADC());
       en_id->Fill(id,hit->GetEnergy());
       enDC_id->Fill(id,hit->GetDCEnergy());
       time_id->Fill(id,hit->GetTime());
