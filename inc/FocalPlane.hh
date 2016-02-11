@@ -83,6 +83,14 @@ public:
   double GetTime(){return ftime;}
   //! Get the charge
   double GetCharge(){return fcharge;}
+  //! Get the time left
+  double GetTimeL(){return ftimeL;}
+  //! Get the charge left
+  double GetChargeL(){return fchargeL;}
+  //! Get the time right
+  double GetTimeR(){return ftimeR;}
+  //! Get the charge right
+  double GetChargeR(){return fchargeR;}
   
 protected:
   //! timing of the plastic (TL + TR)

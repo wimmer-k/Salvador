@@ -8,6 +8,7 @@
 #include "TChain.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TKey.h"
 #include "TStopwatch.h"
 #include "CommandLineInterface.hh"
 #include "FocalPlane.hh"
@@ -31,10 +32,13 @@ int main(int argc, char* argv[]){
   int Verbose =0;
   vector<char*> InputFiles;
   char *OutFile = NULL;
+  char* TreeName = (char*)"tr";
+
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "inputfiles", &InputFiles);
   interface->Add("-o", "output file", &OutFile);    
+  interface->Add("-tn", "name of the tree", &TreeName);
   interface->Add("-le", "last event to be read", &LastEvent);  
   interface->Add("-v", "verbose level", &Verbose);  
   interface->CheckFlags(argc, argv);
@@ -64,7 +68,15 @@ int main(int argc, char* argv[]){
     tsumx[p] = new TH1F(Form("tsumx_%d",p),Form("tsumx_%d",p),1000,-200,800);hlist->Add(tsumx[p]);
     tsumy[p] = new TH1F(Form("tsumy_%d",p),Form("tsumy_%d",p),1000,-200,800);hlist->Add(tsumy[p]);
   }
-
+  //focal planes
+  TH2F* dT_vs_logQ[NFPLANES];
+  TH2F* logQ_vs_X[NFPLANES];
+  TH2F* dT_vs_X[NFPLANES];
+  for(unsigned short f=0;f<NFPLANES;f++){
+    dT_vs_logQ[f] = new TH2F(Form("dT_vs_logQ_%d",fpID[f]),Form("dT_vs_logQ_%d",fpID[f]),1000,-5,5,600,-3,3);hlist->Add( dT_vs_logQ[f]);
+    logQ_vs_X[f] = new TH2F(Form("logQ_vs_X_%d",fpID[f]),Form("logQ_vs_X_%d",fpID[f]),1000,-50,50,600,-3,3);hlist->Add( logQ_vs_X[f]);
+    dT_vs_X[f] = new TH2F(Form("dT_vs_X_%d",fpID[f]),Form("dT_vs_X_%d",fpID[f]),1000,-50,50,1000,-5,5);hlist->Add( dT_vs_X[f]);
+  }
   //dali
   TH2F* adc_id = new TH2F("adc_id","adc_id",200,0,200,5000,0,5000);hlist->Add(adc_id);
   TH2F* en_id = new TH2F("en_id","en_id",200,0,200,500,0,2000);hlist->Add(en_id);
@@ -82,12 +94,12 @@ int main(int argc, char* argv[]){
   } 
 
   TChain* tr;
-  tr = new TChain("tr");
+  tr = new TChain(TreeName);
   for(unsigned int i=0; i<InputFiles.size(); i++){
     tr->Add(InputFiles[i]);
   }
   if(tr == NULL){
-    cout << "could not find tree ctr in file " << endl;
+    cout << "could not find tree "<< TreeName <<" in file " << endl;
     for(unsigned int i=0; i<InputFiles.size(); i++){
       cout<<InputFiles[i]<<endl;
     }
@@ -95,12 +107,19 @@ int main(int argc, char* argv[]){
   }
   PPAC* ppac = new PPAC;
   tr->SetBranchAddress("ppacs",&ppac);
+  FocalPlane *fp[NFPLANES];
+  for(unsigned short f=0;f<NFPLANES;f++){
+    fp[f] = new FocalPlane;
+    tr->SetBranchAddress(Form("fp%d",fpID[f]),&fp[f]);
+  }
   Beam* beam = new Beam;
   tr->SetBranchAddress("beam",&beam);
   DALI* dali = new DALI;
   tr->SetBranchAddress("dali",&dali);
   Double_t nentries = tr->GetEntries();
   cout << nentries << " entries in tree" << endl;
+  if(nentries<1)
+    return 4;
   if(LastEvent>0)
     nentries = LastEvent;
   
@@ -153,6 +172,14 @@ int main(int argc, char* argv[]){
       }
       toffset_id->Fill(id,hit->GetTOffset());
     }
+    //focal planes
+    for(unsigned short f=0;f<NFPLANES;f++){
+      Plastic *pl = fp[f]->GetPlastic();
+      dT_vs_logQ[f]->Fill(log(pl->GetChargeL()/pl->GetChargeR()), pl->GetTimeL()-pl->GetTimeR());
+      logQ_vs_X[f]->Fill(fp[f]->GetTrack()->GetX(), log(pl->GetChargeL()/pl->GetChargeR()));
+      dT_vs_X[f]->Fill(fp[f]->GetTrack()->GetX(), pl->GetTimeL()-pl->GetTimeR());
+    }
+
     //beam
     for(unsigned short f=0;f<6;f++){
       z_vs_aoq[f]->Fill(beam->GetAQ(f),beam->GetZ(f));
@@ -168,7 +195,17 @@ int main(int argc, char* argv[]){
   cout << endl;
   cout << "creating outputfile " << endl;
   TFile* ofile = new TFile(OutFile,"recreate");
-  hlist->Write();
+  TH1F* h1;
+  TH2F* h2;
+  TIter next(hlist);
+  while( (h1 = (TH1F*)next()) ){
+    if(h1->GetEntries()>0)
+      h1->Write("",TObject::kOverwrite);
+  }
+  while( (h2 = (TH2F*)next()) ){
+    if(h2->GetEntries()>0)
+      h2->Write("",TObject::kOverwrite);
+  }
   ofile->Close();
   double time_end = get_time();
   cout << "Program Run time: " << time_end - time_start << " s." << endl;
