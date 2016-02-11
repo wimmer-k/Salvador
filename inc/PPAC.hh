@@ -10,10 +10,6 @@
 using namespace std;
 
 /*!
-  Container for the PPAC information
-*/
-
-/*!
   Container for the information of a single PPAC
 */
 class SinglePPAC : public TObject {
@@ -89,6 +85,10 @@ protected:
   ClassDef(SinglePPAC,1);
   /// \endcond
 };
+
+/*!
+  Container for the PPAC information
+*/
 class PPAC : public TObject {
 public:
   //! default constructor

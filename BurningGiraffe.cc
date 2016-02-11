@@ -25,6 +25,8 @@ int main(int argc, char* argv[]){
   TStopwatch timer;
   timer.Start();
   signal(SIGINT,signalhandler);
+  cout << "\"The Burning Giraffe\" (1937), Salvator Dali" << endl;
+  cout << "Histogramms for DALI" << endl;
   int LastEvent =-1;
   int Verbose =0;
   vector<char*> InputFiles;
@@ -71,6 +73,14 @@ int main(int argc, char* argv[]){
   TH2F* time_id_g = new TH2F("time_id_g","time_id_g",200,0,200,2000,-2000,0);hlist->Add(time_id_g);
   TH2F* toffset_id = new TH2F("toffset_id","toffset_id",200,0,200,1000,-200,800);hlist->Add(toffset_id);
 
+  //PID
+  TH2F* z_vs_aoq[6];
+  TH2F* z_vs_aoqc[6];
+  for(unsigned short f=0;f<6;f++){
+    z_vs_aoq[f] = new TH2F(Form("z_vs_aoq_%d",f),Form("z_vs_aoq_%d",f),1000,1.8,2.2,1000,30,40);hlist->Add(z_vs_aoq[f]);
+    z_vs_aoqc[f] = new TH2F(Form("z_vs_aoqc_%d",f),Form("z_vs_aoqc_%d",f),1000,1.8,2.2,1000,30,40);hlist->Add(z_vs_aoqc[f]);
+  } 
+
   TChain* tr;
   tr = new TChain("tr");
   for(unsigned int i=0; i<InputFiles.size(); i++){
@@ -85,6 +95,8 @@ int main(int argc, char* argv[]){
   }
   PPAC* ppac = new PPAC;
   tr->SetBranchAddress("ppacs",&ppac);
+  Beam* beam = new Beam;
+  tr->SetBranchAddress("beam",&beam);
   DALI* dali = new DALI;
   tr->SetBranchAddress("dali",&dali);
   Double_t nentries = tr->GetEntries();
@@ -100,6 +112,7 @@ int main(int argc, char* argv[]){
     }
     ppac->Clear();
     dali->Clear();
+    beam->Clear();
     if(Verbose>2)
       cout << "getting entry " << i << endl;
     status = tr->GetEvent(i);
@@ -126,7 +139,6 @@ int main(int argc, char* argv[]){
 	tsumx[sp->GetID()]->Fill(sp->GetTsumX());
 	tsumy[sp->GetID()]->Fill(sp->GetTsumY());
       }
-
     }
     //dali
     for(unsigned short g=0;g<dali->GetMult();g++){
@@ -141,7 +153,11 @@ int main(int argc, char* argv[]){
       }
       toffset_id->Fill(id,hit->GetTOffset());
     }
- 
+    //beam
+    for(unsigned short f=0;f<6;f++){
+      z_vs_aoq[f]->Fill(beam->GetAQ(f),beam->GetZ(f));
+      z_vs_aoqc[f]->Fill(beam->GetCorrAQ(f),beam->GetZ(f));
+    }
     if(i%10000 == 0){
       double time_end = get_time();
       cout << setw(5) << setiosflags(ios::fixed) << setprecision(1) << (100.*i)/nentries <<

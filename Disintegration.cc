@@ -1,0 +1,182 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <sys/time.h>
+#include <signal.h>
+#include "TMath.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TCutG.h"
+#include "TKey.h"
+#include "TStopwatch.h"
+#include "CommandLineInterface.hh"
+#include "FocalPlane.hh"
+#include "Beam.hh"
+#include "DALI.hh"
+#include "Globaldefs.h"
+using namespace TMath;
+using namespace std;
+bool signal_received = false;
+void signalhandler(int sig);
+double get_time();
+int main(int argc, char* argv[]){
+  double time_start = get_time();  
+  TStopwatch timer;
+  timer.Start();
+  signal(SIGINT,signalhandler);
+  cout << "\"La Desintegracion de la Persistencia de la Memoria\" (1954), Salvator Dali" << endl;
+  cout << "Treesplitter for DALI" << endl;
+  int LastEvent =-1;
+  int Verbose =0;
+  char *InputFile = NULL;
+  char *OutFile = NULL;
+  char *CutFile = NULL;
+  //Read in the command line arguments
+  CommandLineInterface* interface = new CommandLineInterface();
+  interface->Add("-i", "input file", &InputFile);
+  interface->Add("-o", "output file", &OutFile);    
+  interface->Add("-c", "cutfile", &CutFile);
+  interface->Add("-le", "last event to be read", &LastEvent);  
+  interface->Add("-v", "verbose level", &Verbose);  
+  interface->CheckFlags(argc, argv);
+  //Complain about missing mandatory arguments
+  if(InputFile == NULL){
+    cout << "No input file given " << endl;
+    return 1;
+  }
+  if(OutFile == NULL){
+    cout << "No output ROOT file given " << endl;
+    return 2;
+  }
+  if(CutFile == NULL){
+    cout << "No cut file given " << endl;
+    return 3;
+  }
+  TFile* infile = new TFile(InputFile);
+  TTree* tr = (TTree*) infile->Get("tr");
+  if(tr == NULL){
+    cout << "could not find tree tr in file " << infile->GetName() << endl;
+    return 4;
+  }
+  int trigbit = 0;
+  tr->SetBranchAddress("trigbit",&trigbit);
+  FocalPlane *fp[NFPLANES];
+  for(unsigned short f=0;f<NFPLANES;f++){
+    fp[f] = new FocalPlane;
+    tr->SetBranchAddress(Form("fp%d",fpID[f]),&fp[f]);
+  }
+  Beam* beam = new Beam;
+  tr->SetBranchAddress("beam",&beam);
+  DALI* dali = new DALI;
+  tr->SetBranchAddress("dali",&dali);
+
+  cout<<"output file: "<<OutFile<< endl;
+
+  vector<TCutG*> InPartCut;
+  vector<vector<TTree*> > splittree;
+  //Read in the cuts file for incoming and outgoing particle ID
+  char* Name = NULL;
+  TFile *cFile = new TFile(CutFile);
+  TIter next(cFile->GetListOfKeys());
+  TKey *key;
+  while((key=(TKey*)next())){
+    if(strcmp(key->GetClassName(),"TCutG") == 0){
+      Name = (char*)key->GetName();
+      if(strstr(Name,"in") && !strstr(Name,"out")){
+	cout << "incoming cut found "<<Name << endl;
+	InPartCut.push_back((TCutG*)cFile->Get(Name));
+      }
+    }      
+  }
+  cFile->Close();
+  splittree.resize(InPartCut.size());
+  for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
+    splittree[in].resize(1);
+    splittree[in][0] = new TTree(Form("tr_%s",InPartCut[in]->GetName()),Form("Data Tree with cut on %s",InPartCut[in]->GetName()));
+    splittree[in][0]->Branch("trigbit",&trigbit,"trigbit/I");
+    for(unsigned short f=0;f<NFPLANES;f++)
+      splittree[in][0]->Branch(Form("fp%d",fpID[f]),&fp[f],320000);
+    splittree[in][0]->Branch("beam",&beam,320000);
+    splittree[in][0]->Branch("dali",&dali,320000);
+  }
+
+  Double_t nentries = tr->GetEntries();
+  cout << nentries << " entries in tree" << endl;
+  if(LastEvent>0)
+    nentries = LastEvent;
+  
+  Int_t nbytes = 0;
+  Int_t status;
+  for(int i=0; i<nentries;i++){
+    if(signal_received){
+      break;
+    }
+    trigbit = 0;
+    for(int f=0;f<NFPLANES;f++){
+      fp[f]->Clear();
+    }
+    beam->Clear();
+    dali->Clear();
+    if(Verbose>2)
+      cout << "getting entry " << i << endl;
+    status = tr->GetEvent(i);
+    if(Verbose>2)
+      cout << "status " << status << endl;
+    if(status == -1){
+      cerr<<"Error occured, couldn't read entry "<<i<<" from tree "<<tr->GetName()<<" in file "<<infile->GetName()<<endl;
+      return 5;
+    }
+    else if(status == 0){
+      cerr<<"Error occured, entry "<<i<<" in tree "<<tr->GetName()<<" in file "<<infile->GetName()<<" doesn't exist"<<endl;
+      return 6;
+    }
+    nbytes += status;
+    
+    //start analysis
+    for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
+      if(InPartCut[in]->IsInside(beam->GetAQ(1),beam->GetZ(1)))
+	splittree[in][0]->Fill();
+    }
+ 
+    if(i%10000 == 0){
+      double time_end = get_time();
+      cout << setw(5) << setiosflags(ios::fixed) << setprecision(1) << (100.*i)/nentries <<
+	" % done\t" << (Float_t)i/(time_end - time_start) << " events/s " << 
+	(nentries-i)*(time_end - time_start)/(Float_t)i << "s to go \r" << flush;
+    }
+  }
+  cout << endl;
+  cout << "creating outputfile " << endl;
+  TFile* ofile = new TFile(OutFile,"recreate");
+  ofile->cd();
+  Long64_t filesize =0;
+  for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
+    splittree[in][0]->Write("",TObject::kOverwrite);
+    filesize += splittree[in][0]->GetZipBytes();
+  }
+  cout<<"Size of input tree  "<<setw(7)<<tr->GetZipBytes()/(1024*1024)<<" MB"<<endl
+      <<"size of splitted trees "<<setw(7)<<filesize/(1024*1024)<<" MB"<<endl
+      <<"=> size of splitted tree(s) is "<<setw(5)<<setiosflags(ios::fixed)<<setprecision(1)<<(100.*filesize)/tr->GetZipBytes()<<" % of size of input tree"<<endl;
+  ofile->Close();
+  infile->Close();
+  double time_end = get_time();
+  cout << "Program Run time: " << time_end - time_start << " s." << endl;
+  timer.Stop();
+  cout << "CPU time: " << timer.CpuTime() << "\tReal time: " << timer.RealTime() << endl;
+  return 0;
+}
+
+
+
+void signalhandler(int sig){
+  if (sig == SIGINT){
+    signal_received = true;
+  }
+}
+
+double get_time(){  
+    struct timeval t;  
+    gettimeofday(&t, NULL);  
+    double d = t.tv_sec + (double) t.tv_usec/1000000;  
+    return d;  
+}  

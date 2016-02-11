@@ -35,7 +35,7 @@ BurningGiraffe: BurningGiraffe.cc $(LIB_DIR)/libSalvator.so
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
 
-TreeSplit: TreeSplit.cc
+Disintegration: Disintegration.cc
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
 
