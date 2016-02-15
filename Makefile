@@ -27,21 +27,34 @@ CFLAGS += -Wno-unused-variable -Wno-write-strings
 
 LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o build/DALI.o build/DALIDictionary.o 
 
+O_FILES = build/Reconstruction.o
+
+all: Salvator BurningGiraffe Disintegration Persistence
+
 Salvator: Salvator.cc $(LIB_DIR)/libSalvator.so
 	@echo "Compiling $@"
-	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
 
 BurningGiraffe: BurningGiraffe.cc $(LIB_DIR)/libSalvator.so
 	@echo "Compiling $@"
-	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
 
 Disintegration: Disintegration.cc
+	@echo "Compiling $@"
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
+
+Persistence: Persistence.cc $(LIB_DIR)/libSalvator.so $(O_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
 
 $(LIB_DIR)/libSalvator.so: $(LIB_O_FILES) 
 	@echo "Making $@"
 	@$(CPP) $(LFLAGS) -o $@ $^ -lc
+
+build/Reconstruction.o: src/Reconstruction.cc inc/Reconstruction.hh $(LIB_DIR)/libSalvator.so 
+	@echo "Compiling $@"
+	@mkdir -p $(dir $@)
+	@$(CPP) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
 
 build/%.o: src/%.cc inc/%.hh
 	@echo "Compiling $@"

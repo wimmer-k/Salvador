@@ -36,7 +36,7 @@ int main(int argc, char* argv[]){
 
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
-  interface->Add("-i", "inputfiles", &InputFiles);
+  interface->Add("-i", "input files", &InputFiles);
   interface->Add("-o", "output file", &OutFile);    
   interface->Add("-tn", "name of the tree", &TreeName);
   interface->Add("-le", "last event to be read", &LastEvent);  
@@ -213,9 +213,6 @@ int main(int argc, char* argv[]){
   cout << "CPU time: " << timer.CpuTime() << "\tReal time: " << timer.RealTime() << endl;
   return 0;
 }
-
-
-
 void signalhandler(int sig){
   if (sig == SIGINT){
     signal_received = true;

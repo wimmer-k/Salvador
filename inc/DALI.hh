@@ -36,9 +36,16 @@ public:
   }
   //! Set the position by vector
   void SetPos(TVector3 pos){fpos = pos;}
-  //! Set the position by coordinated
+  //! Set the position by coordinates
   void SetPos(double x, double y, double z){
     fpos.SetXYZ(x,y,z);
+  }
+  //! Set the position by vector
+  void SetPos(vector<double> r){
+    if(r.size()==3)
+      fpos.SetXYZ(r.at(0),r.at(1),r.at(2));
+    else
+      cout << "error in DALI.SetPos()" << endl;
   }
   //! Set the energy
   void SetEnergy(double energy){fen = energy;}
@@ -139,15 +146,21 @@ public:
     fhitsAB.push_back(hit);
     fmultAB++;
   }
-  // //! Do the Doppler correction
-  // void DopplerCorrect(double beta){
-  //   for(vector<DALIHit*>::iterator hit=fhits.begin(); hit!=fhits.end(); hit++){
-  //     (*hit)->DopplerCorrect(beta);
-  //   }
-  //   for(vector<DALIHit*>::iterator hit=fhitsAB.begin(); hit!=fhitsAB.end(); hit++){
-  //     (*hit)->DopplerCorrect(beta);
-  //   }
-  // }
+  //! Set all hits
+  void SetHits(vector<DALIHit*> hits){
+    fmult = hits.size();
+    fhits = hits;
+  }
+
+  //! Do the Doppler correction
+  void DopplerCorrect(double beta){
+    for(vector<DALIHit*>::iterator hit=fhits.begin(); hit!=fhits.end(); hit++){
+      (*hit)->DopplerCorrect(beta);
+    }
+    for(vector<DALIHit*>::iterator hit=fhitsAB.begin(); hit!=fhitsAB.end(); hit++){
+      (*hit)->DopplerCorrect(beta);
+    }
+  }
   //! Returns the multiplicity of the event
   unsigned short GetMult(){return fmult;}
   //! Returns the whole vector of hits
@@ -185,5 +198,16 @@ protected:
   /// \cond CLASSIMP
   ClassDef(DALI,1);
   /// \endcond
+};
+
+/*!
+  Compare two hits by their energies
+*/
+class HitComparer {
+public:
+  //! compares energies of the hits
+  bool operator() ( DALIHit *lhs, DALIHit *rhs) {
+    return (*lhs).GetEnergy() > (*rhs).GetEnergy();
+  }
 };
 #endif
