@@ -19,7 +19,17 @@ public:
   //! default constructor
   DALIHit(){
     Clear();
-  };
+  }
+  //! constructor with individual values
+  DALIHit(short id, double en, double DCen, TVector3 pos, double time, double toffset, unsigned short hitsadded){
+    fID = id;
+    fpos = pos;
+    fen = en;
+    fDCen = DCen;
+    ftime = time;
+    ftoffset = toffset;
+    fhitsadded =hitsadded;
+  }
   //! Clear the music information
   void Clear(Option_t *option = ""){
     fID = -1.;
@@ -28,11 +38,13 @@ public:
     fDCen = sqrt(-1.);
     ftime = sqrt(-1.);
     ftoffset = sqrt(-1.);
+    fhitsadded =0;
   }
   //! Set the detector ID
   void SetID(short id){
     if(id>0 && id <MAXNCRYSTAL-1)//id is from 1
       fID = id-1;
+    fhitsadded++;
   }
   //! Set the position by vector
   void SetPos(TVector3 pos){fpos = pos;}
@@ -60,6 +72,17 @@ public:
   //! Set the raw TDC value
   void SetTDC(int tdc){ftdc = tdc;}
 
+  //! Addback a hit
+  void AddBackHit(DALIHit* hit){
+    if(fen<hit->GetEnergy()){
+      cout << " error hits not sorted by energy" << endl;
+      return;
+    }
+    fen+=hit->GetEnergy();
+    fhitsadded+=hit->GetHitsAdded();
+  }
+
+
   //! Get the ID
   short GetID(){return fID;}
   //! Get the position vector
@@ -76,6 +99,8 @@ public:
   int GetADC(){return fadc;}
   //! Get the raw TDC value
   int GetTDC(){return ftdc;}
+  //! Get the number of hits that were added back to create one gamma
+  unsigned short GetHitsAdded(){return fhitsadded;}
   
 
   //! Apply the Doppler correction with the given beta, assuming motion in the +z direction.
@@ -87,8 +112,11 @@ public:
     cout << "ID " << fID;
     cout << "\tenergy " << fen;
     cout << "\tDCenergy " << fDCen;
+    cout << "\ttheta " << fpos.Theta()*180./TMath::Pi();
+    cout << "\tphi " << fpos.Phi()*180./TMath::Pi();
     cout << "\ttime " << ftime;
-    cout << "\ttoffset " << ftoffset << endl;
+    cout << "\ttoffset " << ftoffset;
+    cout << "\thits added " << fhitsadded << endl;
     return;
   }
 
@@ -109,6 +137,8 @@ protected:
   int fadc;
   //! the raw tdc value
   int ftdc;
+  //! how many hits were added back to create one gamma
+  unsigned short fhitsadded;
 
   /// \cond CLASSIMP
   ClassDef(DALIHit,1);
@@ -122,7 +152,7 @@ public:
   //! default constructor
   DALI(){
     Clear();
-  };
+  }
   //! Clear the music information
   void Clear(Option_t *option = ""){
     fmult = 0;
@@ -131,8 +161,8 @@ public:
       delete *hit;
     }
     fhits.clear();
-    for(vector<DALIHit*>::iterator hit=fhitsAB.begin(); hit!=fhitsAB.end(); hit++){
-      delete *hit;
+    for(vector<DALIHit*>::iterator hitab=fhitsAB.begin(); hitab!=fhitsAB.end(); hitab++){
+      delete *hitab;
     }
     fhitsAB.clear();
   }
@@ -151,7 +181,11 @@ public:
     fmult = hits.size();
     fhits = hits;
   }
-
+  //! Set all hits after addback
+  void SetABHits(vector<DALIHit*> hits){
+    fmultAB = hits.size();
+    fhitsAB = hits;
+  }
   //! Do the Doppler correction
   void DopplerCorrect(double beta){
     for(vector<DALIHit*>::iterator hit=fhits.begin(); hit!=fhits.end(); hit++){

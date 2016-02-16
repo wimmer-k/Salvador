@@ -117,11 +117,16 @@ int main(int argc, char* argv[]){
     nbytes += status;
     
     //analysis
+    //sort by energy
     dali->SetHits(rec->Sort(dali->GetHits()));
+    //set the positions
     rec->SetPositions(dali);
-
-    rtr->Fill();
+    //addback
+    dali->SetABHits(rec->Addback(dali->GetHits()));
+    //DC
+    rec->DopplerCorrect(dali);
     
+    rtr->Fill();
     if(i%10000 == 0){
       double time_end = get_time();
       cout << setw(5) << setiosflags(ios::fixed) << setprecision(1) << (100.*i)/nentries <<

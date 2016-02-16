@@ -51,6 +51,8 @@ int main(int argc, char* argv[]){
   TStopwatch timer;
   timer.Start();
   signal(SIGINT,signalhandler);
+  cout << "\"Metamorphosis of Narcissus\" (1937), Salvator Dali" << endl;
+  cout << "Unpacker for DALI" << endl;
   char* InputFile;
   char* OutputFile = NULL;
   char* CutFile = NULL;

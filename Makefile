@@ -29,9 +29,9 @@ LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build
 
 O_FILES = build/Reconstruction.o
 
-all: Salvator BurningGiraffe Disintegration Persistence
+all: Metamorphosis BurningGiraffe Disintegration Persistence
 
-Salvator: Salvator.cc $(LIB_DIR)/libSalvator.so
+Metamorphosis: Metamorphosis.cc $(LIB_DIR)/libSalvator.so
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
 
