@@ -77,6 +77,16 @@ int main(int argc, char* argv[]){
     logQ_vs_X[f] = new TH2F(Form("logQ_vs_X_%d",fpID[f]),Form("logQ_vs_X_%d",fpID[f]),1000,-50,50,600,-3,3);hlist->Add( logQ_vs_X[f]);
     dT_vs_X[f] = new TH2F(Form("dT_vs_X_%d",fpID[f]),Form("dT_vs_X_%d",fpID[f]),1000,-50,50,1000,-5,5);hlist->Add( dT_vs_X[f]);
   }
+  //beam
+  TH1F* beta[3];
+  for(unsigned short b=0;b<3;b++){
+    beta[b] = new TH1F(Form("beta_%d",b),Form("beta_%d",b),1000,0,1);hlist->Add(beta[b]);
+  }
+  TH1F* delta[4];
+  for(unsigned short b=0;b<4;b++){
+    delta[b] = new TH1F(Form("delta_%d",b),Form("delta_%d",b),1000,-10,10);hlist->Add(delta[b]);
+  }
+
   //dali
   TH2F* adc_id = new TH2F("adc_id","adc_id",200,0,200,5000,0,5000);hlist->Add(adc_id);
   TH2F* en_id = new TH2F("en_id","en_id",200,0,200,500,0,2000);hlist->Add(en_id);
@@ -181,6 +191,10 @@ int main(int argc, char* argv[]){
     }
 
     //beam
+    for(unsigned short b=0;b<3;b++)
+      beta[b]->Fill(beam->GetBeta(b));
+    for(unsigned short b=0;b<4;b++)
+      delta[b]->Fill(beam->GetDelta(b));
     for(unsigned short f=0;f<6;f++){
       z_vs_aoq[f]->Fill(beam->GetAQ(f),beam->GetZ(f));
       z_vs_aoqc[f]->Fill(beam->GetCorrAQ(f),beam->GetZ(f));

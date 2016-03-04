@@ -22,6 +22,8 @@ public:
   //! dummy destructor
   ~Reconstruction(){
   };
+  //! manually set the beta
+  void SetBeta(double beta){fbeta = beta;}
   //! read the average positions within the crystals
   void ReadPositions(const char *infile);
   //! sort by energy highest first

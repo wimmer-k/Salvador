@@ -33,6 +33,7 @@ int main(int argc, char* argv[]){
   char *SetFile = NULL;
   char* TreeName = (char*)"tr";
   int writeTree = 1;
+  double beta =0;
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input files", &InputFiles);
@@ -42,6 +43,8 @@ int main(int argc, char* argv[]){
   interface->Add("-le", "last event to be read", &LastEvent);  
   interface->Add("-v", "verbose level", &Verbose);  
   interface->Add("-wt", "write tree", &writeTree);  
+  interface->Add("-b", "beta (overrides settings file)", &beta);
+
   interface->CheckFlags(argc, argv);
   //Complain about missing mandatory arguments
   if(InputFiles.size() == 0){
@@ -80,7 +83,8 @@ int main(int argc, char* argv[]){
 
   cout<<"settings file: " << SetFile <<endl;
   Reconstruction *rec = new Reconstruction(SetFile);
-  
+  if(beta>0)
+    rec->SetBeta(beta);
 
   TList *hlist = new TList();
   //histograms
