@@ -73,9 +73,11 @@ int main(int argc, char* argv[]){
   cout<<"output file: "<<OutFile<< endl;
 
   vector<TCutG*> InPartCut;
+  vector<vector<TCutG*> > OutPartCut;
   vector<vector<TTree*> > splittree;
   //Read in the cuts file for incoming and outgoing particle ID
   char* Name = NULL;
+  char* Name2 = NULL;
   TFile *cFile = new TFile(CutFile);
   TIter next(cFile->GetListOfKeys());
   TKey *key;
@@ -88,16 +90,38 @@ int main(int argc, char* argv[]){
       }
     }      
   }
+  TIter next2(cFile->GetListOfKeys());
+  OutPartCut.resize(InPartCut.size());
+  
+  while((key=(TKey*)next2())){
+    if(strcmp(key->GetClassName(),"TCutG") == 0){
+      Name = (char*)key->GetName();
+      if(strstr(Name,"in") && strstr(Name,"out")){
+	for(unsigned short i=0;i<InPartCut.size();i++){
+	  Name2 = (char*)InPartCut[i]->GetName();
+	  if(strstr(Name,strstr(Name2,Name2))){
+	    OutPartCut[i].push_back((TCutG*)cFile->Get(Name));
+	    cout << "outgoing cut found "<<Name << endl;
+	  }
+	}
+      }
+    }
+  }
+
   cFile->Close();
   splittree.resize(InPartCut.size());
   for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
-    splittree[in].resize(1);
-    splittree[in][0] = new TTree(Form("tr_%s",InPartCut[in]->GetName()),Form("Data Tree with cut on %s",InPartCut[in]->GetName()));
-    splittree[in][0]->Branch("trigbit",&trigbit,"trigbit/I");
-    for(unsigned short f=0;f<NFPLANES;f++)
-      splittree[in][0]->Branch(Form("fp%d",fpID[f]),&fp[f],320000);
-    splittree[in][0]->Branch("beam",&beam,320000);
-    splittree[in][0]->Branch("dali",&dali,320000);
+    splittree[in].resize(1+OutPartCut[in].size());
+    splittree[in][OutPartCut[in].size()] = new TTree(Form("tr_%s",InPartCut[in]->GetName()),Form("Data Tree with cut on %s",InPartCut[in]->GetName()));
+    for(UShort_t ou=0;ou<OutPartCut[in].size()+1;ou++){ // loop over PID cuts
+      if(ou<OutPartCut[in].size())
+	splittree[in][ou] = new TTree(Form("tr_%s",OutPartCut[in][ou]->GetName()),Form("Data Tree with cut on %s",OutPartCut[in][ou]->GetName()));
+      splittree[in][ou]->Branch("trigbit",&trigbit,"trigbit/I");
+      for(unsigned short f=0;f<NFPLANES;f++)
+	splittree[in][ou]->Branch(Form("fp%d",fpID[f]),&fp[f],320000);
+      splittree[in][ou]->Branch("beam",&beam,320000);
+      splittree[in][ou]->Branch("dali",&dali,320000);
+    }
   }
 
   Double_t nentries = tr->GetEntries();
@@ -134,8 +158,14 @@ int main(int argc, char* argv[]){
     
     //start analysis
     for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
-      if(InPartCut[in]->IsInside(beam->GetAQ(1),beam->GetZ(1)))
-	splittree[in][0]->Fill();
+      if(InPartCut[in]->IsInside(beam->GetAQ(1),beam->GetZ(1))){
+	splittree[in][OutPartCut[in].size()]->Fill();
+	for(UShort_t ou=0;ou<OutPartCut[in].size();ou++){ // loop over outgoing cuts
+	  if(OutPartCut[in][ou]->IsInside(beam->GetAQ(5),beam->GetZ(5))){
+	    splittree[in][ou]->Fill();
+	  }
+	}//outpartcuts
+      }//inpartcuts
     }
  
     if(i%10000 == 0){
@@ -151,8 +181,10 @@ int main(int argc, char* argv[]){
   ofile->cd();
   Long64_t filesize =0;
   for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
-    splittree[in][0]->Write("",TObject::kOverwrite);
-    filesize += splittree[in][0]->GetZipBytes();
+    for(UShort_t ou=0;ou<OutPartCut[in].size();ou++){ // loop over outgoing cuts
+      splittree[in][ou]->Write("",TObject::kOverwrite);
+      filesize += splittree[in][ou]->GetZipBytes();
+    }
   }
   cout<<"Size of input tree  "<<setw(7)<<tr->GetZipBytes()/(1024*1024)<<" MB"<<endl
       <<"size of splitted trees "<<setw(7)<<filesize/(1024*1024)<<" MB"<<endl

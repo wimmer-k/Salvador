@@ -123,7 +123,7 @@ int main(int argc, char* argv[]){
   recorips[2] = recopid->DefineNewRIPS(8,9,"/home/wimmer/ribf94/matrix/F8F9_LargeAccAchr.mat","D7"); // F8 - F9
   recorips[3] = recopid->DefineNewRIPS(9,11,"/home/wimmer/ribf94/matrix/F9F11_LargeAccAchr.mat","D8"); // F9 - F11  
 
-  // Reconstruction of TOF DefineNewTOF(fisrt plane, second plane, time offset)
+  // Reconstruction of TOF DefineNewTOF(first plane, second plane, time offset)
   TArtTOF *recotof[6];
   recotof[0] = recopid->DefineNewTOF("F3pl","F7pl",297.211,5); // F3 - F5
   recotof[1] = recopid->DefineNewTOF("F3pl","F7pl",314.727,5); // F5 - F7

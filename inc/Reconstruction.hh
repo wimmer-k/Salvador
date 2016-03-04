@@ -28,6 +28,8 @@ public:
   vector<DALIHit*> Sort(vector<DALIHit*> dali);
   //! sort by energy lowest first
   vector<DALIHit*> Revert(vector<DALIHit*> dali);
+  //! filter over and underflows
+  vector<DALIHit*> FilterOverUnderflows(vector<DALIHit*> hits);
   //! set the positions
   void SetPositions(DALI* dali);
   //! apply the Doppler correction
@@ -51,7 +53,17 @@ private:
   double faddbackdistance;
   //! max angle between two hits for addback
   double faddbackangle;
+  //! energy threshold for addback
+  double faddbackthreshold;
+  //! time difference between two hits for addback
+  double faddbacktdiff[2];
+
   //! verbose level
   int fverbose;
+  //! Overflow value for gamma energies
+  double foverflow;
+  //! Underflow value for gamma energies
+  double funderflow;
+
 };
 #endif

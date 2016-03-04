@@ -9,9 +9,15 @@ Reconstruction::Reconstruction(char *settings){
   TEnv *set = new TEnv(settings);
   fverbose = set->GetValue("VerboseLevel",0);
   fbeta = set->GetValue("AverageBeta",0.5);
+  foverflow = set->GetValue("Overflow.Threshold",8000);
+  funderflow = set->GetValue("Underflow.Threshold",0);
   faddbacktype = set->GetValue("Addback.Type",1);
   faddbackdistance = set->GetValue("Addback.Distance",20.);
   faddbackangle = set->GetValue("Addback.Angle",20.);
+  faddbackthreshold = set->GetValue("Addback.Threshold",200.);
+  faddbacktdiff[0] = set->GetValue("Addback.TimeDiff.Low",-50.);
+  faddbacktdiff[1] = set->GetValue("Addback.TimeDiff.High",20.);
+
   string posfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
   if(fverbose>0){
     cout << "fverbose " << fverbose << endl;
@@ -49,20 +55,8 @@ void Reconstruction::ReadPositions(const char *infile){
   \return a vector with the sorted hits
 */
 vector<DALIHit*> Reconstruction::Revert(vector<DALIHit*> hits){
-  if(fverbose>2){
-    cout << "before sorting " << endl;
-    for(vector<DALIHit*>::iterator hit0=hits.begin(); hit0!=hits.end(); hit0++){
-      cout << (*hit0)->GetID() <<"\t"<< (*hit0)->GetEnergy() << endl;
-    }
-  }
   sort(hits.begin(), hits.end(), HitComparer());
   reverse(hits.begin(), hits.end());
-  if(fverbose>2){
-    cout << "after sorting " << endl;
-    for(vector<DALIHit*>::iterator hit0=hits.begin(); hit0!=hits.end(); hit0++){
-      cout << (*hit0)->GetID() <<"\t"<<(*hit0)->GetEnergy() << endl;
-    }
-  }
   return hits;
 }
 /*!
@@ -71,20 +65,22 @@ vector<DALIHit*> Reconstruction::Revert(vector<DALIHit*> hits){
   \return a vector with the sorted hits
 */
 vector<DALIHit*> Reconstruction::Sort(vector<DALIHit*> hits){
-  if(fverbose>2){
-    cout << "before sorting " << endl;
-    for(vector<DALIHit*>::iterator hit0=hits.begin(); hit0!=hits.end(); hit0++){
-      cout << (*hit0)->GetID() <<"\t"<< (*hit0)->GetEnergy() << endl;
-    }
-  }
   sort(hits.begin(), hits.end(), HitComparer());
-  if(fverbose>2){
-    cout << "after sorting " << endl;
-    for(vector<DALIHit*>::iterator hit0=hits.begin(); hit0!=hits.end(); hit0++){
-      cout << (*hit0)->GetID() <<"\t"<<(*hit0)->GetEnergy() << endl;
+  return hits;
+}
+/*!
+  Filter the overflow and underflow hits
+  \param hits a vector with all hits
+  \return a vector with the filtered hits
+*/
+vector<DALIHit*> Reconstruction::FilterOverUnderflows(vector<DALIHit*> hits){
+  vector<DALIHit*> output;
+  for(unsigned short i=0;i<hits.size();i++){
+    if(hits[i]->GetEnergy()<foverflow && hits[i]->GetEnergy()> funderflow){
+      output.push_back(hits[i]);
     }
   }
-  return hits;
+  return output;
 }
 /*!
   Checks the distance or angle between two hits
@@ -98,6 +94,10 @@ bool Reconstruction::Addback(DALIHit* hit0, DALIHit* hit1){
     cout << setw(5) << setprecision(3)<< "distance\t" << hit0->GetPos().DeltaR(hit1->GetPos()) << endl;
     cout << "angle\t" << hit0->GetPos().Angle(hit1->GetPos()) << endl;
   }
+  double tdiff = hit0->GetTOffset()-hit1->GetTOffset();
+  if(tdiff < faddbacktdiff[0] || tdiff > faddbacktdiff[1])
+    return false;
+
   if(faddbacktype==1){
     if(hit0->GetPos().DeltaR(hit1->GetPos())<faddbackdistance)
       return true;
@@ -130,9 +130,8 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
 
   while(unusedhits.size() > 0){
     //first one is automatically good
-    vector<DALIHit*> currenthits;
+    vector<DALIHit*> currenthits; //current hits contains all hits that have already been added to thishit, to still know their positions
     currenthits.push_back(unusedhits.back());
-
     DALIHit* thishit = unusedhits.back();
     unusedhits.pop_back();
     
@@ -144,6 +143,8 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
       bool found = false;
       for(unsigned short k=0;k<currenthits.size();k++){
 	for(unsigned short j=0;j<unusedhits.size();j++){
+	  if(unusedhits[j]->GetEnergy()<faddbackthreshold)
+	    continue;
 	  if(Addback(currenthits[k],unusedhits[j])){	    
 	    addme = j;
 	    found = true;
@@ -162,6 +163,7 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
       if(hits.size()==0)
 	break;
     }while(added>0);//do
+    //done with addback for thishit
     if(fverbose>2){
       cout << "current hits" << endl;
       for(unsigned short k=0;k<currenthits.size();k++){
@@ -174,15 +176,17 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
       cout << "this hit" <<endl;
       thishit->Print();
     }
+    //add the addbacked hit into the vector
     hitsAB.push_back(thishit);
   }//while
-  Sort(hitsAB);
+  
   if(fverbose>2){
     cout << "after addback " << endl;
     for(unsigned short k=0;k<hitsAB.size();k++){
       hitsAB[k]->Print();
     }
   }
+
   return hitsAB;
 }
 /*!
@@ -197,8 +201,9 @@ void Reconstruction::SetPositions(DALI* dali){
       cout << "invalid ID in DALI" <<endl;
       hit->Print();
       return;
-    }      
-    //cout << id << "\t" << fpositions[id][0] << endl;
+    } 
+    if(fverbose>3)
+      cout << id << "\t" << fpositions[id][0] << "\t" << fpositions[id][1] << "\t" << fpositions[id][2] << endl;
     hit->SetPos(fpositions[id][0],fpositions[id][1],fpositions[id][2]);
   }
 }

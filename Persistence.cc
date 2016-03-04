@@ -8,6 +8,7 @@
 #include "TChain.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TCutG.h"
 #include "TKey.h"
 #include "TStopwatch.h"
 #include "CommandLineInterface.hh"
@@ -31,6 +32,7 @@ int main(int argc, char* argv[]){
   char *OutFile = NULL;
   char *SetFile = NULL;
   char* TreeName = (char*)"tr";
+  int writeTree = 1;
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input files", &InputFiles);
@@ -39,6 +41,7 @@ int main(int argc, char* argv[]){
   interface->Add("-tn", "name of the tree", &TreeName);
   interface->Add("-le", "last event to be read", &LastEvent);  
   interface->Add("-v", "verbose level", &Verbose);  
+  interface->Add("-wt", "write tree", &writeTree);  
   interface->CheckFlags(argc, argv);
   //Complain about missing mandatory arguments
   if(InputFiles.size() == 0){
@@ -75,17 +78,39 @@ int main(int argc, char* argv[]){
   TTree* rtr = new TTree("rtr","Reconstructed events");
   rtr->Branch("dali",&dali,320000);
 
-  cout<<"settings file:" << SetFile <<endl;
+  cout<<"settings file: " << SetFile <<endl;
   Reconstruction *rec = new Reconstruction(SetFile);
-
+  
 
   TList *hlist = new TList();
   //histograms
+  TH1F* tdiff = new TH1F("tdiff","tdiff",2000,-1000,1000);hlist->Add(tdiff);
+  TH1F* rdiff = new TH1F("rdiff","rdiff",2000,0,10);hlist->Add(rdiff);
+  TH1F* adiff = new TH1F("adiff","adiff",2000,0,4);hlist->Add(adiff);
+  TH2F* radiff = new TH2F("radiff","radiff",200,0,4,200,0,10);hlist->Add(radiff);
+
+  // TH1F* tdiff_coinc = new TH1F("tdiff_coinc","tdiff_coinc",2000,-1000,1000);hlist->Add(tdiff_coinc);
+  // TH1F* rdiff_coinc = new TH1F("rdiff_coinc","rdiff_coinc",2000,0,10);hlist->Add(rdiff_coinc);
+  // TH1F* adiff_coinc = new TH1F("adiff_coinc","adiff_coinc",2000,0,4);hlist->Add(adiff_coinc);
+  // TH2F* radiff_coinc = new TH2F("radiff_coinc","radiff_coinc",200,0,4,200,0,10);hlist->Add(radiff_coinc);
+  
+  TH1F* mult = new TH1F("mult","mult",50,0,50);hlist->Add(mult);
+  TH1F* egam = new TH1F("egam","egam",2000,0,2000);hlist->Add(egam);
+  TH1F* egamdc = new TH1F("egamdc","egamdc",2000,0,2000);hlist->Add(egamdc);
+  TH1F* multAB = new TH1F("multAB","multAB",50,0,50);hlist->Add(multAB);
+  TH1F* egamAB = new TH1F("egamAB","egamAB",2000,0,2000);hlist->Add(egamAB);
+  TH1F* egamABdc = new TH1F("egamABdc","egamABdc",2000,0,2000);hlist->Add(egamABdc);
+
+  TH2F* egamegam = new TH2F("egamegam","egamegam",200,0,2000,200,0,2000);hlist->Add(egamegam);
+  TH2F* egamegamdc = new TH2F("egamegamdc","egamegamdc",200,0,2000,200,0,2000);hlist->Add(egamegamdc);
+  TH2F* egamegamAB = new TH2F("egamegamAB","egamegamAB",200,0,2000,200,0,2000);hlist->Add(egamegamAB);
+  TH2F* egamegamABdc = new TH2F("egamegamABdc","egamegamABdc",200,0,2000,200,0,2000);hlist->Add(egamegamABdc);
 
 
-
-
-
+  // //temp
+  // TFile *fc = new TFile("/home/wimmer/ribf94/cuts/coinc.root");
+  // TCutG *gc = (TCutG*)fc->Get("cscoinc");
+  // fc->Close();
 
   Double_t nentries = tr->GetEntries();
   cout << nentries << " entries in tree" << endl;
@@ -117,15 +142,60 @@ int main(int argc, char* argv[]){
     nbytes += status;
     
     //analysis
+    //filter over and underflow
+    dali->SetHits(rec->FilterOverUnderflows(dali->GetHits()));
     //sort by energy
     dali->SetHits(rec->Sort(dali->GetHits()));
     //set the positions
     rec->SetPositions(dali);
     //addback
     dali->SetABHits(rec->Addback(dali->GetHits()));
+    //sort by energy
+    dali->SetABHits(rec->Sort(dali->GetHitsAB()));
     //DC
     rec->DopplerCorrect(dali);
-    
+
+    if(Verbose>2)
+      dali->Print();
+
+    //histos
+    mult->Fill(dali->GetMult());
+    for(unsigned short k=0;k<dali->GetMult();k++){
+      egam->Fill(dali->GetHit(k)->GetEnergy());
+      egamdc->Fill(dali->GetHit(k)->GetDCEnergy());    
+    }
+    multAB->Fill(dali->GetMultAB());
+    for(unsigned short k=0;k<dali->GetMultAB();k++){
+      egamAB->Fill(dali->GetHitAB(k)->GetEnergy());
+      egamABdc->Fill(dali->GetHitAB(k)->GetDCEnergy());
+    }
+
+    if(dali->GetMult()>1){
+      for(unsigned short k=0;k<dali->GetMult();k++){
+	for(unsigned short l=k+1;l<dali->GetMult();l++){
+	  tdiff->Fill(dali->GetHit(k)->GetTOffset() - dali->GetHit(l)->GetTOffset());
+	  rdiff->Fill(dali->GetHit(k)->GetPos().DeltaR(dali->GetHit(l)->GetPos()));
+	  adiff->Fill(dali->GetHit(k)->GetPos().Angle(dali->GetHit(l)->GetPos()));
+	  radiff->Fill(dali->GetHit(k)->GetPos().Angle(dali->GetHit(l)->GetPos()),dali->GetHit(k)->GetPos().DeltaR(dali->GetHit(l)->GetPos()));
+	  // if(gc->IsInside(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy())){
+	  //   tdiff_coinc->Fill(dali->GetHit(k)->GetTOffset() - dali->GetHit(l)->GetTOffset());
+	  //   rdiff_coinc->Fill(dali->GetHit(k)->GetPos().DeltaR(dali->GetHit(l)->GetPos()));
+	  //   adiff_coinc->Fill(dali->GetHit(k)->GetPos().Angle(dali->GetHit(l)->GetPos()));
+	  //   radiff_coinc->Fill(dali->GetHit(k)->GetPos().Angle(dali->GetHit(l)->GetPos()),dali->GetHit(k)->GetPos().DeltaR(dali->GetHit(l)->GetPos()));
+	  // }
+	  egamegam->Fill(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy());
+	  egamegamdc->Fill(dali->GetHit(k)->GetDCEnergy(),dali->GetHit(l)->GetDCEnergy());
+	}
+      }
+    }
+    if(dali->GetMultAB()>1){
+      for(unsigned short k=0;k<dali->GetMultAB();k++){
+	for(unsigned short l=k+1;l<dali->GetMultAB();l++){
+	  egamegamAB->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
+	  egamegamABdc->Fill(dali->GetHitAB(k)->GetDCEnergy(),dali->GetHitAB(l)->GetDCEnergy());
+	}
+      }
+    }
     rtr->Fill();
     if(i%10000 == 0){
       double time_end = get_time();
@@ -137,7 +207,7 @@ int main(int argc, char* argv[]){
 
 
   cout << endl;
-  cout << "creating outputfile " << endl;
+  cout << "creating outputfile " << OutFile << endl;
   TFile* ofile = new TFile(OutFile,"recreate");
   ofile->cd();
   TH1F* h1;
@@ -151,7 +221,8 @@ int main(int argc, char* argv[]){
     if(h2->GetEntries()>0)
       h2->Write("",TObject::kOverwrite);
   }
-  rtr->Write("",TObject::kOverwrite);
+  if(writeTree>0)
+    rtr->Write("",TObject::kOverwrite);
   ofile->Close();
   double time_end = get_time();
   cout << "Program Run time: " << time_end - time_start << " s." << endl;

@@ -103,6 +103,10 @@ public:
   unsigned short GetHitsAdded(){return fhitsadded;}
   
 
+  //! Get Doppler corrected energy with input beta
+  double GetDCEnergy(double beta){
+    return fen/sqrt(1-beta*beta)*(1-beta*cos(fpos.Theta()));
+  }
   //! Apply the Doppler correction with the given beta, assuming motion in the +z direction.
   void DopplerCorrect(double beta){
     fDCen = fen/sqrt(1-beta*beta)*(1-beta*cos(fpos.Theta()));
