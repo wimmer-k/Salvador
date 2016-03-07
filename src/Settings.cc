@@ -7,6 +7,7 @@ using namespace std;
 */
 Settings::Settings(char *settings){
   finputfile = settings;
+  ReadSettings();
 }
 /*!
   Read in the settings from the fie
