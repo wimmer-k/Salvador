@@ -27,7 +27,7 @@ public:
 
   int VerboseLevel(){return fverbose;}
   double TimeOffset(int b){return ftoffset[b];}
-  const char* DALIFile(){return fDALIFile.c_str();}
+  char* DALIFile(){return (char*)fDALIFile.c_str();}
 
 private:
   //! filename of the settings file

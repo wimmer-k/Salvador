@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input file", &InputFile);
   interface->Add("-o", "output file", &OutputFile);
-  interface->Add("-o", "settings file", &SetFile);
+  interface->Add("-s", "settings file", &SetFile);
   interface->Add("-n", "nmax", &nmax);
   interface->Add("-v", "verbose", &vl);
   interface->CheckFlags(argc, argv);
@@ -134,13 +134,13 @@ int main(int argc, char* argv[]){
 
   // Reconstruction of TOF DefineNewTOF(first plane, second plane, time offset)
   TArtTOF *recotof[6];
-  recotof[0] = recopid->DefineNewTOF("F3pl","F7pl",297.211,5); // F3 - F5
-  recotof[1] = recopid->DefineNewTOF("F3pl","F7pl",314.727,5); // F5 - F7
-  recotof[2] = recopid->DefineNewTOF("F3pl","F7pl",306.04,5); // F3 - F7
+  recotof[0] = recopid->DefineNewTOF("F3pl","F7pl",set->TimeOffset(0),5); // F3 - F5
+  recotof[1] = recopid->DefineNewTOF("F3pl","F7pl",set->TimeOffset(1),5); // F5 - F7
+  recotof[2] = recopid->DefineNewTOF("F3pl","F7pl",set->TimeOffset(2),5); // F3 - F7
 
-  recotof[3] = recopid->DefineNewTOF("F8pl","F11pl-1",-162.302,9); // F8 - F9
-  recotof[4] = recopid->DefineNewTOF("F8pl","F11pl-1",-161.356,9); // F9 - F11
-  recotof[5] = recopid->DefineNewTOF("F8pl","F11pl-1",-161.712,9); // F8 - F11
+  recotof[3] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(3),9); // F8 - F9
+  recotof[4] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(4),9); // F9 - F11
+  recotof[5] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(5),9); // F8 - F11
   
   TArtTOF *tof7to8  = recopid->DefineNewTOF("F7pl","F8pl"); // F7 - F8
 
@@ -156,7 +156,7 @@ int main(int argc, char* argv[]){
 
   // Create DALIParameters to get ".xml"
   TArtDALIParameters *dpara = TArtDALIParameters::Instance();
-  dpara->LoadParameter("/home/wimmer/ribf94/db/DALI.xml");
+  dpara->LoadParameter(set->DALIFile());
   
   // Create CalibDALI to get and calibrate raw data
   TArtCalibDALI *dalicalib = new TArtCalibDALI();
