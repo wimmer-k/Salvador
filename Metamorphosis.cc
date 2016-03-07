@@ -34,6 +34,8 @@
 
 
 #include "CommandLineInterface.hh"
+#include "Settings.hh"
+
 #include "FocalPlane.hh"
 #include "PPAC.hh"
 #include "Beam.hh"
@@ -55,13 +57,15 @@ int main(int argc, char* argv[]){
   cout << "Unpacker for DALI" << endl;
   char* InputFile;
   char* OutputFile = NULL;
+  char* SetFile = NULL;
   char* CutFile = NULL;
   int nmax =0;
   int vl =0;
 
   CommandLineInterface* interface = new CommandLineInterface();
-  interface->Add("-i", "inputfile", &InputFile);
-  interface->Add("-o", "outputfile", &OutputFile);
+  interface->Add("-i", "input file", &InputFile);
+  interface->Add("-o", "output file", &OutputFile);
+  interface->Add("-o", "settings file", &SetFile);
   interface->Add("-n", "nmax", &nmax);
   interface->Add("-v", "verbose", &vl);
   interface->CheckFlags(argc, argv);
@@ -72,6 +76,10 @@ int main(int argc, char* argv[]){
   }
   cout<<"input file:"<<InputFile<<endl;
   cout<<"output file: "<<OutputFile<< endl;
+  if(SetFile == NULL)
+    cerr<<"No settings file! Using standard values"<<endl;
+  else
+    cout<<"settings file:"<<SetFile<<endl;
 
   cout << "creating outputfile " << endl;
   TFile* outfile = new TFile(OutputFile,"recreate");
@@ -79,6 +87,7 @@ int main(int argc, char* argv[]){
   if(outfile->IsZombie()){
     return 4;
   }
+  Settings *set = new Settings(SetFile);
 
   // Create StoreManager both for calibration "TArtCalib..." and treatment "TArtReco..."
   //------------------------------------------------------------------------------------

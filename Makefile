@@ -27,13 +27,13 @@ CFLAGS += -Wno-unused-variable -Wno-write-strings
 
 LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o build/DALI.o build/DALIDictionary.o 
 
-O_FILES = build/Reconstruction.o
+O_FILES = build/Reconstruction.o build/Settings.o
 
 all: Metamorphosis BurningGiraffe Disintegration Persistence
 
-Metamorphosis: Metamorphosis.cc $(LIB_DIR)/libSalvator.so
+Metamorphosis: Metamorphosis.cc $(LIB_DIR)/libSalvator.so build/Settings.o
 	@echo "Compiling $@"
-	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) build/Settings.o -o $(BIN_DIR)/$@ 
 
 BurningGiraffe: BurningGiraffe.cc $(LIB_DIR)/libSalvator.so
 	@echo "Compiling $@"
