@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "TObject.h"
+#include "TVector3.h"
 
 using namespace std;
 
@@ -73,6 +74,28 @@ public:
     fdelta[j] = delta;
   }
 
+  //! Set the target position 
+  void SetTargetPos(double xpos, double ypos){
+    ftargX = xpos;
+    ftargY = ypos;
+  }
+  //! Set the target x position 
+  void SetTargetXPos(double xpos){
+    ftargX = xpos;
+  }
+  //! Set the target y position 
+  void SetTargetYPos(double ypos){
+    ftargY = ypos;
+  }
+  //! Set the direction of the incoming beam
+  void SetIncomingDirection(TVector3 dir){
+    fincdir = dir;
+  }
+  //! Set the direction of the scattered beam
+  void SetScatteredDirection(TVector3 dir){
+    foutdir = dir;
+  }
+
   //! Correct the A/Q ratio based on position
   void CorrectAQ(unsigned short j, double corr){
     if(j<0 || j>5) return;
@@ -127,6 +150,15 @@ protected:
 
   //! delta momentum 3-5, 5-7, 8-9, 9-11
   double fdelta[4];
+
+  //! target position x
+  double ftargX;
+  //! target position y
+  double ftargY;
+  //! incoming direction
+  TVector3 fincdir;
+  //! scattered direction
+  TVector3 foutdir;
 
   /// \cond CLASSIMP
   ClassDef(Beam,1);

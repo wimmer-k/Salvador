@@ -11,6 +11,7 @@
 #include "TStopwatch.h"
 #include "CommandLineInterface.hh"
 #include "FocalPlane.hh"
+#include "PPAC.hh"
 #include "Beam.hh"
 #include "DALI.hh"
 #include "Globaldefs.h"
@@ -65,6 +66,8 @@ int main(int argc, char* argv[]){
     fp[f] = new FocalPlane;
     tr->SetBranchAddress(Form("fp%d",fpID[f]),&fp[f]);
   }
+  PPAC *ppacs = new PPAC;
+  tr->Branch("ppacs",&ppacs);
   Beam* beam = new Beam;
   tr->SetBranchAddress("beam",&beam);
   DALI* dali = new DALI;
@@ -119,6 +122,7 @@ int main(int argc, char* argv[]){
       splittree[in][ou]->Branch("trigbit",&trigbit,"trigbit/I");
       for(unsigned short f=0;f<NFPLANES;f++)
 	splittree[in][ou]->Branch(Form("fp%d",fpID[f]),&fp[f],320000);
+      splittree[in][ou]->Branch("ppacs",&ppacs,320000);
       splittree[in][ou]->Branch("beam",&beam,320000);
       splittree[in][ou]->Branch("dali",&dali,320000);
     }
@@ -139,6 +143,7 @@ int main(int argc, char* argv[]){
     for(int f=0;f<NFPLANES;f++){
       fp[f]->Clear();
     }
+    ppacs->Clear();
     beam->Clear();
     dali->Clear();
     if(Verbose>2)
@@ -181,7 +186,7 @@ int main(int argc, char* argv[]){
   ofile->cd();
   Long64_t filesize =0;
   for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
-    for(UShort_t ou=0;ou<OutPartCut[in].size();ou++){ // loop over outgoing cuts
+    for(UShort_t ou=0;ou<OutPartCut[in].size()+1;ou++){ // loop over outgoing cuts
       splittree[in][ou]->Write("",TObject::kOverwrite);
       filesize += splittree[in][ou]->GetZipBytes();
     }
