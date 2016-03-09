@@ -42,10 +42,14 @@ void Settings::ReadSettings(){
   Print the settings to the screen
 */
 void Settings::PrintSettings(){  
-  cout << "fverbose " << fverbose << endl;
-  cout << "fbeta " << fbeta << endl;
-  cout << "faddbacktype " << faddbacktype << endl;
-  cout << "faddbackdistance " << faddbackdistance << endl;
-  cout << "faddbackangle " << faddbackangle << endl;
-  cout << "fposition file " << fposfile << endl;  
+  for(int i=0;i<6;i++)
+    cout << Form("TOF.Offset.%d\t",i) << ftoffset[i] << endl;
+  cout << "DALI.File\t" << fDALIFile << endl;
+
+  cout << "fverbose\t" << fverbose << endl;
+  cout << "fbeta\t" << fbeta << endl;
+  cout << "faddbacktype\t" << faddbacktype << endl;
+  cout << "faddbackdistance\t" << faddbackdistance << endl;
+  cout << "faddbackangle\t" << faddbackangle << endl;
+  cout << "fposition file\t" << fposfile << endl;  
 }
