@@ -43,8 +43,7 @@
 #include "Globaldefs.h"
 using namespace TMath;
 using namespace std;
-//int fpID[6] = {3,5,7,8,9,11};
-//int fpNr(int id);
+
 bool signal_received = false;
 void signalhandler(int sig);
 double get_time();

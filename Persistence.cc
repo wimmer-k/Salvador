@@ -12,8 +12,13 @@
 #include "TKey.h"
 #include "TStopwatch.h"
 #include "CommandLineInterface.hh"
+#include "FocalPlane.hh"
 #include "DALI.hh"
+#include "Beam.hh"
+#include "PPAC.hh"
 #include "Reconstruction.hh"
+#include "Globaldefs.h"
+
 using namespace TMath;
 using namespace std;
 bool signal_received = false;
@@ -77,9 +82,19 @@ int main(int argc, char* argv[]){
   }
   DALI* dali = new DALI;
   tr->SetBranchAddress("dali",&dali);
+  PPAC* ppac = new PPAC;
+  tr->SetBranchAddress("ppacs",&ppac);
+  Beam* beam = new Beam;
+  tr->SetBranchAddress("beam",&beam);
+  FocalPlane *fp[NFPLANES];
+  for(unsigned short f=0;f<NFPLANES;f++){
+    fp[f] = new FocalPlane;
+    tr->SetBranchAddress(Form("fp%d",fpID[f]),&fp[f]);
+  }
 
   TTree* rtr = new TTree("rtr","Reconstructed events");
   rtr->Branch("dali",&dali,320000);
+  rtr->Branch("beam",&beam,320000);
 
   cout<<"settings file: " << SetFile <<endl;
   Reconstruction *rec = new Reconstruction(SetFile);
@@ -87,7 +102,15 @@ int main(int argc, char* argv[]){
     rec->SetBeta(beta);
 
   TList *hlist = new TList();
+
   //histograms
+  TH1F* f8ppacX[6];
+  TH1F* f8ppacY[6];
+  for(int p=0;p<6;p++){
+    f8ppacX[p] = new TH1F(Form("f8ppacX_%d",p),Form("f8ppacX_%d",p),200,-100,100);hlist->Add(f8ppacX[p]);
+    f8ppacY[p] = new TH1F(Form("f8ppacY_%d",p),Form("f8ppacY_%d",p),200,-100,100);hlist->Add(f8ppacY[p]);
+  }
+
   TH1F* tdiff = new TH1F("tdiff","tdiff",2000,-1000,1000);hlist->Add(tdiff);
   TH1F* rdiff = new TH1F("rdiff","rdiff",2000,0,10);hlist->Add(rdiff);
   TH1F* adiff = new TH1F("adiff","adiff",2000,0,4);hlist->Add(adiff);
@@ -157,6 +180,8 @@ int main(int argc, char* argv[]){
       break;
     }
     dali->Clear();
+    ppac->Clear();
+    beam->Clear();
     if(Verbose>2)
       cout << "getting entry " << i << endl;
     status = tr->GetEvent(i);
@@ -189,7 +214,27 @@ int main(int argc, char* argv[]){
     if(Verbose>2)
       dali->Print();
 
+    
+
     //histos
+
+    //PPACs
+    //ppacs
+    for(unsigned short p=0;p<ppac->GetN();p++){
+      SinglePPAC *sp = ppac->GetPPAC(p);
+      if(sp->GetID()>=18 && sp->GetID()<=21){
+	f8ppacX[sp->GetID()-18]->Fill(sp->GetX());
+	f8ppacY[sp->GetID()-18]->Fill(sp->GetY());
+      }
+      if(sp->GetID()>=34 && sp->GetID()<=35){
+	f8ppacX[sp->GetID()-34+4]->Fill(sp->GetX());
+	f8ppacY[sp->GetID()-34+4]->Fill(sp->GetY());
+      }
+    
+    }
+
+
+    //DALI
     mult->Fill(dali->GetMult());
     for(unsigned short k=0;k<dali->GetMult();k++){
       egam->Fill(dali->GetHit(k)->GetEnergy());
