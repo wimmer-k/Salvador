@@ -39,7 +39,7 @@ BurningGiraffe: BurningGiraffe.cc $(LIB_DIR)/libSalvator.so
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
 
-Disintegration: Disintegration.cc
+Disintegration: Disintegration.cc $(LIB_DIR)/libSalvator.so
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
 
@@ -69,7 +69,7 @@ build/%Dictionary.o: build/%Dictionary.cc
 build/%Dictionary.cc: inc/%.hh inc/%LinkDef.h
 	@echo "Building $@"
 	@mkdir -p build
-	@rootcint -f $@ -c $(INCLUDES) $(ROOTCFLAGS) $(SWITCH) $(notdir $^)
+	@rootcint -f $@ -c $(INCLUDES) $(ROOTCFLAGS) $(notdir $^)
 
 doc:	doxyconf
 	doxygen doxyconf

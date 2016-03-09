@@ -61,13 +61,13 @@ int main(int argc, char* argv[]){
   }
   int trigbit = 0;
   tr->SetBranchAddress("trigbit",&trigbit);
+  PPAC* ppac = new PPAC;
+  tr->SetBranchAddress("ppacs",&ppac);
   FocalPlane *fp[NFPLANES];
   for(unsigned short f=0;f<NFPLANES;f++){
     fp[f] = new FocalPlane;
     tr->SetBranchAddress(Form("fp%d",fpID[f]),&fp[f]);
   }
-  PPAC *ppacs = new PPAC;
-  tr->Branch("ppacs",&ppacs);
   Beam* beam = new Beam;
   tr->SetBranchAddress("beam",&beam);
   DALI* dali = new DALI;
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]){
       splittree[in][ou]->Branch("trigbit",&trigbit,"trigbit/I");
       for(unsigned short f=0;f<NFPLANES;f++)
 	splittree[in][ou]->Branch(Form("fp%d",fpID[f]),&fp[f],320000);
-      splittree[in][ou]->Branch("ppacs",&ppacs,320000);
+      splittree[in][ou]->Branch("ppacs",&ppac,320000);
       splittree[in][ou]->Branch("beam",&beam,320000);
       splittree[in][ou]->Branch("dali",&dali,320000);
     }
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]){
     for(int f=0;f<NFPLANES;f++){
       fp[f]->Clear();
     }
-    ppacs->Clear();
+    ppac->Clear();
     beam->Clear();
     dali->Clear();
     if(Verbose>2)
