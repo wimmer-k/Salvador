@@ -132,6 +132,14 @@ public:
     if(j<0 || j>2) return sqrt(-1.);
     return fdelta[j];
   }
+  //! Get the direction of the incoming beam
+  TVector3 GetIncomingDirection(){
+    return fincdir;
+  }
+  //! Get the direction of the scattered beam
+  TVector3 GetScatteredDirection(){
+    return foutdir;
+  }
 
 protected:
   //! A/Q for 3-5, 5-7, 3-7,  8-9, 9-11, 8-11

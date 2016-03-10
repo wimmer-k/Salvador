@@ -123,6 +123,8 @@ int main(int argc, char* argv[]){
     compareY[p] = new TH2F(Form("compareY_%d",p),Form("compareY_%d",p),200,-100,100,200,-100,100);hlist->Add(compareY[p]);
     compareZ[p] = new TH2F(Form("compareZ_%d",p),Form("compareZ_%d",p),200,-100,100,200,-100,100);hlist->Add(compareZ[p]);
   }
+  TH2F* compareA = new TH2F("compareA","compareA",200,-100,100,200,-100,100);hlist->Add(compareA);
+  TH2F* compareB = new TH2F("compareB","compareB",200,-100,100,200,-100,100);hlist->Add(compareB);
   TH2F* ppacZpos = new TH2F("ppacZpos","ppacZpos",40,0,40,3000,-1500,1500);hlist->Add(ppacZpos);
 
   TH1F* tdiff = new TH1F("tdiff","tdiff",2000,-1000,1000);hlist->Add(tdiff);
@@ -242,6 +244,12 @@ int main(int argc, char* argv[]){
     ppacpos[0] = rec->PPACpos(ppac->GetPPACID(19),ppac->GetPPACID(20));
     ppacpos[1] = rec->PPACpos(ppac->GetPPACID(21),ppac->GetPPACID(22));
     ppacpos[2] = rec->PPACpos(ppac->GetPPACID(35),ppac->GetPPACID(36));
+    beam->SetIncomingDirection(ppacpos[1]-ppacpos[0]);
+    TVector3 inc = beam->GetIncomingDirection();
+    compareA->Fill(atan2(inc.X(),inc.Z())*1000, fp[fpNr(8)]->GetTrack()->GetA());
+    compareB->Fill(atan2(inc.Y(),inc.Z())*1000, fp[fpNr(8)]->GetTrack()->GetB());
+
+
     compareX[0]->Fill(ppacpos[0].X(),fp[fpNr(8)]->GetTrack()->GetX());
     compareX[1]->Fill(ppacpos[1].X(),fp[fpNr(8)]->GetTrack()->GetX());
     compareY[0]->Fill(ppacpos[0].Y(),fp[fpNr(8)]->GetTrack()->GetY());
