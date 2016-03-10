@@ -190,13 +190,41 @@ void Reconstruction::SetPositions(DALI* dali){
     hit->SetPos(fpositions[id][0],fpositions[id][1],fpositions[id][2]);
   }
 }
-/*
+/*!
   Do the Doppler correction
   \param dali the input DALI object
 */
 void Reconstruction::DopplerCorrect(DALI* dali){
   dali->DopplerCorrect(fbeta);
 }
+/*!
+  Calculate the ppac position as the average of A and B PPACs
+  \param pina A PPAC
+  \param pinb B PPAC
+  \return vector to the position
+*/
+TVector3 Reconstruction::PPACpos(SinglePPAC* pina, SinglePPAC* pinb){
+  double x = sqrt(-1.);
+  double y = sqrt(-1.);
+  double z = sqrt(-1.);
+  if(pina->Fired() && pinb->Fired()){
+    x = (pina->GetX()+pinb->GetX())/2;
+    y = (pina->GetY()+pinb->GetY())/2;
+    z = (pina->GetZ()+pinb->GetZ())/2;
+  }
+  else if(pina->Fired() && !pinb->Fired()){
+    x = pina->GetX();
+    y = pina->GetY();
+    z = pina->GetZ();
+  }
+  else if(!pina->Fired() && pinb->Fired()){
+    x = pinb->GetX();
+    y = pinb->GetY();
+    z = pinb->GetZ();
+  }
+  return TVector3(x,y,z);
+}
+
 
 // /*!
 

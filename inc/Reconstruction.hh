@@ -5,11 +5,12 @@
 
 
 //#include "TTree.h"
-#include "TEnv.h"
+//#include "TEnv.h"
 
+#include "Settings.hh"
 #include "DALIdefs.h"
 #include "DALI.hh"
-#include "Settings.hh"
+#include "PPAC.hh"
 /*!
   A class for reconstruction of DALI data, includes Doppler correction and add-back
 */
@@ -41,6 +42,8 @@ public:
   //! do the adding back
   vector<DALIHit*> Addback(vector<DALIHit*> dali);
   
+  TVector3 PPACpos(SinglePPAC* pina, SinglePPAC* pinb);
+
   // //! read in the addback table
   // void ReadAddBackTable();
 

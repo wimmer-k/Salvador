@@ -25,19 +25,31 @@ public:
   //! print the settings
   void PrintSettings();
 
+  //! Get the vorbose level
   int VerboseLevel(){return fverbose;}
+  //! Time of flight offsets for the A/Q
   double TimeOffset(int b){return ftoffset[b];}
+  //! XML file with the DALI calibrations
   char* DALIFile(){return (char*)fDALIfile.c_str();}
 
+  //! overflow energy
   double Overflow(){return foverflow;}
+  //! underflow energy
   double Underflow(){return funderflow;}
+  //! txt file witht the positions of the DALI crystals from the simulation
   char* DALIPosFile(){return (char*)fDALIposfile.c_str();}
+  //! beta for the Doppler correction
   double Beta(){return fbeta;}
   
+  //! type of addback to be used, 1 distance, 2 angles
   int AddbackType(){return faddbacktype;}
+  //! maximum distance between hits to be considered for addback
   double AddbackDistance(){return faddbackdistance;}
+  //! maximum angle between hits and target to be considered for addback
   double AddbackAngle(){return faddbackangle;}
+  //! software threshold for addback, global
   double AddbackThresh(){return faddbackthreshold;}
+  //! time difference between hits to be considered for addback
   double AddbackTimeDiff(int i){return faddbacktdiff[i];}
 
 private:

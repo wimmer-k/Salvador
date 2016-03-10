@@ -89,16 +89,19 @@ public:
   //! Get the timing sum y
   double GetTsumY(){return ftsumy;}
   
+  //! Has the PPAC fired
   bool Fired(){
     if( (!isnan(fx) && fx>-500) && (!isnan(fy) && fy>-500) )
       return true;
     return false;
   }
+  //! Has the PPAC fired in X
   bool FiredX(){
     if(!isnan(fx) && fx>-500)
       return true;
     return false;
   }
+  //! Has the PPAC fired in Y
   bool FiredY(){
     if(!isnan(fy) && fy>-500)
       return true;
@@ -149,8 +152,16 @@ public:
   unsigned short GetN(){return fnppacs;}
   //! Returns the whole vector of ppacs
   vector<SinglePPAC*> GetPPACS(){return fppacs;}
-  //! Returns the ppacs number n
+  //! Returns the ppac number n in the vector
   SinglePPAC* GetPPAC(unsigned short n){return fppacs.at(n);}
+  //! Returns the ppac with ID n
+  SinglePPAC* GetPPACID(unsigned short n){
+    for(vector<SinglePPAC*>::iterator ppac=fppacs.begin(); ppac!=fppacs.end(); ppac++){
+      if((*ppac)->GetID()==n)
+	return (*ppac);
+    }
+    return new SinglePPAC;
+  }
 
 protected:
   //! number of ppacs hit

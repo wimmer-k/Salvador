@@ -80,8 +80,8 @@ int main(int argc, char* argv[]){
     }
     return 3;
   }
-  DALI* dali = new DALI;
-  tr->SetBranchAddress("dali",&dali);
+  int trigbit = 0;
+  tr->SetBranchAddress("trigbit",&trigbit);
   PPAC* ppac = new PPAC;
   tr->SetBranchAddress("ppacs",&ppac);
   Beam* beam = new Beam;
@@ -91,8 +91,11 @@ int main(int argc, char* argv[]){
     fp[f] = new FocalPlane;
     tr->SetBranchAddress(Form("fp%d",fpID[f]),&fp[f]);
   }
+  DALI* dali = new DALI;
+  tr->SetBranchAddress("dali",&dali);
 
   TTree* rtr = new TTree("rtr","Reconstructed events");
+  rtr->Branch("trigbit",&trigbit,"trigbit/I");
   rtr->Branch("dali",&dali,320000);
   rtr->Branch("beam",&beam,320000);
 
@@ -112,6 +115,15 @@ int main(int argc, char* argv[]){
     f8ppacY[p] = new TH1F(Form("f8ppacY_%d",p),Form("f8ppacY_%d",p),200,-100,100);hlist->Add(f8ppacY[p]);
     f8ppacXY[p] = new TH2F(Form("f8ppacXY_%d",p),Form("f8ppacXY_%d",p),200,-100,100,200,-100,100);hlist->Add(f8ppacXY[p]);
   }
+  TH2F* compareX[2];
+  TH2F* compareY[2];
+  TH2F* compareZ[2];
+  for(int p=0;p<2;p++){
+    compareX[p] = new TH2F(Form("compareX_%d",p),Form("compareX_%d",p),200,-100,100,200,-100,100);hlist->Add(compareX[p]);
+    compareY[p] = new TH2F(Form("compareY_%d",p),Form("compareY_%d",p),200,-100,100,200,-100,100);hlist->Add(compareY[p]);
+    compareZ[p] = new TH2F(Form("compareZ_%d",p),Form("compareZ_%d",p),200,-100,100,200,-100,100);hlist->Add(compareZ[p]);
+  }
+  TH2F* ppacZpos = new TH2F("ppacZpos","ppacZpos",40,0,40,3000,-1500,1500);hlist->Add(ppacZpos);
 
   TH1F* tdiff = new TH1F("tdiff","tdiff",2000,-1000,1000);hlist->Add(tdiff);
   TH1F* rdiff = new TH1F("rdiff","rdiff",2000,0,10);hlist->Add(rdiff);
@@ -181,6 +193,10 @@ int main(int argc, char* argv[]){
     if(signal_received){
       break;
     }
+    trigbit = 0;
+    for(int f=0;f<NFPLANES;f++){
+      fp[f]->Clear();
+    }
     dali->Clear();
     ppac->Clear();
     beam->Clear();
@@ -222,19 +238,30 @@ int main(int argc, char* argv[]){
 
     //PPACs
     //ppacs
+    TVector3 ppacpos[3];
+    ppacpos[0] = rec->PPACpos(ppac->GetPPACID(19),ppac->GetPPACID(20));
+    ppacpos[1] = rec->PPACpos(ppac->GetPPACID(21),ppac->GetPPACID(22));
+    ppacpos[2] = rec->PPACpos(ppac->GetPPACID(35),ppac->GetPPACID(36));
+    compareX[0]->Fill(ppacpos[0].X(),fp[fpNr(8)]->GetTrack()->GetX());
+    compareX[1]->Fill(ppacpos[1].X(),fp[fpNr(8)]->GetTrack()->GetX());
+    compareY[0]->Fill(ppacpos[0].Y(),fp[fpNr(8)]->GetTrack()->GetY());
+    compareY[1]->Fill(ppacpos[1].Y(),fp[fpNr(8)]->GetTrack()->GetY());
+    // compareZ[0]->Fill(ppacpos[0].Z(),fp[fpNr(8)]->GetTrack()->GetZ());
+    // compareZ[1]->Fill(ppacpos[1].Z(),fp[fpNr(8)]->GetTrack()->GetZ());
     for(unsigned short p=0;p<ppac->GetN();p++){
       SinglePPAC *sp = ppac->GetPPAC(p);
-      if(sp->GetID()>=18 && sp->GetID()<=21){
-	f8ppacX[sp->GetID()-18]->Fill(sp->GetX());
-	f8ppacY[sp->GetID()-18]->Fill(sp->GetY());
+      ppacZpos->Fill(sp->GetID(),sp->GetZ());
+      if(sp->GetID()>=19 && sp->GetID()<=22){
+	f8ppacX[sp->GetID()-19]->Fill(sp->GetX());
+	f8ppacY[sp->GetID()-19]->Fill(sp->GetY());
 	if(sp->Fired())
-	  f8ppacXY[sp->GetID()-18]->Fill(sp->GetX(),sp->GetY());
+	  f8ppacXY[sp->GetID()-19]->Fill(sp->GetX(),sp->GetY());
       }
-      if(sp->GetID()>=34 && sp->GetID()<=35){
-	f8ppacX[sp->GetID()-34+4]->Fill(sp->GetX());
-	f8ppacY[sp->GetID()-34+4]->Fill(sp->GetY());
+      if(sp->GetID()>=35 && sp->GetID()<=36){
+	f8ppacX[sp->GetID()-35+4]->Fill(sp->GetX());
+	f8ppacY[sp->GetID()-35+4]->Fill(sp->GetY());
 	if(sp->Fired())
-	  f8ppacXY[sp->GetID()-34+4]->Fill(sp->GetX(),sp->GetY());
+	  f8ppacXY[sp->GetID()-35+4]->Fill(sp->GetX(),sp->GetY());
       }
     
     }
