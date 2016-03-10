@@ -27,7 +27,18 @@ public:
 
   int VerboseLevel(){return fverbose;}
   double TimeOffset(int b){return ftoffset[b];}
-  char* DALIFile(){return (char*)fDALIFile.c_str();}
+  char* DALIFile(){return (char*)fDALIfile.c_str();}
+
+  double Overflow(){return foverflow;}
+  double Underflow(){return funderflow;}
+  char* DALIPosFile(){return (char*)fDALIposfile.c_str();}
+  double Beta(){return fbeta;}
+  
+  int AddbackType(){return faddbacktype;}
+  double AddbackDistance(){return faddbackdistance;}
+  double AddbackAngle(){return faddbackangle;}
+  double AddbackThresh(){return faddbackthreshold;}
+  double AddbackTimeDiff(int i){return faddbacktdiff[i];}
 
 private:
   //! filename of the settings file
@@ -37,10 +48,18 @@ private:
   //! time offsets for A/Q calibration
   double ftoffset[6];
   //! DALI calibration file
-  string fDALIFile;
+  string fDALIfile;
 
+  //! Overflow value for gamma energies
+  double foverflow;
+  //! Underflow value for gamma energies
+  double funderflow;
+
+  //! averaged positions from the simulation
+  string fDALIposfile;
   //! averge beta for Doppler correction
   double fbeta;
+
   //! type of addback
   int faddbacktype;
   //! max distance between two hits for addback
@@ -52,12 +71,5 @@ private:
   //! time difference between two hits for addback
   double faddbacktdiff[2];
 
-  //! Overflow value for gamma energies
-  double foverflow;
-  //! Underflow value for gamma energies
-  double funderflow;
-
-  //! averaged positions from the simulation
-  string fposfile;
 };
 #endif

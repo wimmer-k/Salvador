@@ -18,9 +18,7 @@ void Settings::ReadSettings(){
 
   for(int i=0;i<6;i++)
     ftoffset[i] = set->GetValue(Form("TOF.Offset.%d",i),300.0);
-  fDALIFile = set->GetValue("DALI.File","/home/wimmer/ribf94/db/DALI.xml");
-
-
+  fDALIfile = set->GetValue("DALI.File","/home/wimmer/ribf94/db/DALI.xml");
 
   fbeta = set->GetValue("AverageBeta",0.5);
   foverflow = set->GetValue("Overflow.Threshold",8000);
@@ -32,7 +30,7 @@ void Settings::ReadSettings(){
   faddbacktdiff[0] = set->GetValue("Addback.TimeDiff.Low",-50.);
   faddbacktdiff[1] = set->GetValue("Addback.TimeDiff.High",20.);
 
-  fposfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
+  fDALIposfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
 
 
   if(fverbose>0)
@@ -44,12 +42,12 @@ void Settings::ReadSettings(){
 void Settings::PrintSettings(){  
   for(int i=0;i<6;i++)
     cout << Form("TOF.Offset.%d\t",i) << ftoffset[i] << endl;
-  cout << "DALI.File\t" << fDALIFile << endl;
+  cout << "DALI.File\t" << fDALIfile << endl;
 
   cout << "fverbose\t" << fverbose << endl;
   cout << "fbeta\t" << fbeta << endl;
   cout << "faddbacktype\t" << faddbacktype << endl;
   cout << "faddbackdistance\t" << faddbackdistance << endl;
   cout << "faddbackangle\t" << faddbackangle << endl;
-  cout << "fposition file\t" << fposfile << endl;  
+  cout << "fposition file\t" << fDALIposfile << endl;  
 }

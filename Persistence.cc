@@ -106,9 +106,11 @@ int main(int argc, char* argv[]){
   //histograms
   TH1F* f8ppacX[6];
   TH1F* f8ppacY[6];
+  TH2F* f8ppacXY[6];
   for(int p=0;p<6;p++){
     f8ppacX[p] = new TH1F(Form("f8ppacX_%d",p),Form("f8ppacX_%d",p),200,-100,100);hlist->Add(f8ppacX[p]);
     f8ppacY[p] = new TH1F(Form("f8ppacY_%d",p),Form("f8ppacY_%d",p),200,-100,100);hlist->Add(f8ppacY[p]);
+    f8ppacXY[p] = new TH2F(Form("f8ppacXY_%d",p),Form("f8ppacXY_%d",p),200,-100,100,200,-100,100);hlist->Add(f8ppacXY[p]);
   }
 
   TH1F* tdiff = new TH1F("tdiff","tdiff",2000,-1000,1000);hlist->Add(tdiff);
@@ -225,10 +227,14 @@ int main(int argc, char* argv[]){
       if(sp->GetID()>=18 && sp->GetID()<=21){
 	f8ppacX[sp->GetID()-18]->Fill(sp->GetX());
 	f8ppacY[sp->GetID()-18]->Fill(sp->GetY());
+	if(sp->Fired())
+	  f8ppacXY[sp->GetID()-18]->Fill(sp->GetX(),sp->GetY());
       }
       if(sp->GetID()>=34 && sp->GetID()<=35){
 	f8ppacX[sp->GetID()-34+4]->Fill(sp->GetX());
 	f8ppacY[sp->GetID()-34+4]->Fill(sp->GetY());
+	if(sp->Fired())
+	  f8ppacXY[sp->GetID()-34+4]->Fill(sp->GetX(),sp->GetY());
       }
     
     }

@@ -9,7 +9,7 @@
 
 #include "DALIdefs.h"
 #include "DALI.hh"
-
+#include "Settings.hh"
 /*!
   A class for reconstruction of DALI data, includes Doppler correction and add-back
 */
@@ -45,27 +45,12 @@ public:
   // void ReadAddBackTable();
 
 private:
+  //! settings for reconstruction
+  Settings* fset;
+  //! average beta for Doppler correction
+  double fbeta;
   //! average positions of first interaction points
   vector<vector<double> > fpositions;
-  //! averge beta for Doppler correction
-  double fbeta;
-  //! type of addback
-  int faddbacktype;
-  //! max distance between two hits for addback
-  double faddbackdistance;
-  //! max angle between two hits for addback
-  double faddbackangle;
-  //! energy threshold for addback
-  double faddbackthreshold;
-  //! time difference between two hits for addback
-  double faddbacktdiff[2];
-
-  //! verbose level
-  int fverbose;
-  //! Overflow value for gamma energies
-  double foverflow;
-  //! Underflow value for gamma energies
-  double funderflow;
 
 };
 #endif

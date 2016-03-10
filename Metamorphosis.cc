@@ -221,7 +221,7 @@ int main(int argc, char* argv[]){
       SinglePPAC *dppac = new SinglePPAC;
       tppac = ppaccalib->GetPPAC(p);
       if(tppac){
-	dppac->Set(tppac->GetID(),tppac->GetX(),tppac->GetY(),tppac->GetTSumX(),tppac->GetTSumY());
+	dppac->Set(tppac->GetID(),tppac->GetX(),tppac->GetY(),tppac->GetXZPos(),tppac->GetTSumX(),tppac->GetTSumY());
 	if(tppac->IsFiredX()||tppac->IsFiredY())
 	  ppacs->AddPPAC(dppac);
       }

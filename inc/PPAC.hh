@@ -23,6 +23,7 @@ public:
     fID = -1;
     fx = sqrt(-1.);
     fy = sqrt(-1.);
+    fz = sqrt(-1.);
     ftsumx = sqrt(-1.);
     ftsumy = sqrt(-1.);
   }
@@ -35,6 +36,8 @@ public:
   void SetX(double x){fx = x;}
   //! Set the y position
   void SetY(double y){fy = y;}
+  //! Set the z position
+  void SetZ(double z){fz = z;}
   //! Set the timing sum x
   void SetTsumX(double tsumx){ftsumx = tsumx;}
   //! Set the timing sum y
@@ -44,16 +47,31 @@ public:
     fx = x;
     fy = y;
   }
+  //! Set the position
+  void SetXYZ(double x, double y, double z){
+    fx = x;
+    fy = y;
+    fz = z;
+  }
   //! Set the timing sum
   void SetTsumXY(double tsumx, double tsumy){
     ftsumx = tsumx;
     ftsumy = tsumy;
   }
-  //! Set everything
+  //! Set everything (x,y only for backwards compatability)
   void Set(short id, double x, double y, double tsumx, double tsumy){
     fID = id;
     fx = x;
     fy = y;
+    ftsumx = tsumx;
+    ftsumy = tsumy;
+  }
+  //! Set everything
+  void Set(short id, double x, double y, double z, double tsumx, double tsumy){
+    fID = id;
+    fx = x;
+    fy = y;
+    fz = z;
     ftsumx = tsumx;
     ftsumy = tsumy;
   }
@@ -64,11 +82,28 @@ public:
   double GetX(){return fx;}
   //! Get the y position
   double GetY(){return fy;}
+  //! Get the z position
+  double GetZ(){return fz;}
   //! Get the timing sum x
   double GetTsumX(){return ftsumx;}
   //! Get the timing sum y
   double GetTsumY(){return ftsumy;}
   
+  bool Fired(){
+    if( (!isnan(fx) && fx>-500) && (!isnan(fy) && fy>-500) )
+      return true;
+    return false;
+  }
+  bool FiredX(){
+    if(!isnan(fx) && fx>-500)
+      return true;
+    return false;
+  }
+  bool FiredY(){
+    if(!isnan(fy) && fy>-500)
+      return true;
+    return false;
+  }
 protected:
   //! ID
   short fID;
@@ -76,6 +111,8 @@ protected:
   double fx;
   //! y position
   double fy;
+  //! z position
+  double fz;
   //! timing sum x
   double ftsumx;
   //! timing sum y
