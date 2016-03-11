@@ -35,6 +35,9 @@ public:
     for(unsigned short j=0;j<4;j++){
       fdelta[j] = sqrt(-1.);
     }
+    ftargetpos.SetXYZ(0,0,-99999);
+    fincdir.SetXYZ(0,0,-99999);
+    foutdir.SetXYZ(0,0,-99999);
   }
   //! Set the A/Q ratio
   void SetAQ(unsigned short j, double aoq){
@@ -150,6 +153,19 @@ public:
   //! Get the target Y position
   double GetTargetPositionY(){
     return ftargetpos.Y();
+  }
+
+  //! Get the scattering angle phi
+  double GetPhi(){
+    if(fincdir.Z()>-99999 && foutdir.Z()>-99999)
+      return foutdir.DeltaPhi(fincdir);
+    return sqrt(-1.);
+  }
+  //! Get the scattering angle theta
+  double GetTheta(){
+    if(fincdir.Z()>-99999 && foutdir.Z()>-99999)
+      return foutdir.Angle(fincdir);
+    return sqrt(-1.);
   }
 
 protected:

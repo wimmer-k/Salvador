@@ -128,6 +128,9 @@ int main(int argc, char* argv[]){
   TH2F* compareA = new TH2F("compareA","compareA",200,-100,100,200,-100,100);hlist->Add(compareA);
   TH2F* compareB = new TH2F("compareB","compareB",200,-100,100,200,-100,100);hlist->Add(compareB);
   TH2F* ppacZpos = new TH2F("ppacZpos","ppacZpos",40,0,40,3000,-1500,1500);hlist->Add(ppacZpos);
+  TH2F* targetXY = new TH2F("targetXY","targetXY",200,-100,100,200,-100,100);hlist->Add(targetXY);
+  TH2F* thetaphi = new TH2F("thetaphi","thetaphi",800,-4,4,1500,0,150);hlist->Add(thetaphi);
+
 
   TH1F* tdiff = new TH1F("tdiff","tdiff",2000,-1000,1000);hlist->Add(tdiff);
   TH1F* rdiff = new TH1F("rdiff","rdiff",2000,0,10);hlist->Add(rdiff);
@@ -249,14 +252,23 @@ int main(int argc, char* argv[]){
     
     beam->SetIncomingDirection(ppacpos[1]-ppacpos[0]);
     TVector3 inc = beam->GetIncomingDirection();
-    compareA->Fill(atan2(inc.X(),inc.Z())*1000, fp[fpNr(8)]->GetTrack()->GetA());
-    compareB->Fill(atan2(inc.Y(),inc.Z())*1000, fp[fpNr(8)]->GetTrack()->GetB());
-    
     TVector3 targ = rec->TargetPosition(inc,ppacpos[1]);
     beam->SetTargetPosition(targ);
 
+    if(trigbit>1){
+      beam->SetScatteredDirection(ppacpos[2]-targ);
+      TVector3 sca = beam->GetScatteredDirection();
+      
+      thetaphi->Fill(beam->GetPhi(),beam->GetTheta()*1000);
+    }
+
     double a = inc.X()/inc.Z();
     double b = inc.Y()/inc.Z();
+
+    compareA->Fill(atan2(inc.X(),inc.Z())*1000, fp[fpNr(8)]->GetTrack()->GetA());
+    compareB->Fill(atan2(inc.Y(),inc.Z())*1000, fp[fpNr(8)]->GetTrack()->GetB());
+    targetXY->Fill(targ.X(),targ.Y());
+    
 
     double x = ppacpos[1].X() + a * (ppac->GetPPACID(35)->GetZ()-ppacpos[1].Z());
     double y = ppacpos[1].Y() + b * (ppac->GetPPACID(35)->GetZ()-ppacpos[1].Z());
