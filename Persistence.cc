@@ -117,11 +117,13 @@ int main(int argc, char* argv[]){
   }
   TH2F* compareX[2];
   TH2F* compareY[2];
-  TH2F* compareZ[2];
+  TH1F* compare1dX[2];
+  TH1F* compare1dY[2];
   for(int p=0;p<2;p++){
     compareX[p] = new TH2F(Form("compareX_%d",p),Form("compareX_%d",p),200,-100,100,200,-100,100);hlist->Add(compareX[p]);
     compareY[p] = new TH2F(Form("compareY_%d",p),Form("compareY_%d",p),200,-100,100,200,-100,100);hlist->Add(compareY[p]);
-    compareZ[p] = new TH2F(Form("compareZ_%d",p),Form("compareZ_%d",p),200,-100,100,200,-100,100);hlist->Add(compareZ[p]);
+    compare1dX[p] = new TH1F(Form("compare1dX_%d",p),Form("compare1dX_%d",p),1000,-100,100);hlist->Add(compare1dX[p]);
+    compare1dY[p] = new TH1F(Form("compare1dY_%d",p),Form("compare1dY_%d",p),1000,-100,100);hlist->Add(compare1dY[p]);
   }
   TH2F* compareA = new TH2F("compareA","compareA",200,-100,100,200,-100,100);hlist->Add(compareA);
   TH2F* compareB = new TH2F("compareB","compareB",200,-100,100,200,-100,100);hlist->Add(compareB);
@@ -241,21 +243,35 @@ int main(int argc, char* argv[]){
     //PPACs
     //ppacs
     TVector3 ppacpos[3];
-    ppacpos[0] = rec->PPACpos(ppac->GetPPACID(19),ppac->GetPPACID(20));
-    ppacpos[1] = rec->PPACpos(ppac->GetPPACID(21),ppac->GetPPACID(22));
-    ppacpos[2] = rec->PPACpos(ppac->GetPPACID(35),ppac->GetPPACID(36));
+    ppacpos[0] = rec->PPACPosition(ppac->GetPPACID(19),ppac->GetPPACID(20));
+    ppacpos[1] = rec->PPACPosition(ppac->GetPPACID(21),ppac->GetPPACID(22));
+    ppacpos[2] = rec->PPACPosition(ppac->GetPPACID(35),ppac->GetPPACID(36));
+    
     beam->SetIncomingDirection(ppacpos[1]-ppacpos[0]);
     TVector3 inc = beam->GetIncomingDirection();
     compareA->Fill(atan2(inc.X(),inc.Z())*1000, fp[fpNr(8)]->GetTrack()->GetA());
     compareB->Fill(atan2(inc.Y(),inc.Z())*1000, fp[fpNr(8)]->GetTrack()->GetB());
+    
+    TVector3 targ = rec->TargetPosition(inc,ppacpos[1]);
+    beam->SetTargetPosition(targ);
 
+    double a = inc.X()/inc.Z();
+    double b = inc.Y()/inc.Z();
 
-    compareX[0]->Fill(ppacpos[0].X(),fp[fpNr(8)]->GetTrack()->GetX());
-    compareX[1]->Fill(ppacpos[1].X(),fp[fpNr(8)]->GetTrack()->GetX());
-    compareY[0]->Fill(ppacpos[0].Y(),fp[fpNr(8)]->GetTrack()->GetY());
-    compareY[1]->Fill(ppacpos[1].Y(),fp[fpNr(8)]->GetTrack()->GetY());
-    // compareZ[0]->Fill(ppacpos[0].Z(),fp[fpNr(8)]->GetTrack()->GetZ());
-    // compareZ[1]->Fill(ppacpos[1].Z(),fp[fpNr(8)]->GetTrack()->GetZ());
+    double x = ppacpos[1].X() + a * (ppac->GetPPACID(35)->GetZ()-ppacpos[1].Z());
+    double y = ppacpos[1].Y() + b * (ppac->GetPPACID(35)->GetZ()-ppacpos[1].Z());
+    compareX[0]->Fill(ppac->GetPPACID(35)->GetX(),x);
+    compareY[0]->Fill(ppac->GetPPACID(35)->GetY(),y);
+    compare1dX[0]->Fill(ppac->GetPPACID(35)->GetX()-x);
+    compare1dY[0]->Fill(ppac->GetPPACID(35)->GetY()-y);
+
+    x = ppacpos[1].X() + a * (ppac->GetPPACID(36)->GetZ()-ppacpos[1].Z());
+    y = ppacpos[1].Y() + b * (ppac->GetPPACID(36)->GetZ()-ppacpos[1].Z());
+    compareX[1]->Fill(ppac->GetPPACID(36)->GetX(),x);
+    compareY[1]->Fill(ppac->GetPPACID(36)->GetY(),y);
+    compare1dX[1]->Fill(ppac->GetPPACID(36)->GetX()-x);
+    compare1dY[1]->Fill(ppac->GetPPACID(36)->GetY()-y);
+
     for(unsigned short p=0;p<ppac->GetN();p++){
       SinglePPAC *sp = ppac->GetPPAC(p);
       ppacZpos->Fill(sp->GetID(),sp->GetZ());

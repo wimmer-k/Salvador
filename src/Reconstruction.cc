@@ -203,7 +203,7 @@ void Reconstruction::DopplerCorrect(DALI* dali){
   \param pinb B PPAC
   \return vector to the position
 */
-TVector3 Reconstruction::PPACpos(SinglePPAC* pina, SinglePPAC* pinb){
+TVector3 Reconstruction::PPACPosition(SinglePPAC* pina, SinglePPAC* pinb){
   double x = sqrt(-1.);
   double y = sqrt(-1.);
   double z = sqrt(-1.);
@@ -224,7 +224,21 @@ TVector3 Reconstruction::PPACpos(SinglePPAC* pina, SinglePPAC* pinb){
   }
   return TVector3(x,y,z);
 }
-
+/*!
+  Calculate the ppac position as the average of A and B PPACs
+  \param inc incoming beam
+  \param ppac position from which to extrapolate  
+  \return vector to the target position
+*/
+TVector3 Reconstruction::TargetPosition(TVector3 inc, TVector3 ppac){
+  double a = inc.X()/inc.Z();
+  double b = inc.Y()/inc.Z();
+  
+  double x = ppac.X() + a * (fset->TargetPosition()-ppac.Z());
+  double y = ppac.Y() + b * (fset->TargetPosition()-ppac.Z());
+  
+  return TVector3(x,y,fset->TargetPosition());
+}
 
 // /*!
 

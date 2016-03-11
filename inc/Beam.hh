@@ -75,17 +75,16 @@ public:
   }
 
   //! Set the target position 
-  void SetTargetPos(double xpos, double ypos){
-    ftargX = xpos;
-    ftargY = ypos;
+  void SetTargetPosition(TVector3 pos){
+    ftargetpos = pos;
   }
   //! Set the target x position 
   void SetTargetXPos(double xpos){
-    ftargX = xpos;
+    ftargetpos.SetX(xpos);
   }
   //! Set the target y position 
   void SetTargetYPos(double ypos){
-    ftargY = ypos;
+    ftargetpos.SetY(ypos);
   }
   //! Set the direction of the incoming beam
   void SetIncomingDirection(TVector3 dir){
@@ -140,6 +139,18 @@ public:
   TVector3 GetScatteredDirection(){
     return foutdir;
   }
+  //! Get the target position
+  TVector3 GetTargetPosition(){
+    return ftargetpos;
+  }
+  //! Get the target X position
+  double GetTargetPositionX(){
+    return ftargetpos.X();
+  }
+  //! Get the target Y position
+  double GetTargetPositionY(){
+    return ftargetpos.Y();
+  }
 
 protected:
   //! A/Q for 3-5, 5-7, 3-7,  8-9, 9-11, 8-11
@@ -159,10 +170,8 @@ protected:
   //! delta momentum 3-5, 5-7, 8-9, 9-11
   double fdelta[4];
 
-  //! target position x
-  double ftargX;
-  //! target position y
-  double ftargY;
+  //! target position 
+  TVector3 ftargetpos;
   //! incoming direction
   TVector3 fincdir;
   //! scattered direction

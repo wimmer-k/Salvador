@@ -41,8 +41,10 @@ public:
   bool Addback(DALIHit* hit0, DALIHit* hit1);
   //! do the adding back
   vector<DALIHit*> Addback(vector<DALIHit*> dali);
-  
-  TVector3 PPACpos(SinglePPAC* pina, SinglePPAC* pinb);
+  //! calculate the PPAC position
+  TVector3 PPACPosition(SinglePPAC* pina, SinglePPAC* pinb);
+  //! calculate the target position
+  TVector3 TargetPosition(TVector3 inc, TVector3 ppac);
 
   // //! read in the addback table
   // void ReadAddBackTable();

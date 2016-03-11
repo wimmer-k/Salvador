@@ -52,6 +52,9 @@ public:
   //! time difference between hits to be considered for addback
   double AddbackTimeDiff(int i){return faddbacktdiff[i];}
 
+  //! target position with respect to nominal focus
+  double TargetPosition(){return ftargetposition;}
+
 private:
   //! filename of the settings file
   string finputfile;
@@ -83,5 +86,7 @@ private:
   //! time difference between two hits for addback
   double faddbacktdiff[2];
 
+  //! target position with respect to nominal focus
+  double ftargetposition;
 };
 #endif

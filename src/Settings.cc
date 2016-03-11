@@ -32,7 +32,7 @@ void Settings::ReadSettings(){
 
   fDALIposfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
 
-
+  ftargetposition = set->GetValue("Target.Position",138.5);
   if(fverbose>0)
     PrintSettings();
 }
@@ -41,13 +41,16 @@ void Settings::ReadSettings(){
 */
 void Settings::PrintSettings(){  
   for(int i=0;i<6;i++)
-    cout << Form("TOF.Offset.%d\t",i) << ftoffset[i] << endl;
-  cout << "DALI.File\t" << fDALIfile << endl;
+    cout << Form("TOF offset.%d\t",i) << ftoffset[i] << endl;
+  cout << "DALI calibration file\t" << fDALIfile << endl;
 
-  cout << "fverbose\t" << fverbose << endl;
-  cout << "fbeta\t" << fbeta << endl;
-  cout << "faddbacktype\t" << faddbacktype << endl;
-  cout << "faddbackdistance\t" << faddbackdistance << endl;
-  cout << "faddbackangle\t" << faddbackangle << endl;
-  cout << "fposition file\t" << fDALIposfile << endl;  
+  cout << "verbose level\t" << fverbose << endl;
+  cout << "beta\t" << fbeta << endl;
+  cout << "addback type\t" << faddbacktype << endl;
+  cout << "addback distance\t" << faddbackdistance << endl;
+  cout << "addback angle\t" << faddbackangle << endl;
+  cout << "position file\t" << fDALIposfile << endl;  
+  
+  cout << "target position\t" << ftargetposition << endl;
 }
+
