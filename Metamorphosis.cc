@@ -58,8 +58,8 @@ int main(int argc, char* argv[]){
   char* OutputFile = NULL;
   char* SetFile = NULL;
   char* CutFile = NULL;
-  int nmax =0;
-  int vl =0;
+  int nmax = 0;
+  int vl = 0;
 
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input file", &InputFile);
