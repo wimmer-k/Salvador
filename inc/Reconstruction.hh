@@ -27,10 +27,14 @@ public:
   void SetBeta(double beta){fbeta = beta;}
   //! read the average positions within the crystals
   void ReadPositions(const char *infile);
+  //! read a list with bad channels
+  void ReadBadChannels(const char *infile);
   //! sort by energy highest first
   vector<DALIHit*> Sort(vector<DALIHit*> dali);
   //! sort by energy lowest first
   vector<DALIHit*> Revert(vector<DALIHit*> dali);
+  //! filter bad channels, over and underflows
+  vector<DALIHit*> FilterBadHits(vector<DALIHit*> hits);
   //! filter over and underflows
   vector<DALIHit*> FilterOverUnderflows(vector<DALIHit*> hits);
   //! set the positions
@@ -56,6 +60,6 @@ private:
   double fbeta;
   //! average positions of first interaction points
   vector<vector<double> > fpositions;
-
+  vector<unsigned short> fbad;
 };
 #endif

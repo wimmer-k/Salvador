@@ -11,10 +11,23 @@ Reconstruction::Reconstruction(char *settings){
   //string posfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
 
   ReadPositions(fset->DALIPosFile());
+  ReadBadChannels(fset->BadChFile());
   if(fset->VerboseLevel()>1){
     for(unsigned short i=0;i<fpositions.size();i++){
       cout << i << "\t" << fpositions[i][0]<< "\t" << fpositions[i][1]<< "\t" << fpositions[i][2]<<endl;
     }
+  }
+}
+/*!
+  Reads a list with bad channels
+  \param infile the file with the bad channels
+*/
+void Reconstruction::ReadBadChannels(const char *infile){
+  TEnv *bad = new TEnv(infile);
+  unsigned short nbad = bad->GetValue("Number.Bad.Channels",0);
+  fbad.resize(nbad);
+  for(int i=0;i<nbad;i++){
+    fbad.at(i) = bad->GetValue(Form("Bad.Channel.%d",i),-1);
   }
 }
 /*!
@@ -52,6 +65,26 @@ vector<DALIHit*> Reconstruction::Sort(vector<DALIHit*> hits){
   return hits;
 }
 /*!
+  Filter bad channels, the overflow and underflow hits
+  \param hits a vector with all hits
+  \return a vector with the filtered hits
+*/
+vector<DALIHit*> Reconstruction::FilterBadHits(vector<DALIHit*> hits){
+  vector<DALIHit*> output;
+  for(unsigned short i=0;i<hits.size();i++){
+    if(hits.at(i)->GetEnergy()<fset->Overflow() && hits.at(i)->GetEnergy()> fset->Underflow()){
+      bool bad = false;
+      for(unsigned short j=0;j<fbad.size();j++){
+	if(hits.at(i)->GetID()==fbad.at(j))
+	  bad = true;
+      }
+      if(!bad)
+	output.push_back(hits.at(i));
+    }
+  }
+  return output;
+}
+/*!
   Filter the overflow and underflow hits
   \param hits a vector with all hits
   \return a vector with the filtered hits
@@ -59,8 +92,8 @@ vector<DALIHit*> Reconstruction::Sort(vector<DALIHit*> hits){
 vector<DALIHit*> Reconstruction::FilterOverUnderflows(vector<DALIHit*> hits){
   vector<DALIHit*> output;
   for(unsigned short i=0;i<hits.size();i++){
-    if(hits[i]->GetEnergy()<fset->Overflow() && hits[i]->GetEnergy()> fset->Underflow()){
-      output.push_back(hits[i]);
+    if(hits.at(i)->GetEnergy()<fset->Overflow() && hits.at(i)->GetEnergy()> fset->Underflow()){
+      output.push_back(hits.at(i));
     }
   }
   return output;
@@ -100,13 +133,13 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
   vector<DALIHit*> hitsAB;
   vector<DALIHit*> unusedhits;
   for(unsigned short i=0;i<hits.size();i++){
-    short id = hits[i]->GetID();
-    double en = hits[i]->GetEnergy();
-    double DCen = hits[i]->GetDCEnergy();
-    TVector3 pos = hits[i]->GetPos();
-    double time = hits[i]->GetTime();
-    double toffset = hits[i]->GetTOffset();
-    unsigned short hitsadded = hits[i]->GetHitsAdded();
+    short id = hits.at(i)->GetID();
+    double en = hits.at(i)->GetEnergy();
+    double DCen = hits.at(i)->GetDCEnergy();
+    TVector3 pos = hits.at(i)->GetPos();
+    double time = hits.at(i)->GetTime();
+    double toffset = hits.at(i)->GetTOffset();
+    unsigned short hitsadded = hits.at(i)->GetHitsAdded();
     unusedhits.push_back(new DALIHit(id, en, DCen, pos, time, toffset, hitsadded));
   }
   unusedhits = Revert(unusedhits);
@@ -126,9 +159,9 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
       bool found = false;
       for(unsigned short k=0;k<currenthits.size();k++){
 	for(unsigned short j=0;j<unusedhits.size();j++){
-	  if(unusedhits[j]->GetEnergy()<fset->AddbackThresh())
+	  if(unusedhits.at(j)->GetEnergy()<fset->AddbackThresh())
 	    continue;
-	  if(Addback(currenthits[k],unusedhits[j])){	    
+	  if(Addback(currenthits.at(k),unusedhits.at(j))){	    
 	    addme = j;
 	    found = true;
 	    break;
@@ -139,8 +172,8 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
       }//loop add back hits
       if(found && addme >-1){
 	added++;
-	currenthits.push_back(unusedhits[addme]);
-	thishit->AddBackHit(unusedhits[addme]);
+	currenthits.push_back(unusedhits.at(addme));
+	thishit->AddBackHit(unusedhits.at(addme));
 	unusedhits.erase(unusedhits.begin() + addme);
       }
       if(hits.size()==0)
@@ -150,11 +183,11 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
     if(fset->VerboseLevel()>2){
       cout << "current hits" << endl;
       for(unsigned short k=0;k<currenthits.size();k++){
-	currenthits[k]->Print();
+	currenthits.at(k)->Print();
       }
       cout << "unused hits" << endl;
       for(unsigned short k=0;k<unusedhits.size();k++){
-	unusedhits[k]->Print();
+	unusedhits.at(k)->Print();
       }
       cout << "this hit" <<endl;
       thishit->Print();
@@ -166,7 +199,7 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
   if(fset->VerboseLevel()>2){
     cout << "after addback " << endl;
     for(unsigned short k=0;k<hitsAB.size();k++){
-      hitsAB[k]->Print();
+      hitsAB.at(k)->Print();
     }
   }
 

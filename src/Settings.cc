@@ -31,6 +31,7 @@ void Settings::ReadSettings(){
   faddbacktdiff[1] = set->GetValue("Addback.TimeDiff.High",20.);
 
   fDALIposfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
+  fDALIbadfile = set->GetValue("Bad.Channels",(char*)"settings/baddali.dat");
 
   ftargetposition = set->GetValue("Target.Position",138.5);
   if(fverbose>0)
@@ -50,6 +51,7 @@ void Settings::PrintSettings(){
   cout << "addback distance\t" << faddbackdistance << endl;
   cout << "addback angle\t" << faddbackangle << endl;
   cout << "position file\t" << fDALIposfile << endl;  
+  cout << "bad channels file\t" << fDALIbadfile << endl;  
   
   cout << "target position\t" << ftargetposition << endl;
 }

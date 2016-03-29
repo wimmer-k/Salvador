@@ -353,23 +353,3 @@ double get_time(){
     double d = t.tv_sec + (double) t.tv_usec/1000000;  
     return d;  
 }  
-//int fpNr(int id){
-//  if(id<3 || id>11)
-//    return -1;
-//  switch (id){
-//    case 3:
-//      return 0;
-//    case 5:
-//      return 1;
-//    case 7:
-//      return 2;
-//    case 8:
-//      return 3;
-//    case 9:
-//      return 4;
-//    case 11:
-//      return 5;
-//    default:
-//      return -1;
-//  }
-//}

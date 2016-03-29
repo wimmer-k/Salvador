@@ -32,6 +32,9 @@ public:
   //! XML file with the DALI calibrations
   char* DALIFile(){return (char*)fDALIfile.c_str();}
 
+  //! file with the bad DALI channels
+  char* BadChFile(){return (char*)fDALIbadfile.c_str();}
+
   //! overflow energy
   double Overflow(){return foverflow;}
   //! underflow energy
@@ -64,7 +67,9 @@ private:
   double ftoffset[6];
   //! DALI calibration file
   string fDALIfile;
-
+  
+  //! DALI bad channels file
+  string fDALIbadfile;
   //! Overflow value for gamma energies
   double foverflow;
   //! Underflow value for gamma energies
