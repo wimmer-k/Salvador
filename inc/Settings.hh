@@ -20,42 +20,46 @@ public:
   //! dummy destructor
   ~Settings(){
   };
-  //! read the settings
+  //! Read the settings
   void ReadSettings();
-  //! print the settings
+  //! Print the settings
   void PrintSettings();
 
   //! Get the vorbose level
   int VerboseLevel(){return fverbose;}
-  //! Time of flight offsets for the A/Q
+  //! Get the time of flight offsets for the A/Q
   double TimeOffset(int b){return ftoffset[b];}
   //! XML file with the DALI calibrations
   char* DALIFile(){return (char*)fDALIfile.c_str();}
 
-  //! file with the bad DALI channels
+  //! Get the file with the bad DALI channels
   char* BadChFile(){return (char*)fDALIbadfile.c_str();}
+  //! Get the file with the DALI recalibration parameters
+  char* ReCalFile(){return (char*)fDALIrecalfile.c_str();}
+  //! Do the recalibration
+  bool DoReCalibration(){return fdorecal;}
 
-  //! overflow energy
+  //! Get the overflow energy
   double Overflow(){return foverflow;}
-  //! underflow energy
+  //! Get the underflow energy
   double Underflow(){return funderflow;}
-  //! txt file witht the positions of the DALI crystals from the simulation
+  //! Get the txt file witht the positions of the DALI crystals from the simulation
   char* DALIPosFile(){return (char*)fDALIposfile.c_str();}
-  //! beta for the Doppler correction
+  //! Get the beta for the Doppler correction
   double Beta(){return fbeta;}
   
-  //! type of addback to be used, 1 distance, 2 angles
+  //! Get the type of addback to be used, 1 distance, 2 angles
   int AddbackType(){return faddbacktype;}
-  //! maximum distance between hits to be considered for addback
+  //! Get the maximum distance between hits to be considered for addback
   double AddbackDistance(){return faddbackdistance;}
-  //! maximum angle between hits and target to be considered for addback
+  //! Get the maximum angle between hits and target to be considered for addback
   double AddbackAngle(){return faddbackangle;}
-  //! software threshold for addback, global
+  //! Get the software threshold for addback, global
   double AddbackThresh(){return faddbackthreshold;}
-  //! time difference between hits to be considered for addback
+  //! Get the time difference between hits to be considered for addback
   double AddbackTimeDiff(int i){return faddbacktdiff[i];}
 
-  //! target position with respect to nominal focus
+  //! Get the target position with respect to nominal focus
   double TargetPosition(){return ftargetposition;}
 
 private:
@@ -70,6 +74,10 @@ private:
   
   //! DALI bad channels file
   string fDALIbadfile;
+  //! DALI recalibration file
+  string fDALIrecalfile;
+  //! do recalibration
+  bool fdorecal;
   //! Overflow value for gamma energies
   double foverflow;
   //! Underflow value for gamma energies

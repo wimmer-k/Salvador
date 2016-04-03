@@ -25,10 +25,14 @@ public:
   };
   //! manually set the beta
   void SetBeta(double beta){fbeta = beta;}
-  //! read the average positions within the crystals
-  void ReadPositions(const char *infile);
   //! read a list with bad channels
   void ReadBadChannels(const char *infile);
+  //! read recalibration parameters
+  void ReadReCalParams(const char *infile);
+  //! read the average positions within the crystals
+  void ReadPositions(const char *infile);
+  //! recalibrate dali
+  void ReCalibrate(vector<DALIHit*> dali);
   //! sort by energy highest first
   vector<DALIHit*> Sort(vector<DALIHit*> dali);
   //! sort by energy lowest first
@@ -49,9 +53,8 @@ public:
   TVector3 PPACPosition(SinglePPAC* pina, SinglePPAC* pinb);
   //! calculate the target position
   TVector3 TargetPosition(TVector3 inc, TVector3 ppac);
-
-  // //! read in the addback table
-  // void ReadAddBackTable();
+  //! recalibration to be done
+  bool DoReCalibration(){return fset->DoReCalibration();}
 
 private:
   //! settings for reconstruction
@@ -60,6 +63,9 @@ private:
   double fbeta;
   //! average positions of first interaction points
   vector<vector<double> > fpositions;
+  //! which detectors are bad and should be excluded
   vector<unsigned short> fbad;
+  //! recalibration parameters
+  vector<vector<double> > frecal;
 };
 #endif

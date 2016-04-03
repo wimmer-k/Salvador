@@ -103,6 +103,7 @@ int main(int argc, char* argv[]){
   Reconstruction *rec = new Reconstruction(SetFile);
   if(beta>0)
     rec->SetBeta(beta);
+  bool recalibrate = rec->DoReCalibration();
 
   TList *hlist = new TList();
 
@@ -237,28 +238,33 @@ int main(int argc, char* argv[]){
     nbytes += status;
     
     //analysis
-    //filter over and underflow
+
+    // filter over and underflow
     dali->SetHits(rec->FilterBadHits(dali->GetHits()));
-    //sort by energy
+
+    // recalibration second order
+    if(recalibrate)
+      rec->ReCalibrate(dali->GetHits());
+
+    // sort by energy
     dali->SetHits(rec->Sort(dali->GetHits()));
-    //set the positions
+
+    // set the positions
     rec->SetPositions(dali);
-    //addback
+
+    // addback
     dali->SetABHits(rec->Addback(dali->GetHits()));
-    //sort by energy
+ 
+    // sort by energy
     dali->SetABHits(rec->Sort(dali->GetHitsAB()));
-    //DC
+
+    // Doppler correction
     rec->DopplerCorrect(dali);
 
     if(Verbose>2)
       dali->Print();
-
-    
-
-    //histos
-
-    //PPACs
-    //ppacs
+ 
+    //beam direction, scattering angle
     TVector3 ppacpos[3];
     ppacpos[0] = rec->PPACPosition(ppac->GetPPACID(19),ppac->GetPPACID(20));
     ppacpos[1] = rec->PPACPosition(ppac->GetPPACID(21),ppac->GetPPACID(22));
@@ -272,10 +278,14 @@ int main(int argc, char* argv[]){
     if(trigbit>1){
       beam->SetScatteredDirection(ppacpos[2]-targ);
       TVector3 sca = beam->GetScatteredDirection();
-      
-      thetaphi->Fill(beam->GetPhi(),beam->GetTheta()*1000);
     }
 
+    //histos
+    
+    // BEAM
+    if(trigbit>1){
+      thetaphi->Fill(beam->GetPhi(),beam->GetTheta()*1000);
+    }
     double a = inc.X()/inc.Z();
     double b = inc.Y()/inc.Z();
 
@@ -298,6 +308,7 @@ int main(int argc, char* argv[]){
     compare1dX[1]->Fill(ppac->GetPPACID(36)->GetX()-x);
     compare1dY[1]->Fill(ppac->GetPPACID(36)->GetY()-y);
 
+    // PPACs
     for(unsigned short p=0;p<ppac->GetN();p++){
       SinglePPAC *sp = ppac->GetPPAC(p);
       ppacZpos->Fill(sp->GetID(),sp->GetZ());
@@ -317,7 +328,7 @@ int main(int argc, char* argv[]){
     }
     
 
-    //DALI
+    // DALI
     mult->Fill(dali->GetMult());
     for(unsigned short k=0;k<dali->GetMult();k++){
       egam->Fill(dali->GetHit(k)->GetEnergy());
@@ -335,8 +346,6 @@ int main(int argc, char* argv[]){
 	egamdcID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
       }
     }
-
-
 
     multAB->Fill(dali->GetMultAB());
     for(unsigned short k=0;k<dali->GetMultAB();k++){
@@ -416,6 +425,8 @@ int main(int argc, char* argv[]){
 	}
       }
     }
+
+    // fill tree
     rtr->Fill();
     if(i%10000 == 0){
       double time_end = get_time();

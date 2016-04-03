@@ -8,16 +8,21 @@ using namespace std;
 Reconstruction::Reconstruction(char *settings){
   fset = new Settings(settings);
   fbeta = fset->Beta();
-  //string posfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
-
-  ReadPositions(fset->DALIPosFile());
   ReadBadChannels(fset->BadChFile());
+  ReadPositions(fset->DALIPosFile());
+  if(fset->DoReCalibration())
+    ReadReCalParams(fset->ReCalFile());
   if(fset->VerboseLevel()>1){
     for(unsigned short i=0;i<fpositions.size();i++){
       cout << i << "\t" << fpositions[i][0]<< "\t" << fpositions[i][1]<< "\t" << fpositions[i][2]<<endl;
     }
+    if(fset->DoReCalibration())
+    for(unsigned short i=0;i<frecal.size();i++){
+      cout << i << "\t" << frecal[i][0]<< "\t" << frecal[i][1]<< "\t" << frecal[i][2]<<endl;
+    }
   }
 }
+
 /*!
   Reads a list with bad channels
   \param infile the file with the bad channels
@@ -30,6 +35,23 @@ void Reconstruction::ReadBadChannels(const char *infile){
     fbad.at(i) = bad->GetValue(Form("Bad.Channel.%d",i),-1);
   }
 }
+
+/*!
+  Reads in the parameters for the recalibration
+  \param infile the file with the calibration parameters
+*/
+void Reconstruction::ReadReCalParams(const char *infile){
+  TEnv *cal = new TEnv(infile);
+  for(int i=0;i<MAXNCRYSTAL;i++){
+    vector<double> r;
+    r.resize(3);
+    r.at(0) = cal->GetValue(Form("DALI.%d.Parameter.0",i),0.0);
+    r.at(1) = cal->GetValue(Form("DALI.%d.Parameter.1",i),1.0);
+    r.at(2) = cal->GetValue(Form("DALI.%d.Parameter.2",i),0.0);
+    frecal.push_back(r);
+  }
+}
+
 /*!
   Reads in the average positions of first interaction points from the simulation
   \param infile the file with the interaction point averages
@@ -45,6 +67,7 @@ void Reconstruction::ReadPositions(const char *infile){
     fpositions.push_back(r);
   }
 }
+
 /*!
   Sort the hits by their energy, first the one with the lowest energy
   \param hits a vector with the unsorted hits
@@ -55,6 +78,7 @@ vector<DALIHit*> Reconstruction::Revert(vector<DALIHit*> hits){
   reverse(hits.begin(), hits.end());
   return hits;
 }
+
 /*!
   Sort the hits by their energy, first the one with the highest energy
   \param hits a vector with the unsorted hits
@@ -64,6 +88,21 @@ vector<DALIHit*> Reconstruction::Sort(vector<DALIHit*> hits){
   sort(hits.begin(), hits.end(), HitComparer());
   return hits;
 }
+
+/*!
+  Recalibrate DALI using second order polynomial
+  \param hits a vector with all hits to be recalibrated
+*/
+void Reconstruction::ReCalibrate(vector<DALIHit*> hits){
+  vector<DALIHit*> output;
+  for(unsigned short i=0;i<hits.size();i++){
+    short id = hits.at(i)->GetID();
+    double en = hits.at(i)->GetEnergy();
+    en = frecal[id][0] + frecal[id][1]*en + frecal[id][2]*en*en;
+    hits.at(i)->SetEnergy(en);
+  }
+}
+
 /*!
   Filter bad channels, the overflow and underflow hits
   \param hits a vector with all hits
@@ -84,6 +123,7 @@ vector<DALIHit*> Reconstruction::FilterBadHits(vector<DALIHit*> hits){
   }
   return output;
 }
+
 /*!
   Filter the overflow and underflow hits
   \param hits a vector with all hits
@@ -98,6 +138,7 @@ vector<DALIHit*> Reconstruction::FilterOverUnderflows(vector<DALIHit*> hits){
   }
   return output;
 }
+
 /*!
   Checks the distance or angle between two hits
   \param hit0 first hit
@@ -124,6 +165,7 @@ bool Reconstruction::Addback(DALIHit* hit0, DALIHit* hit1){
   }
   return false;
 }
+
 /*!
   Addback
   \param hits a vector with the energy sorted hits
@@ -205,6 +247,7 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
 
   return hitsAB;
 }
+
 /*!
   Sets the positions of the DALIHits to the average positions determined from the simulation
   \param dali the input DALI object
@@ -223,6 +266,7 @@ void Reconstruction::SetPositions(DALI* dali){
     hit->SetPos(fpositions[id][0],fpositions[id][1],fpositions[id][2]);
   }
 }
+
 /*!
   Do the Doppler correction
   \param dali the input DALI object
@@ -230,6 +274,7 @@ void Reconstruction::SetPositions(DALI* dali){
 void Reconstruction::DopplerCorrect(DALI* dali){
   dali->DopplerCorrect(fbeta);
 }
+
 /*!
   Calculate the ppac position as the average of A and B PPACs
   \param pina A PPAC
@@ -257,6 +302,7 @@ TVector3 Reconstruction::PPACPosition(SinglePPAC* pina, SinglePPAC* pinb){
   }
   return TVector3(x,y,z);
 }
+
 /*!
   Calculate the ppac position as the average of A and B PPACs
   \param inc incoming beam
@@ -273,9 +319,3 @@ TVector3 Reconstruction::TargetPosition(TVector3 inc, TVector3 ppac){
   return TVector3(x,y,fset->TargetPosition());
 }
 
-// /*!
-
-//  */
-// void Reconstruction::ReadAddBackTable(){
-  
-// }

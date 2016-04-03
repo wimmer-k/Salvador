@@ -20,6 +20,12 @@ void Settings::ReadSettings(){
     ftoffset[i] = set->GetValue(Form("TOF.Offset.%d",i),300.0);
   fDALIfile = set->GetValue("DALI.File","/home/wimmer/ribf94/db/DALI.xml");
 
+  fdorecal = false;
+  if(set->GetValue("Do.ReCalibration",0)>0){
+    fdorecal = true;
+    fDALIrecalfile = set->GetValue("ReCalibration.File",(char*)"settings/recal.dat");
+  }
+
   fbeta = set->GetValue("AverageBeta",0.5);
   foverflow = set->GetValue("Overflow.Threshold",8000);
   funderflow = set->GetValue("Underflow.Threshold",0);
@@ -41,18 +47,23 @@ void Settings::ReadSettings(){
   Print the settings to the screen
 */
 void Settings::PrintSettings(){  
+  cout << "verbose level\t" << fverbose << endl;
   for(int i=0;i<6;i++)
     cout << Form("TOF offset.%d\t",i) << ftoffset[i] << endl;
-  cout << "DALI calibration file\t" << fDALIfile << endl;
 
-  cout << "verbose level\t" << fverbose << endl;
-  cout << "beta\t" << fbeta << endl;
+  cout << "bad channels file\t" << fDALIbadfile << endl;  
+  cout << "DALI calibration file\t" << fDALIfile << endl;
+  if(fdorecal){
+    cout << "performing re-calibration with second order" << endl;
+    cout << "DALI second order calibration file\t" << fDALIrecalfile << endl;
+  }
+  cout << "position file\t" << fDALIposfile << endl;  
+
   cout << "addback type\t" << faddbacktype << endl;
   cout << "addback distance\t" << faddbackdistance << endl;
   cout << "addback angle\t" << faddbackangle << endl;
-  cout << "position file\t" << fDALIposfile << endl;  
-  cout << "bad channels file\t" << fDALIbadfile << endl;  
-  
+
+  cout << "beta\t" << fbeta << endl;  
   cout << "target position\t" << ftargetposition << endl;
 }
 
