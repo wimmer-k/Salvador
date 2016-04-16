@@ -132,6 +132,14 @@ int main(int argc, char* argv[]){
   TH2F* targetXY = new TH2F("targetXY","targetXY",200,-100,100,200,-100,100);hlist->Add(targetXY);
   TH2F* thetaphi = new TH2F("thetaphi","thetaphi",800,-4,4,1500,0,150);hlist->Add(thetaphi);
 
+  TH1F* bbeta[3];
+  for(unsigned short b=0;b<3;b++){
+    bbeta[b] = new TH1F(Form("bbeta_%d",b),Form("bbeta_%d",b),1000,0,1);hlist->Add(bbeta[b]);
+  }
+  TH1F* delta[4];
+  for(unsigned short b=0;b<4;b++){
+    delta[b] = new TH1F(Form("delta_%d",b),Form("delta_%d",b),1000,-10,10);hlist->Add(delta[b]);
+  }
 
   TH1F* tdiff = new TH1F("tdiff","tdiff",2000,-1000,1000);hlist->Add(tdiff);
   TH1F* rdiff = new TH1F("rdiff","rdiff",2000,0,10);hlist->Add(rdiff);
@@ -146,10 +154,14 @@ int main(int argc, char* argv[]){
   TH1F* mult = new TH1F("mult","mult",50,0,50);hlist->Add(mult);
   TH1F* egam = new TH1F("egam","egam",4000,0,4000);hlist->Add(egam);
   TH1F* egamdc = new TH1F("egamdc","egamdc",4000,0,4000);hlist->Add(egamdc);
+  TH2F* egamtgam = new TH2F("egamtgam","egamtgam",1000,-500,500,1000,0,4000);hlist->Add(egamtgam);
+  TH2F* egamdctgam = new TH2F("egamdctgam","egamdctgam",1000,-500,500,1000,0,4000);hlist->Add(egamdctgam);
   TH2F* egammult = new TH2F("egammult","egammult",20,0,20,400,0,4000);hlist->Add(egammult);
   TH2F* egamdcmult = new TH2F("egamdcmult","egamdcmult",20,0,20,400,0,4000);hlist->Add(egamdcmult);
   TH2F* egamID_mult[10];
   TH2F* egamdcID_mult[10];
+  TH2F* egamdctheta_mult[10];
+  TH2F* egamdcphi_mult[10];
   TH2F* egamegam_mult[10];
   TH2F* egamegamdc_mult[10];
   
@@ -172,6 +184,8 @@ int main(int argc, char* argv[]){
 
   egamID_mult[0] = new TH2F("egamID","egamID",200,0,200,400,0,4000);hlist->Add(egamID_mult[0]);
   egamdcID_mult[0] = new TH2F("egamdcID","egamdcID",200,0,200,400,0,4000);hlist->Add(egamdcID_mult[0]);
+  egamdctheta_mult[0] = new TH2F("egamdctheta","egamdctheta",200,0,4,400,0,4000);hlist->Add(egamdctheta_mult[0]);
+  egamdcphi_mult[0] = new TH2F("egamdcphi","egamdcphi",200,-4,4,400,0,4000);hlist->Add(egamdcphi_mult[0]);
   egamABID_mult[0] = new TH2F("egamABID","egamABID",200,0,200,400,0,4000);hlist->Add(egamABID_mult[0]);
   egamABdcID_mult[0] = new TH2F("egamABdcID","egamABdcID",200,0,200,400,0,4000);hlist->Add(egamABdcID_mult[0]);
 
@@ -182,6 +196,8 @@ int main(int argc, char* argv[]){
   for(int m=1;m<10;m++){
     egamID_mult[m] = new TH2F(Form("egamIDmult%d",m),Form("egamIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamID_mult[m]);
     egamdcID_mult[m] = new TH2F(Form("egamdcIDmult%d",m),Form("egamdcIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamdcID_mult[m]);
+    egamdctheta_mult[m] = new TH2F(Form("egamdcthetamult%d",m),Form("egamdcthetamult%d",m),200,0,4,400,0,4000);hlist->Add(egamdctheta_mult[m]);
+    egamdcphi_mult[m] = new TH2F(Form("egamdcphimult%d",m),Form("egamdcphimult%d",m),200,-4,4,400,0,4000);hlist->Add(egamdcphi_mult[m]);
     egamABID_mult[m] = new TH2F(Form("egamABIDmult%d",m),Form("egamABIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamABID_mult[m]);
     egamABID_multAB[m] = new TH2F(Form("egamABIDmultAB%d",m),Form("egamABIDmultAB%d",m),200,0,200,400,0,4000);hlist->Add(egamABID_multAB[m]);
     egamABdcID_mult[m] = new TH2F(Form("egamABdcIDmult%d",m),Form("egamABdcIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamABdcID_mult[m]);
@@ -242,6 +258,9 @@ int main(int argc, char* argv[]){
     // filter over and underflow
     dali->SetHits(rec->FilterBadHits(dali->GetHits()));
 
+    // apply timing gate
+    dali->SetHits(rec->TimingGate(dali->GetHits()));
+
     // recalibration second order
     if(recalibrate)
       rec->ReCalibrate(dali->GetHits());
@@ -286,6 +305,12 @@ int main(int argc, char* argv[]){
     if(trigbit>1){
       thetaphi->Fill(beam->GetPhi(),beam->GetTheta()*1000);
     }
+    //beam
+    for(unsigned short b=0;b<3;b++)
+      bbeta[b]->Fill(beam->GetBeta(b));
+    for(unsigned short b=0;b<4;b++)
+      delta[b]->Fill(beam->GetDelta(b));
+
     double a = inc.X()/inc.Z();
     double b = inc.Y()/inc.Z();
 
@@ -333,17 +358,27 @@ int main(int argc, char* argv[]){
     for(unsigned short k=0;k<dali->GetMult();k++){
       egam->Fill(dali->GetHit(k)->GetEnergy());
       egamdc->Fill(dali->GetHit(k)->GetDCEnergy());    
+      egamtgam->Fill(dali->GetHit(k)->GetTOffset(),dali->GetHit(k)->GetEnergy());
+      egamdctgam->Fill(dali->GetHit(k)->GetTOffset(),dali->GetHit(k)->GetDCEnergy());    
       egammult->Fill(dali->GetMult(),dali->GetHit(k)->GetEnergy());
       egamdcmult->Fill(dali->GetMult(),dali->GetHit(k)->GetDCEnergy());
       egamID_mult[0]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
       egamdcID_mult[0]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
+      egamdctheta_mult[0]->Fill(dali->GetHit(k)->GetPos().Theta(),dali->GetHit(k)->GetDCEnergy());
+      egamdcphi_mult[0]->Fill(dali->GetHit(k)->GetPos().Phi(),dali->GetHit(k)->GetDCEnergy());
       if(dali->GetMult()<9){
 	egamID_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
 	egamdcID_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
+	egamdctheta_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetPos().Theta(),dali->GetHit(k)->GetDCEnergy());
+	egamdcphi_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetPos().Phi(),dali->GetHit(k)->GetDCEnergy());
       }
       else{
 	egamID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
 	egamdcID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
+	egamID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
+	egamdcID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
+	egamdctheta_mult[9]->Fill(dali->GetHit(k)->GetPos().Theta(),dali->GetHit(k)->GetDCEnergy());
+	egamdcphi_mult[9]->Fill(dali->GetHit(k)->GetPos().Phi(),dali->GetHit(k)->GetDCEnergy());
       }
     }
 

@@ -36,6 +36,9 @@ void Settings::ReadSettings(){
   faddbacktdiff[0] = set->GetValue("Addback.TimeDiff.Low",-50.);
   faddbacktdiff[1] = set->GetValue("Addback.TimeDiff.High",20.);
 
+  ftimegate[0] = set->GetValue("Timing.Gate.Low", 20.);
+  ftimegate[1] = set->GetValue("Timing.Gate.High",30.);
+
   fDALIposfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
   fDALIbadfile = set->GetValue("Bad.Channels",(char*)"settings/baddali.dat");
 
@@ -58,10 +61,12 @@ void Settings::PrintSettings(){
     cout << "DALI second order calibration file\t" << fDALIrecalfile << endl;
   }
   cout << "position file\t" << fDALIposfile << endl;  
+  cout << "timing gate\t" <<ftimegate[0] << " to " << ftimegate[1] << endl;
 
   cout << "addback type\t" << faddbacktype << endl;
   cout << "addback distance\t" << faddbackdistance << endl;
   cout << "addback angle\t" << faddbackangle << endl;
+  cout << "addback time difference\t" <<faddbacktdiff[0] << " to " << faddbacktdiff[1] << endl;
 
   cout << "beta\t" << fbeta << endl;  
   cout << "target position\t" << ftargetposition << endl;

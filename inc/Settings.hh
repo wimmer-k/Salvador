@@ -47,6 +47,9 @@ public:
   char* DALIPosFile(){return (char*)fDALIposfile.c_str();}
   //! Get the beta for the Doppler correction
   double Beta(){return fbeta;}
+  //! Get the gate on the DALI - beam timing
+  double TimingGate(int i){return ftimegate[i];}
+
   
   //! Get the type of addback to be used, 1 distance, 2 angles
   int AddbackType(){return faddbacktype;}
@@ -87,6 +90,8 @@ private:
   string fDALIposfile;
   //! averge beta for Doppler correction
   double fbeta;
+  //! timing gate DALI - beam
+  double ftimegate[2];
 
   //! type of addback
   int faddbacktype;

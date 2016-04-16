@@ -41,6 +41,8 @@ public:
   vector<DALIHit*> FilterBadHits(vector<DALIHit*> hits);
   //! filter over and underflows
   vector<DALIHit*> FilterOverUnderflows(vector<DALIHit*> hits);
+  //! apply the time cut
+  vector<DALIHit*> TimingGate(vector<DALIHit*> hits);
   //! set the positions
   void SetPositions(DALI* dali);
   //! apply the Doppler correction

@@ -125,6 +125,21 @@ vector<DALIHit*> Reconstruction::FilterBadHits(vector<DALIHit*> hits){
 }
 
 /*!
+  Apply the timing cut
+  \param hits a vector with all hits
+  \return a vector with the gated hits
+*/
+vector<DALIHit*> Reconstruction::TimingGate(vector<DALIHit*> hits){
+  vector<DALIHit*> output;
+  for(unsigned short i=0;i<hits.size();i++){
+    if(hits.at(i)->GetTOffset()>fset->TimingGate(0) && hits.at(i)->GetTOffset()< fset->TimingGate(1)){
+      output.push_back(hits.at(i));
+    }
+  }
+  return output;
+}
+
+/*!
   Filter the overflow and underflow hits
   \param hits a vector with all hits
   \return a vector with the filtered hits
