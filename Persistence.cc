@@ -113,9 +113,11 @@ int main(int argc, char* argv[]){
   TH2F* zerodeg = new TH2F("zerodeg","zerodeg",1000,1.8,2.2,1000,30,40);hlist->Add(zerodeg);
   TH2F* bigrips_tr[10];
   TH2F* zerodeg_tr[10];
+  TH1F* f5X_tr[10];
   for(int i=0;i<10;i++){
     bigrips_tr[i] = new TH2F(Form("bigrips_tr%d",i),Form("bigrips_tr%d",i),1000,1.8,2.2,1000,30,40);hlist->Add(bigrips_tr[i]);
     zerodeg_tr[i] = new TH2F(Form("zerodeg_tr%d",i),Form("zerodeg_tr%d",i),1000,1.8,2.2,1000,30,40);hlist->Add(zerodeg_tr[i]);
+    f5X_tr[i] = new TH1F(Form("f5X_tr%d",i),Form("f5X_tr%d",i),300,-150,150);hlist->Add(f5X_tr[i]);
   }
 
   TH1F* f8ppacX[6];
@@ -316,6 +318,7 @@ int main(int argc, char* argv[]){
     if(trigbit>-1 && trigbit<10){
       bigrips_tr[trigbit]->Fill(beam->GetAQ(1),beam->GetZ(1));
       zerodeg_tr[trigbit]->Fill(beam->GetAQ(5),beam->GetZ(5));
+      f5X_tr[trigbit]->Fill(fp[fpNr(5)]->GetTrack()->GetX());
     }
     
     // BEAM

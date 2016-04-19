@@ -42,7 +42,7 @@ void Settings::ReadSettings(){
   fDALIposfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
   fDALIbadfile = set->GetValue("Bad.Channels",(char*)"settings/baddali.dat");
 
-  ftargetposition = set->GetValue("Target.Position",138.5);
+  ftargetposition = set->GetValue("Target.Position",129.5);
   if(fverbose>0)
     PrintSettings();
 }
