@@ -163,13 +163,16 @@ int main(int argc, char* argv[]){
   // TH1F* adiff_coinc = new TH1F("adiff_coinc","adiff_coinc",2000,0,4);hlist->Add(adiff_coinc);
   // TH2F* radiff_coinc = new TH2F("radiff_coinc","radiff_coinc",200,0,4,200,0,10);hlist->Add(radiff_coinc);
   
+  TH2F* triggertgam = new TH2F("triggertgam","triggertgam",1000,-500,500,10,0,10);hlist->Add(triggertgam);
   TH1F* mult = new TH1F("mult","mult",50,0,50);hlist->Add(mult);
   TH1F* egam = new TH1F("egam","egam",4000,0,4000);hlist->Add(egam);
   TH1F* egamdc = new TH1F("egamdc","egamdc",4000,0,4000);hlist->Add(egamdc);
   TH2F* egamtgam = new TH2F("egamtgam","egamtgam",1000,-500,500,1000,0,4000);hlist->Add(egamtgam);
   TH2F* egamdctgam = new TH2F("egamdctgam","egamdctgam",1000,-500,500,1000,0,4000);hlist->Add(egamdctgam);
-  TH2F* egammult = new TH2F("egammult","egammult",20,0,20,400,0,4000);hlist->Add(egammult);
-  TH2F* egamdcmult = new TH2F("egamdcmult","egamdcmult",20,0,20,400,0,4000);hlist->Add(egamdcmult);
+  TH2F* egammult = new TH2F("egammult","egammult",20,0,20,4000,0,4000);hlist->Add(egammult);
+  TH2F* egamdcmult = new TH2F("egamdcmult","egamdcmult",20,0,20,4000,0,4000);hlist->Add(egamdcmult);
+  TH2F* egamtrig = new TH2F("egamtrig","egamtrig",20,0,20,4000,0,4000);hlist->Add(egamtrig);
+  TH2F* egamdctrig = new TH2F("egamdctrig","egamdctrig",20,0,20,4000,0,4000);hlist->Add(egamdctrig);
   TH2F* egamID_mult[10];
   TH2F* egamdcID_mult[10];
   TH2F* egamdctheta_mult[10];
@@ -180,10 +183,14 @@ int main(int argc, char* argv[]){
   TH1F* multAB = new TH1F("multAB","multAB",50,0,50);hlist->Add(multAB);
   TH1F* egamAB = new TH1F("egamAB","egamAB",4000,0,4000);hlist->Add(egamAB);
   TH1F* egamABdc = new TH1F("egamABdc","egamABdc",4000,0,4000);hlist->Add(egamABdc);
-  TH2F* egamABmult = new TH2F("egamABmult","egamABmult",20,0,20,400,0,4000);hlist->Add(egamABmult);
-  TH2F* egamABmultAB = new TH2F("egamABmultAB","egamABmultAB",20,0,20,400,0,4000);hlist->Add(egamABmultAB);
-  TH2F* egamABdcmult = new TH2F("egamABdcmult","egamABdcmult",20,0,20,400,0,4000);hlist->Add(egamABdcmult);
-  TH2F* egamABdcmultAB = new TH2F("egamABdcmultAB","egamABdcmultAB",20,0,20,400,0,4000);hlist->Add(egamABdcmultAB);
+  TH2F* egamABmult = new TH2F("egamABmult","egamABmult",20,0,20,4000,0,4000);hlist->Add(egamABmult);
+  TH2F* egamABmultAB = new TH2F("egamABmultAB","egamABmultAB",20,0,20,4000,0,4000);hlist->Add(egamABmultAB);
+  TH2F* egamABdcmult = new TH2F("egamABdcmult","egamABdcmult",20,0,20,4000,0,4000);hlist->Add(egamABdcmult);
+  TH2F* egamABdcmultAB = new TH2F("egamABdcmultAB","egamABdcmultAB",20,0,20,4000,0,4000);hlist->Add(egamABdcmultAB);
+  TH2F* egamABtrig = new TH2F("egamABtrig","egamABtrig",20,0,20,4000,0,4000);hlist->Add(egamABtrig);
+  TH2F* egamABtrigAB = new TH2F("egamABtrigAB","egamABtrigAB",20,0,20,4000,0,4000);hlist->Add(egamABtrigAB);
+  TH2F* egamABdctrig = new TH2F("egamABdctrig","egamABdctrig",20,0,20,4000,0,4000);hlist->Add(egamABdctrig);
+  TH2F* egamABdctrigAB = new TH2F("egamABdctrigAB","egamABdctrigAB",20,0,20,4000,0,4000);hlist->Add(egamABdctrigAB);
   TH2F* egamABID_mult[10];
   TH2F* egamABID_multAB[10];
   TH2F* egamABdcID_mult[10];
@@ -377,9 +384,12 @@ int main(int argc, char* argv[]){
     mult->Fill(dali->GetMult());
     for(unsigned short k=0;k<dali->GetMult();k++){
       egam->Fill(dali->GetHit(k)->GetEnergy());
-      egamdc->Fill(dali->GetHit(k)->GetDCEnergy());    
+      egamdc->Fill(dali->GetHit(k)->GetDCEnergy()); 
+      triggertgam->Fill(dali->GetHit(k)->GetTOffset(),trigbit);
       egamtgam->Fill(dali->GetHit(k)->GetTOffset(),dali->GetHit(k)->GetEnergy());
       egamdctgam->Fill(dali->GetHit(k)->GetTOffset(),dali->GetHit(k)->GetDCEnergy());    
+      egamtrig->Fill(trigbit,dali->GetHit(k)->GetEnergy());
+      egamdctrig->Fill(trigbit,dali->GetHit(k)->GetDCEnergy());
       egammult->Fill(dali->GetMult(),dali->GetHit(k)->GetEnergy());
       egamdcmult->Fill(dali->GetMult(),dali->GetHit(k)->GetDCEnergy());
       egamID_mult[0]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
@@ -406,6 +416,8 @@ int main(int argc, char* argv[]){
     for(unsigned short k=0;k<dali->GetMultAB();k++){
       egamAB->Fill(dali->GetHitAB(k)->GetEnergy());
       egamABdc->Fill(dali->GetHitAB(k)->GetDCEnergy());
+      egamABtrig->Fill(trigbit,dali->GetHitAB(k)->GetEnergy());
+      egamABdctrig->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
       egamABmult->Fill(dali->GetMult(),dali->GetHitAB(k)->GetEnergy());    
       egamABmultAB->Fill(dali->GetMultAB(),dali->GetHitAB(k)->GetEnergy());    
       egamABID_mult[0]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetEnergy());

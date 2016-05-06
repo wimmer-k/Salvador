@@ -73,8 +73,8 @@ int main(int argc, char* argv[]){
   TH2F* logQ_vs_X[NFPLANES];
   TH2F* dT_vs_X[NFPLANES];
   for(unsigned short f=0;f<NFPLANES;f++){
-    dT_vs_logQ[f] = new TH2F(Form("dT_vs_logQ_%d",fpID[f]),Form("dT_vs_logQ_%d",fpID[f]),1000,-5,5,600,-3,3);hlist->Add( dT_vs_logQ[f]);
-    logQ_vs_X[f] = new TH2F(Form("logQ_vs_X_%d",fpID[f]),Form("logQ_vs_X_%d",fpID[f]),1000,-50,50,600,-3,3);hlist->Add( logQ_vs_X[f]);
+    dT_vs_logQ[f] = new TH2F(Form("dT_vs_logQ_%d",fpID[f]),Form("dT_vs_logQ_%d",fpID[f]),1000,-5,5,300,-3,3);hlist->Add( dT_vs_logQ[f]);
+    logQ_vs_X[f] = new TH2F(Form("logQ_vs_X_%d",fpID[f]),Form("logQ_vs_X_%d",fpID[f]),1000,-50,50,300,-3,3);hlist->Add( logQ_vs_X[f]);
     dT_vs_X[f] = new TH2F(Form("dT_vs_X_%d",fpID[f]),Form("dT_vs_X_%d",fpID[f]),1000,-50,50,1000,-5,5);hlist->Add( dT_vs_X[f]);
   }
   //beam

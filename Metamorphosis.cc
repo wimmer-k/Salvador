@@ -165,6 +165,9 @@ int main(int argc, char* argv[]){
   //branch for trig bit
   int trigbit = 0;
   tr->Branch("trigbit",&trigbit,"trigbit/I");
+  //branch for original event number
+  int eventnumber = 0;
+  tr->Branch("eventnumber",&eventnumber,"eventnumber/I");
   //branches for each focal plane
   FocalPlane *fp[NFPLANES];
   for(unsigned short f=0;f<NFPLANES;f++){
@@ -186,6 +189,7 @@ int main(int argc, char* argv[]){
   while(estore->GetNextEvent() && !signal_received){
     //clearing
     trigbit = 0;
+    eventnumber++;
     for(int f=0;f<NFPLANES;f++){
       fp[f]->Clear();
     }
