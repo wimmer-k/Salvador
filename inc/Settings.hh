@@ -27,6 +27,23 @@ public:
 
   //! Get the vorbose level
   int VerboseLevel(){return fverbose;}
+
+  //! Get if DALI is to be used
+  bool WithDALI(){return fwithDALI;}
+
+  //! Get the BigRIPS PPAC xml file
+  char *PPACFile(){return (char*)fPPACfile.c_str();}
+  //! Get the BigRIPS PPAC Default xml file
+  char *PPACDefFile(){return (char*)fPPACdefaultfile.c_str();}
+  //! Get the BigRIPS plastic xml file
+  char *PlasticFile(){return (char*)fplasticfile.c_str();}
+  //! Get the BigRIPS IC xml file
+  char *ICFile(){return (char*)fICfile.c_str();}
+  //! Get the BigRIPS Focalplane xml file
+  char *FocalFile(){return (char*)ffocalfile.c_str();}
+  //! Get the BigRIPS/ZeroDegree matrix file
+  char *MatrixFile(int i){return (char*)fmatrixfile[i].c_str();}
+
   //! Get the time of flight offsets for the A/Q
   double TimeOffset(int b){return ftoffset[b];}
   //! XML file with the DALI calibrations
@@ -70,6 +87,20 @@ private:
   string finputfile;
   //! verbose level
   int fverbose;
+  //! use DALI
+  bool fwithDALI;
+  //! BigRIPS PPAC xml file
+  string fPPACfile;
+  //! BigRIPS PPAC default xml file
+  string fPPACdefaultfile;
+  //! BigRIPS Plastic xml file
+  string fplasticfile;
+  //! BigRIPS IC xml file
+  string fICfile;
+  //! BigRIPS Focalplane xml file
+  string ffocalfile;
+  //! BigRIPS/ZeroDegree matrix files
+  string fmatrixfile[4];
   //! time offsets for A/Q calibration
   double ftoffset[6];
   //! DALI calibration file

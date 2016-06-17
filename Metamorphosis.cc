@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
   timer.Start();
   signal(SIGINT,signalhandler);
   cout << "\"Metamorphosis of Narcissus\" (1937), Salvator Dali" << endl;
-  cout << "Unpacker for DALI" << endl;
+  cout << "Unpacker for BigRIPS/DALI" << endl;
   char* InputFile;
   char* OutputFile = NULL;
   char* SetFile = NULL;
@@ -102,11 +102,18 @@ int main(int argc, char* argv[]){
   // Create BigRIPSParameters to get Plastics, PPACs, ICs and FocalPlanes parameters from ".xml" files
   //--------------------------------------------------------------------------------------------------	
   TArtBigRIPSParameters *para = TArtBigRIPSParameters::Instance();
-  para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSPPAC.xml");
-  para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSPlastic.xml");
-  para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSIC.xml");
-  para->LoadParameter("/home/wimmer/ribf94/db/FocalPlane.xml");
-  para->SetFocusPosOffset(8,138.5);
+  para->LoadParameter(set->PPACFile());
+  // if(!set->WithDALI())
+  //   para->LoadParameter(set->PPACDefFile());
+  para->LoadParameter(set->PlasticFile());
+  para->LoadParameter(set->ICFile());
+  para->LoadParameter(set->FocalFile());
+  // para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSPPAC.xml");
+  // para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSPlastic.xml");
+  // para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSIC.xml");
+  // para->LoadParameter("/home/wimmer/ribf94/db/FocalPlane.xml");
+  if(set->WithDALI())
+    para->SetFocusPosOffset(8,138.5);
 
   // Create CalibPID to get and calibrate raw data ( CalibPID -> 
   //[CalibPPAC , CalibIC, CalibPlastic , CalibFocalPlane] 
@@ -126,10 +133,14 @@ int main(int argc, char* argv[]){
   std::cout << "Defining bigrips parameters" << std::endl;
 
   TArtRIPS *recorips[4];
-  recorips[0] = recopid->DefineNewRIPS(3,5,"/home/wimmer/ribf94/matrix/mat1.mat","D3"); // F3 - F5
-  recorips[1] = recopid->DefineNewRIPS(5,7,"/home/wimmer/ribf94/matrix/mat2.mat","D5"); // F5 - F7
-  recorips[2] = recopid->DefineNewRIPS(8,9,"/home/wimmer/ribf94/matrix/F8F9_LargeAccAchr.mat","D7"); // F8 - F9
-  recorips[3] = recopid->DefineNewRIPS(9,11,"/home/wimmer/ribf94/matrix/F9F11_LargeAccAchr.mat","D8"); // F9 - F11  
+  recorips[0] = recopid->DefineNewRIPS(3,5,set->MatrixFile(0),"D3"); // F3 - F5
+  recorips[1] = recopid->DefineNewRIPS(5,7,set->MatrixFile(1),"D5"); // F5 - F7
+  recorips[2] = recopid->DefineNewRIPS(8,9,set->MatrixFile(2),"D7"); // F8 - F9
+  recorips[3] = recopid->DefineNewRIPS(9,11,set->MatrixFile(3),"D8"); // F9 - F11  
+  // recorips[0] = recopid->DefineNewRIPS(3,5,"/home/wimmer/ribf94/matrix/mat1.mat","D3"); // F3 - F5
+  // recorips[1] = recopid->DefineNewRIPS(5,7,"/home/wimmer/ribf94/matrix/mat2.mat","D5"); // F5 - F7
+  // recorips[2] = recopid->DefineNewRIPS(8,9,"/home/wimmer/ribf94/matrix/F8F9_LargeAccAchr.mat","D7"); // F8 - F9
+  // recorips[3] = recopid->DefineNewRIPS(9,11,"/home/wimmer/ribf94/matrix/F9F11_LargeAccAchr.mat","D8"); // F9 - F11  
 
   // Reconstruction of TOF DefineNewTOF(first plane, second plane, time offset)
   TArtTOF *recotof[6];
@@ -155,10 +166,13 @@ int main(int argc, char* argv[]){
 
   // Create DALIParameters to get ".xml"
   TArtDALIParameters *dpara = TArtDALIParameters::Instance();
-  dpara->LoadParameter(set->DALIFile());
+  if(set->WithDALI())
+    dpara->LoadParameter(set->DALIFile());
   
   // Create CalibDALI to get and calibrate raw data
-  TArtCalibDALI *dalicalib = new TArtCalibDALI();
+  TArtCalibDALI *dalicalib = NULL;
+  if(set->WithDALI())
+    dalicalib = new TArtCalibDALI();
 
   // output tree
   TTree *tr = new TTree("tr","Data Tree");
@@ -180,10 +194,11 @@ int main(int argc, char* argv[]){
   //branch for the PPACs
   PPAC *ppacs = new PPAC;
   tr->Branch("ppacs",&ppacs,320000);
-  //branch for DALI
   DALI *dali = new DALI;
-  tr->Branch("dali",&dali,320000);
-  
+  if(set->WithDALI()){
+    //branch for DALI
+    tr->Branch("dali",&dali,320000);
+  }
 
   int ctr =0;
   while(estore->GetNextEvent() && !signal_received){
@@ -195,7 +210,8 @@ int main(int argc, char* argv[]){
     }
     ppacs->Clear();
     beam->Clear();
-    dali->Clear();
+    if(set->WithDALI())    
+      dali->Clear();
 
     //Making the BigRIPS tree calibration
     brcalib->ClearData();
@@ -278,47 +294,49 @@ int main(int argc, char* argv[]){
     for(unsigned short b=0;b<6;b++)
       beam->SetAQZ(b,recobeam[b]->GetAoQ(),recobeam[b]->GetZet());
 
-    beam->CorrectAQ(1, +0.00034002 *fp[fpNr(5)]->GetTrack()->GetA()
-		       -6.089e-05  *fp[fpNr(5)]->GetTrack()->GetX()
-		       +0.000413889*fp[fpNr(7)]->GetTrack()->GetA() 
-                       +0.000460512*fp[fpNr(7)]->GetTrack()->GetX());
-    
-    beam->CorrectAQ(5, +8.53643e-05*fp[fpNr(5)]->GetTrack()->GetA()
-		       -6.57149e-05*fp[fpNr(5)]->GetTrack()->GetX()
-		       +0.000158604*fp[fpNr(7)]->GetTrack()->GetA() 
-                       +0.000212333*fp[fpNr(7)]->GetTrack()->GetX()
-                       -9.46977e-05*fp[fpNr(9)]->GetTrack()->GetA()
-		       +1.46503e-06*fp[fpNr(9)]->GetTrack()->GetX()
-		       -2.54913e-06*fp[fpNr(11)]->GetTrack()->GetA() 
-                       -0.00010038 *fp[fpNr(11)]->GetTrack()->GetX());
-    for(unsigned short b=0;b<4;b++)
+    if(set->WithDALI(){
+	beam->CorrectAQ(1, +0.00034002 *fp[fpNr(5)]->GetTrack()->GetA()
+			   -6.089e-05  *fp[fpNr(5)]->GetTrack()->GetX()
+			   +0.000413889*fp[fpNr(7)]->GetTrack()->GetA() 
+			   +0.000460512*fp[fpNr(7)]->GetTrack()->GetX());
+	
+	beam->CorrectAQ(5, +8.53643e-05*fp[fpNr(5)]->GetTrack()->GetA()
+			   -6.57149e-05*fp[fpNr(5)]->GetTrack()->GetX()
+			   +0.000158604*fp[fpNr(7)]->GetTrack()->GetA() 
+			   +0.000212333*fp[fpNr(7)]->GetTrack()->GetX()
+			   -9.46977e-05*fp[fpNr(9)]->GetTrack()->GetA()
+			   +1.46503e-06*fp[fpNr(9)]->GetTrack()->GetX()
+			   -2.54913e-06*fp[fpNr(11)]->GetTrack()->GetA() 
+			   -0.00010038 *fp[fpNr(11)]->GetTrack()->GetX());
+      }
+      for(unsigned short b=0;b<4;b++)
       beam->SetDelta(b ,recorips[b]->GetDelta());
 
-    
-    //dali
-    dalicalib->ClearData();
-    dalicalib->SetPlTime(beam->GetTOF(2));
-    //dalicalib->SetVertex(z_vertex-3.9);
-    dalicalib->SetVertex(0.0);
-    //Add above to remove F8plastic tof.
-    dalicalib->ReconstructData();
-
-    //cout << "dalicalib->GetNumNaI() " << dalicalib->GetNumNaI() << endl;
-    for(unsigned short g=0; g<dalicalib->GetNumNaI()-2; g++){//last two are junk?
-      TArtDALINaI* hit = (TArtDALINaI*)dalicalib->GetNaIArray()->At(g);
-      DALIHit *dhit = new DALIHit();
-      dhit->SetID(hit->GetID());
-      dhit->SetADC(hit->GetRawADC());
-      dhit->SetTDC(hit->GetRawTDC());
-      dhit->SetEnergy(hit->GetEnergy());
-      dhit->SetPos(hit->GetXPos(),hit->GetYPos(),hit->GetZPos());
-      dhit->SetDCEnergy(hit->GetDoppCorEnergy());	
-      dhit->SetTime(hit->GetTime());  
-      dhit->SetTOffset(hit->GetTimeOffseted());
-      //      if(dhit->GetEnergy()>0)
-      dali->AddHit(dhit);
+    if(set->WithDALI()&&dalicalib!=NULL){
+      //dali
+      dalicalib->ClearData();
+      dalicalib->SetPlTime(beam->GetTOF(2));
+      //dalicalib->SetVertex(z_vertex-3.9);
+      dalicalib->SetVertex(0.0);
+      //Add above to remove F8plastic tof.
+      dalicalib->ReconstructData();
+      
+      //cout << "dalicalib->GetNumNaI() " << dalicalib->GetNumNaI() << endl;
+      for(unsigned short g=0; g<dalicalib->GetNumNaI()-2; g++){//last two are junk?
+	TArtDALINaI* hit = (TArtDALINaI*)dalicalib->GetNaIArray()->At(g);
+	DALIHit *dhit = new DALIHit();
+	dhit->SetID(hit->GetID());
+	dhit->SetADC(hit->GetRawADC());
+	dhit->SetTDC(hit->GetRawTDC());
+	dhit->SetEnergy(hit->GetEnergy());
+	dhit->SetPos(hit->GetXPos(),hit->GetYPos(),hit->GetZPos());
+	dhit->SetDCEnergy(hit->GetDoppCorEnergy());	
+	dhit->SetTime(hit->GetTime());  
+	dhit->SetTOffset(hit->GetTimeOffseted());
+	//      if(dhit->GetEnergy()>0)
+	dali->AddHit(dhit);
+      }
     }
-    
 
     //fill the tree
     tr->Fill();
@@ -327,6 +345,7 @@ int main(int argc, char* argv[]){
     if(ctr%10000 == 0){
       double time_end = get_time();
       cout << setw(5) << ctr << " events done " << setiosflags(ios::fixed) << setprecision(1) << (Float_t)ctr/(time_end - time_start) << " events/s \r" << flush;
+      tr->AutoSave();
     }
     ctr++;
 
