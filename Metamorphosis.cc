@@ -6,6 +6,7 @@
 #include <signal.h>
 #include "TArtStoreManager.hh"
 #include "TArtEventStore.hh"
+#include "TArtEventInfo.hh"
 #include "TArtBigRIPSParameters.hh"
 #include "TArtDALIParameters.hh"
 #include "TArtCalibPID.hh"
@@ -86,22 +87,22 @@ int main(int argc, char* argv[]){
   if(outfile->IsZombie()){
     return 4;
   }
-  Settings *set = new Settings(SetFile);
+  Settings* set = new Settings(SetFile);
 
   // Create StoreManager both for calibration "TArtCalib..." and treatment "TArtReco..."
   //------------------------------------------------------------------------------------
-  TArtStoreManager * sman = TArtStoreManager::Instance();
+  TArtStoreManager* sman = TArtStoreManager::Instance();
 
   // Create EventStore to control the loop and get the EventInfo
   //------------------------------------------------------------
-  TArtEventStore *estore = new TArtEventStore();
+  TArtEventStore* estore = new TArtEventStore();
   estore->SetInterrupt(&signal_received); 
   estore->Open(InputFile);
   std::cout<<"estore ->"<< InputFile <<std::endl;
 
   // Create BigRIPSParameters to get Plastics, PPACs, ICs and FocalPlanes parameters from ".xml" files
   //--------------------------------------------------------------------------------------------------	
-  TArtBigRIPSParameters *para = TArtBigRIPSParameters::Instance();
+  TArtBigRIPSParameters* para = TArtBigRIPSParameters::Instance();
   para->LoadParameter(set->PPACFile());
   // if(!set->WithDALI())
   //   para->LoadParameter(set->PPACDefFile());
@@ -117,22 +118,22 @@ int main(int argc, char* argv[]){
 
   // Create CalibPID to get and calibrate raw data ( CalibPID -> 
   //[CalibPPAC , CalibIC, CalibPlastic , CalibFocalPlane] 
-  TArtCalibPID *brcalib          = new TArtCalibPID();
-  TArtCalibPPAC *ppaccalib       = brcalib->GetCalibPPAC();
-  TArtCalibPlastic *plasticcalib = brcalib->GetCalibPlastic();
-  TArtCalibIC *iccalib           = brcalib->GetCalibIC(); 
-  TArtCalibFocalPlane *cfpl      = brcalib->GetCalibFocalPlane();
+  TArtCalibPID* brcalib          = new TArtCalibPID();
+  TArtCalibPPAC* ppaccalib       = brcalib->GetCalibPPAC();
+  TArtCalibPlastic* plasticcalib = brcalib->GetCalibPlastic();
+  TArtCalibIC* iccalib           = brcalib->GetCalibIC(); 
+  TArtCalibFocalPlane* cfpl      = brcalib->GetCalibFocalPlane();
 
   // Create RecoPID to get calibrated data and to reconstruct TOF, AoQ, Z, ... (RecoPID -> 
   //[ RecoTOF , RecoRIPS , RecoBeam] )
-  TArtRecoPID *recopid = new TArtRecoPID();
+  TArtRecoPID* recopid = new TArtRecoPID();
  
   //para->PrintListOfPPACPara();
 
   // Definition of observables we want to reconstruct
   std::cout << "Defining bigrips parameters" << std::endl;
 
-  TArtRIPS *recorips[4];
+  TArtRIPS* recorips[4];
   recorips[0] = recopid->DefineNewRIPS(3,5,set->MatrixFile(0),"D3"); // F3 - F5
   recorips[1] = recopid->DefineNewRIPS(5,7,set->MatrixFile(1),"D5"); // F5 - F7
   recorips[2] = recopid->DefineNewRIPS(8,9,set->MatrixFile(2),"D7"); // F8 - F9
@@ -143,7 +144,7 @@ int main(int argc, char* argv[]){
   // recorips[3] = recopid->DefineNewRIPS(9,11,"/home/wimmer/ribf94/matrix/F9F11_LargeAccAchr.mat","D8"); // F9 - F11  
 
   // Reconstruction of TOF DefineNewTOF(first plane, second plane, time offset)
-  TArtTOF *recotof[6];
+  TArtTOF* recotof[6];
   recotof[0] = recopid->DefineNewTOF("F3pl","F7pl",set->TimeOffset(0),5); // F3 - F5
   recotof[1] = recopid->DefineNewTOF("F3pl","F7pl",set->TimeOffset(1),5); // F5 - F7
   recotof[2] = recopid->DefineNewTOF("F3pl","F7pl",set->TimeOffset(2),5); // F3 - F7
@@ -152,10 +153,10 @@ int main(int argc, char* argv[]){
   recotof[4] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(4),9); // F9 - F11
   recotof[5] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(5),9); // F8 - F11
   
-  TArtTOF *tof7to8  = recopid->DefineNewTOF("F7pl","F8pl"); // F7 - F8
+  TArtTOF* tof7to8  = recopid->DefineNewTOF("F7pl","F8pl"); // F7 - F8
 
   // Reconstruction of IC observables for ID
-  TArtBeam *recobeam[6];
+  TArtBeam* recobeam[6];
   recobeam[0] = recopid->DefineNewBeam(recorips[0],recotof[0],"F7IC");
   recobeam[1] = recopid->DefineNewBeam(recorips[1],recotof[1],"F7IC");   
   recobeam[2] = recopid->DefineNewBeam(recorips[0],recorips[1],recotof[2],"F7IC");   
@@ -165,36 +166,40 @@ int main(int argc, char* argv[]){
   recobeam[5] = recopid->DefineNewBeam(recorips[2],recorips[3],recotof[5],"F11IC");
 
   // Create DALIParameters to get ".xml"
-  TArtDALIParameters *dpara = TArtDALIParameters::Instance();
+  TArtDALIParameters* dpara = TArtDALIParameters::Instance();
   if(set->WithDALI())
     dpara->LoadParameter(set->DALIFile());
   
   // Create CalibDALI to get and calibrate raw data
-  TArtCalibDALI *dalicalib = NULL;
+  TArtCalibDALI* dalicalib = NULL;
   if(set->WithDALI())
     dalicalib = new TArtCalibDALI();
 
   // output tree
-  TTree *tr = new TTree("tr","Data Tree");
+  TTree* tr = new TTree("tr","Data Tree");
   //branch for trig bit
   int trigbit = 0;
   tr->Branch("trigbit",&trigbit,"trigbit/I");
   //branch for original event number
   int eventnumber = 0;
   tr->Branch("eventnumber",&eventnumber,"eventnumber/I");
+  //branch for timestamp
+  unsigned long long int timestamp = 0;
+  if(!set->WithDALI())
+    tr->Branch("timestamp",&timestamp,"timestamp/l");
   //branches for each focal plane
-  FocalPlane *fp[NFPLANES];
+  FocalPlane* fp[NFPLANES];
   for(unsigned short f=0;f<NFPLANES;f++){
     fp[f] = new FocalPlane;
     tr->Branch(Form("fp%d",fpID[f]),&fp[f],320000);
   }
   //branch for the beam, beta, a/q, z
-  Beam *beam = new Beam;
+  Beam* beam = new Beam;
   tr->Branch("beam",&beam,320000);
   //branch for the PPACs
-  PPAC *ppacs = new PPAC;
+  PPAC* ppacs = new PPAC;
   tr->Branch("ppacs",&ppacs,320000);
-  DALI *dali = new DALI;
+  DALI* dali = new DALI;
   if(set->WithDALI()){
     //branch for DALI
     tr->Branch("dali",&dali,320000);
@@ -204,6 +209,7 @@ int main(int argc, char* argv[]){
   while(estore->GetNextEvent() && !signal_received){
     //clearing
     trigbit = 0;
+    timestamp = 0;
     eventnumber++;
     for(int f=0;f<NFPLANES;f++){
       fp[f]->Clear();
@@ -223,22 +229,31 @@ int main(int argc, char* argv[]){
 
 
     //trigger bit information
-    TArtRawEventObject *rawevent = (TArtRawEventObject *)sman->FindDataContainer("RawEvent");
+    TArtRawEventObject* rawevent = (TArtRawEventObject*)sman->FindDataContainer("RawEvent");
     for(int i=0;i<rawevent -> GetNumSeg();i++){
-      TArtRawSegmentObject *seg = rawevent -> GetSegment(i);
+      TArtRawSegmentObject* seg = rawevent -> GetSegment(i);
       Int_t fpl = seg -> GetFP();
       Int_t detector = seg -> GetDetector();
       if(fpl==63 && detector==10){
         for(int j=0; j < seg -> GetNumData(); j++){
-          TArtRawDataObject *d = seg -> GetData(j);
+          TArtRawDataObject* d = seg -> GetData(j);
           trigbit = d -> GetVal();
         }
       }
     }
-    
-    TArtPPAC *tppac;
+    if(!set->WithDALI()){
+      //timestamp information
+      TClonesArray* info_a = (TClonesArray*)sman->FindDataContainer("EventInfo");
+      TArtEventInfo* info = (TArtEventInfo*)info_a->At(0);
+      unsigned int bit = info->GetTriggerBit();
+      timestamp = info->GetTimeStamp();
+      //timestamp = info->GetEventNumber();
+      //cout << trigbit << "\t" << bit << "\t" << timestamp << endl;
+    }
+
+    TArtPPAC* tppac;
     for(unsigned short p=0;p<NPPACS;p++){
-      SinglePPAC *dppac = new SinglePPAC;
+      SinglePPAC* dppac = new SinglePPAC;
       tppac = ppaccalib->GetPPAC(p);
       if(tppac){
 	dppac->Set(tppac->GetID(),tppac->GetX(),tppac->GetY(),tppac->GetXZPos(),tppac->GetTSumX(),tppac->GetTSumY());
@@ -248,10 +263,10 @@ int main(int argc, char* argv[]){
     }
 
     //focal plane detector information
-    TArtFocalPlane *tfpl;
-    TArtPlastic *tpla;
-    TArtIC *tic;
-    TVectorD *vec;
+    TArtFocalPlane* tfpl;
+    TArtPlastic* tpla;
+    TArtIC* tic;
+    TVectorD* vec;
     Track track;
     Plastic plastic;
     MUSIC music;
@@ -294,24 +309,24 @@ int main(int argc, char* argv[]){
     for(unsigned short b=0;b<6;b++)
       beam->SetAQZ(b,recobeam[b]->GetAoQ(),recobeam[b]->GetZet());
 
-    if(set->WithDALI(){
-	beam->CorrectAQ(1, +0.00034002 *fp[fpNr(5)]->GetTrack()->GetA()
-			   -6.089e-05  *fp[fpNr(5)]->GetTrack()->GetX()
-			   +0.000413889*fp[fpNr(7)]->GetTrack()->GetA() 
-			   +0.000460512*fp[fpNr(7)]->GetTrack()->GetX());
+    if(set->WithDALI()){
+      beam->CorrectAQ(1, +0.00034002 *fp[fpNr(5)]->GetTrack()->GetA()
+		         -6.089e-05  *fp[fpNr(5)]->GetTrack()->GetX()
+			 +0.000413889*fp[fpNr(7)]->GetTrack()->GetA() 
+			 +0.000460512*fp[fpNr(7)]->GetTrack()->GetX());
 	
-	beam->CorrectAQ(5, +8.53643e-05*fp[fpNr(5)]->GetTrack()->GetA()
-			   -6.57149e-05*fp[fpNr(5)]->GetTrack()->GetX()
-			   +0.000158604*fp[fpNr(7)]->GetTrack()->GetA() 
-			   +0.000212333*fp[fpNr(7)]->GetTrack()->GetX()
-			   -9.46977e-05*fp[fpNr(9)]->GetTrack()->GetA()
-			   +1.46503e-06*fp[fpNr(9)]->GetTrack()->GetX()
-			   -2.54913e-06*fp[fpNr(11)]->GetTrack()->GetA() 
-			   -0.00010038 *fp[fpNr(11)]->GetTrack()->GetX());
-      }
-      for(unsigned short b=0;b<4;b++)
+      beam->CorrectAQ(5, +8.53643e-05*fp[fpNr(5)]->GetTrack()->GetA()
+			 -6.57149e-05*fp[fpNr(5)]->GetTrack()->GetX()
+			 +0.000158604*fp[fpNr(7)]->GetTrack()->GetA() 
+			 +0.000212333*fp[fpNr(7)]->GetTrack()->GetX()
+			 -9.46977e-05*fp[fpNr(9)]->GetTrack()->GetA()
+			 +1.46503e-06*fp[fpNr(9)]->GetTrack()->GetX()
+			 -2.54913e-06*fp[fpNr(11)]->GetTrack()->GetA() 
+			 -0.00010038 *fp[fpNr(11)]->GetTrack()->GetX());
+    }
+    for(unsigned short b=0;b<4;b++)
       beam->SetDelta(b ,recorips[b]->GetDelta());
-
+    
     if(set->WithDALI()&&dalicalib!=NULL){
       //dali
       dalicalib->ClearData();
@@ -324,7 +339,7 @@ int main(int argc, char* argv[]){
       //cout << "dalicalib->GetNumNaI() " << dalicalib->GetNumNaI() << endl;
       for(unsigned short g=0; g<dalicalib->GetNumNaI()-2; g++){//last two are junk?
 	TArtDALINaI* hit = (TArtDALINaI*)dalicalib->GetNaIArray()->At(g);
-	DALIHit *dhit = new DALIHit();
+	DALIHit* dhit = new DALIHit();
 	dhit->SetID(hit->GetID());
 	dhit->SetADC(hit->GetRawADC());
 	dhit->SetTDC(hit->GetRawTDC());

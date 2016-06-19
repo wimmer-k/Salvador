@@ -28,8 +28,9 @@ CFLAGS += -Wno-unused-variable -Wno-write-strings
 LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o build/DALI.o build/DALIDictionary.o 
 
 O_FILES = build/Reconstruction.o build/Settings.o
+EU_O_FILES = build/BuildEvents.o
 
-all: Metamorphosis FriedBacon BurningGiraffe Disintegration Persistence
+all: Metamorphosis FriedBacon BurningGiraffe Disintegration Persistence MergeEURICA
 
 Metamorphosis: Metamorphosis.cc $(LIB_DIR)/libSalvator.so build/Settings.o
 	@echo "Compiling $@"
@@ -51,7 +52,15 @@ Persistence: Persistence.cc $(LIB_DIR)/libSalvator.so $(O_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
 
+MergeEURICA: MergeEURICA.cc $(LIB_DIR)/libSalvator.so $(LIB_DIR)/libEURICA.so $(EU_O_FILES)
+	@echo "Compiling $@"
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -lEURICA $(EU_O_FILES) -o $(BIN_DIR)/$@ 
+
 $(LIB_DIR)/libSalvator.so: $(LIB_O_FILES) 
+	@echo "Making $@"
+	@$(CPP) $(LFLAGS) -o $@ $^ -lc
+
+$(LIB_DIR)/libEURICA.so: build/EURICA.o build/EURICADictionary.o 
 	@echo "Making $@"
 	@$(CPP) $(LFLAGS) -o $@ $^ -lc
 
