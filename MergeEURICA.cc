@@ -25,18 +25,20 @@ int main(int argc, char* argv[]){
   timer.Start();
   signal(SIGINT,signalhandler);
   cout << "Merger for ERUICA and BigRIPS" << endl;
-  int LastEvent =-1;
-  int Verbose =0;
-  char *InputBigRIPS = NULL;
-  char *InputEURICA = NULL;
-  char *OutFile = NULL;
-  char *CutFile = NULL;
+  int LastEvent = -1;
+  int Verbose = 0;
+  long long int Window = 10000;
+  char* InputBigRIPS = NULL;
+  char* InputEURICA = NULL;
+  char* OutFile = NULL;
+  //char* CutFile = NULL;
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-b", "BigRIPS input file", &InputBigRIPS);
   interface->Add("-e", "EURICA input file", &InputEURICA);
   interface->Add("-o", "output file", &OutFile);    
-  interface->Add("-c", "cutfile", &CutFile);
+  //interface->Add("-c", "cutfile", &CutFile);
+  interface->Add("-w", "event building window", &Window);  
   interface->Add("-le", "last event to be read", &LastEvent);  
   interface->Add("-v", "verbose level", &Verbose);  
   interface->CheckFlags(argc, argv);
@@ -64,50 +66,27 @@ int main(int argc, char* argv[]){
     return 4;
   }
 
-
-  // long long brtimestamp = 0;
-  // trbigrips->SetBranchAddress("timestamp",&brtimestamp);
-  // Beam* beam = new Beam;
-  // trbigrips->SetBranchAddress("beam",&beam);
-
   TFile* ineurica = new TFile(InputEURICA);
   TTree* treurica = (TTree*) ineurica->Get("tree");
   if(treurica == NULL){
     cout << "could not find EURICA tree in file " << ineurica->GetName() << endl;
     return 4;
   }
-  // TClonesArray *euricaeventinfo = 0;
-
-  // unsigned long long int eutimestamp = 0;
-  // treurica->SetBranchAddress("EventInfo",&euricaeventinfo);
-
   cout<<"output file: "<<OutFile<< endl;
   TFile* ofile = new TFile(OutFile,"recreate");
   ofile->cd();
   TTree* mtr = new TTree("mtr","merged tree");
-  // mtr->Branch("beam",&beam,320000);
-  // mtr->Branch("brtimestamp",&brtimestamp,320000);
 
   BuildEvents* evts = new BuildEvents();
+  evts->SetVerbose(Verbose);
+  evts->SetWindow(Window);
   evts->Init(trbigrips,treurica,mtr);
+  evts->ReadBigRIPS();
+  evts->ReadEURICA();
 
-  // Double_t nbigrips = trbigrips->GetEntries();
-  // cout << nbigrips << " entries in BigRIPS tree" << endl;
-  // Double_t neurica = treurica->GetEntries();
-  // cout << neurica << " entries in EURICA tree" << endl;
-
-  // Int_t status;
-  // status = trbigrips->GetEvent(0);
-  // cout << "first BigRIPS timestamp: " << brtimestamp << endl;;
-  // status = treurica->GetEvent(0);
-  // eutimestamp =((TArtEventInfo*) euricaeventinfo->At(0))->GetTimeStamp();
-  // cout << "first EURICA timestamp: " << eutimestamp << endl;;
+  //for(int i=0;i<100;i++)
   
-  // status = trbigrips->GetEvent(nbigrips-1);
-  // cout << "last BigRIPS timestamp: " << brtimestamp << endl;;
-  // status = treurica->GetEvent(neurica-1);
-  // eutimestamp =((TArtEventInfo*) euricaeventinfo->At(0))->GetTimeStamp();
-  // cout << "last EURICA timestamp: " << eutimestamp << endl;;
+  evts->GetTree()->Write();
   /*
   if(LastEvent>0)
     nentries = LastEvent;

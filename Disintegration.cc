@@ -27,11 +27,11 @@ int main(int argc, char* argv[]){
   signal(SIGINT,signalhandler);
   cout << "\"La Desintegracion de la Persistencia de la Memoria\" (1954), Salvator Dali" << endl;
   cout << "Treesplitter for DALI" << endl;
-  int LastEvent =-1;
-  int Verbose =0;
-  char *InputFile = NULL;
-  char *OutFile = NULL;
-  char *CutFile = NULL;
+  int LastEvent = -1;
+  int Verbose = 0;
+  char* InputFile = NULL;
+  char* OutFile = NULL;
+  char* CutFile = NULL;
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input file", &InputFile);
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
   tr->SetBranchAddress("trigbit",&trigbit);
   PPAC* ppac = new PPAC;
   tr->SetBranchAddress("ppacs",&ppac);
-  FocalPlane *fp[NFPLANES];
+  FocalPlane* fp[NFPLANES];
   for(unsigned short f=0;f<NFPLANES;f++){
     fp[f] = new FocalPlane;
     tr->SetBranchAddress(Form("fp%d",fpID[f]),&fp[f]);
@@ -81,9 +81,9 @@ int main(int argc, char* argv[]){
   //Read in the cuts file for incoming and outgoing particle ID
   char* Name = NULL;
   char* Name2 = NULL;
-  TFile *cFile = new TFile(CutFile);
+  TFile* cFile = new TFile(CutFile);
   TIter next(cFile->GetListOfKeys());
-  TKey *key;
+  TKey* key;
   while((key=(TKey*)next())){
     if(strcmp(key->GetClassName(),"TCutG") == 0){
       Name = (char*)key->GetName();

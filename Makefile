@@ -6,6 +6,7 @@ BIN_DIR = $(HOME)/bin
 LIB_DIR = $(HOME)/lib
 COMMON_DIR = $(HOME)/common/
 TARTSYS=/usr/local/anaroot5
+EURICASYS=$(HOME)/ribf140/Go4EURICA
 
 
 ROOTCFLAGS   := $(shell root-config --cflags)
@@ -16,7 +17,7 @@ ROOTINC      := -I$(shell root-config --incdir)
 CPP             = g++
 CFLAGS		= -Wall -Wno-long-long -g -O3 $(ROOTCFLAGS) -fPIC
 
-INCLUDES        = -I./inc -I$(COMMON_DIR) -I$(TARTSYS)/include
+INCLUDES        = -I./inc -I$(COMMON_DIR) -I$(TARTSYS)/include -I$(EURICASYS)
 BASELIBS 	= -lm $(ROOTLIBS) $(ROOTGLIBS) -L$(LIB_DIR) -L$(TARTSYS)/lib -lSpectrum -lXMLParser
 ALLIBS  	=  $(BASELIBS) -lCommandLineInterface -lanaroot -lananadeko -lanacore -lanabrips -lanaloop -lanadali -lSalvator
 LIBS 		= $(ALLIBS)

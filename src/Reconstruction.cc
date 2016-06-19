@@ -5,7 +5,7 @@ using namespace std;
   Constructor, reads in the settings for the reconstruction
   \param settings the settings file
 */
-Reconstruction::Reconstruction(char *settings){
+Reconstruction::Reconstruction(char* settings){
   fset = new Settings(settings);
   fbeta = fset->Beta();
   ReadBadChannels(fset->BadChFile());
@@ -27,8 +27,8 @@ Reconstruction::Reconstruction(char *settings){
   Reads a list with bad channels
   \param infile the file with the bad channels
 */
-void Reconstruction::ReadBadChannels(const char *infile){
-  TEnv *bad = new TEnv(infile);
+void Reconstruction::ReadBadChannels(const char* infile){
+  TEnv* bad = new TEnv(infile);
   unsigned short nbad = bad->GetValue("Number.Bad.Channels",0);
   fbad.resize(nbad);
   for(int i=0;i<nbad;i++){
@@ -40,8 +40,8 @@ void Reconstruction::ReadBadChannels(const char *infile){
   Reads in the parameters for the recalibration
   \param infile the file with the calibration parameters
 */
-void Reconstruction::ReadReCalParams(const char *infile){
-  TEnv *cal = new TEnv(infile);
+void Reconstruction::ReadReCalParams(const char* infile){
+  TEnv* cal = new TEnv(infile);
   for(int i=0;i<MAXNCRYSTAL;i++){
     vector<double> r;
     r.resize(3);
@@ -56,8 +56,8 @@ void Reconstruction::ReadReCalParams(const char *infile){
   Reads in the average positions of first interaction points from the simulation
   \param infile the file with the interaction point averages
 */
-void Reconstruction::ReadPositions(const char *infile){
-  TEnv *pos = new TEnv(infile);
+void Reconstruction::ReadPositions(const char* infile){
+  TEnv* pos = new TEnv(infile);
   for(int i=0;i<MAXNCRYSTAL;i++){
     vector<double> r;
     r.resize(3);
@@ -269,7 +269,7 @@ vector<DALIHit*> Reconstruction::Addback(vector<DALIHit*> hits){
 */
 void Reconstruction::SetPositions(DALI* dali){
   for(unsigned short g=0;g<dali->GetMult();g++){
-    DALIHit * hit = dali->GetHit(g);
+    DALIHit* hit = dali->GetHit(g);
     short id = hit->GetID();
     if(id<0||id>MAXNCRYSTAL){
       cout << "invalid ID in DALI" <<endl;
