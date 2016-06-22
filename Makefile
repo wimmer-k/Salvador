@@ -55,7 +55,7 @@ Persistence: Persistence.cc $(LIB_DIR)/libSalvator.so $(O_FILES)
 
 MergeEURICA: MergeEURICA.cc $(LIB_DIR)/libSalvator.so $(LIB_DIR)/libEURICA.so $(EU_O_FILES)
 	@echo "Compiling $@"
-	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -lEURICA $(EU_O_FILES) -o $(BIN_DIR)/$@ 
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -lEURICA -lGo4EURICA $(EU_O_FILES) -o $(BIN_DIR)/$@ 
 
 $(LIB_DIR)/libSalvator.so: $(LIB_O_FILES) 
 	@echo "Making $@"

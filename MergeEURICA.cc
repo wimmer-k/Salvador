@@ -82,9 +82,10 @@ int main(int argc, char* argv[]){
   evts->SetWindow(Window);
   evts->Init(trbigrips,treurica,mtr);
   evts->ReadBigRIPS();
-  evts->ReadEURICA();
-
-  //for(int i=0;i<100;i++)
+  for(int i=0;i<10;i++)
+    evts->ReadEURICA();
+  
+  //
   
   evts->GetTree()->Write();
   /*

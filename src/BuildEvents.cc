@@ -66,6 +66,8 @@ void BuildEvents::Init(TTree* brtr, TTree* eutr, TTree* mtr){
   feurica->Clear();
 }
 bool BuildEvents::ReadBigRIPS(){
+  if(fverbose>0)
+    cout << __PRETTY_FUNCTION__ << endl;
   if(fBRts>0){
     if(fverbose>0){
       cout << "reading another BigRIPS, closing event" << endl;
@@ -93,6 +95,8 @@ bool BuildEvents::ReadBigRIPS(){
   return true;
 }
 bool BuildEvents::ReadEURICA(){
+  //if(fverbose>0)
+  //  cout << __PRETTY_FUNCTION__ << endl;
   if(fEUentry==fEUentries){
     return false;
   }
@@ -108,11 +112,14 @@ bool BuildEvents::ReadEURICA(){
     return false;
   }
   fnbytes += status;
-  fEUentry++;
   
-  TArtGeCluster *hit =(TArtGeCluster*) fEUcluster->At(0);
-
-  cout << hit->GetEnergy() << "\t" << hit->GetTiming() << endl;
+  //cout << "fEUentry: " << fEUentry << "\tfEUcluster->GetEntries() " << fEUcluster->GetEntries() << endl;
+  for(unsigned int i=0;i<fEUcluster->GetEntries();i++){
+    TArtGeCluster *hit =(TArtGeCluster*) fEUcluster->At(i);
+    if(hit->GetEnergy()>1)
+      cout << fEUentry << "\t" << i <<"\t" << hit->GetEnergy() << "\t" << hit->GetTiming() << endl;
+  }
+  fEUentry++;
   return true;
 }
 void BuildEvents::CloseEvent(){
