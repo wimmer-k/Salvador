@@ -75,17 +75,29 @@ int main(int argc, char* argv[]){
   cout<<"output file: "<<OutFile<< endl;
   TFile* ofile = new TFile(OutFile,"recreate");
   ofile->cd();
-  TTree* mtr = new TTree("mtr","merged tree");
 
   BuildEvents* evts = new BuildEvents();
   evts->SetVerbose(Verbose);
   evts->SetWindow(Window);
-  evts->Init(trbigrips,treurica,mtr);
-  evts->ReadBigRIPS();
-  for(int i=0;i<10;i++)
-    evts->ReadEURICA();
+  evts->Init(trbigrips,treurica);
+  evts->SetLastEvent(LastEvent);
+
+  evts->ReadEach();
+  int ctr=0;
+  int total = evts->GetNEvents();
+  while(evts->Merge()){
+    if(ctr%100000 == 0){
+      double time_end = get_time();
+      cout << setw(5) << setiosflags(ios::fixed) << setprecision(1) << (100.*ctr)/total<<" % done\t" << 
+  	(Float_t)ctr/(time_end - time_start) << " events/s " <<
+  	(total-ctr)*(time_end - time_start)/(Float_t)ctr << "s to go \r" << flush;
+    }
+    if(signal_received){
+      break;
+    }
+    ctr++;
+  }
   
-  //
   
   evts->GetTree()->Write();
   /*

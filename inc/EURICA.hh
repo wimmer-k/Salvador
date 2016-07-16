@@ -122,13 +122,7 @@ public:
   void Clear(Option_t *option = ""){
     fmult = 0;
     fmultAB = 0;
-    for(vector<EURICAHit*>::iterator hit=fhits.begin(); hit!=fhits.end(); hit++){
-      delete *hit;
-    }
     fhits.clear();
-    for(vector<EURICAHit*>::iterator hitab=fhitsAB.begin(); hitab!=fhitsAB.end(); hitab++){
-      delete *hitab;
-    }
     fhitsAB.clear();
   }
   //! Add a hit
@@ -151,6 +145,15 @@ public:
     fmultAB = hits.size();
     fhitsAB = hits;
   }
+  //! Add more hits
+  void AddHits(vector<EURICAHit*> hits){
+    fmult += hits.size();
+    for(vector<EURICAHit*>::iterator hit=hits.begin(); hit!=hits.end(); hit++){
+      fhits.push_back(*hit);
+    }
+  }
+
+
   //! Returns the multiplicity of the event
   unsigned short GetMult(){return fmult;}
   //! Returns the whole vector of hits
