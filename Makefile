@@ -57,6 +57,10 @@ MergeEURICA: MergeEURICA.cc $(LIB_DIR)/libSalvator.so $(LIB_DIR)/libEURICA.so $(
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -lEURICA -lGo4EURICA $(EU_O_FILES) -o $(BIN_DIR)/$@ 
 
+IsomerHistos: IsomerHistos.cc $(LIB_DIR)/libSalvator.so $(LIB_DIR)/libEURICA.so 
+	@echo "Compiling $@"
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -lEURICA -lGo4EURICA -o $(BIN_DIR)/$@ 
+
 $(LIB_DIR)/libSalvator.so: $(LIB_O_FILES) 
 	@echo "Making $@"
 	@$(CPP) $(LFLAGS) -o $@ $^ -lc

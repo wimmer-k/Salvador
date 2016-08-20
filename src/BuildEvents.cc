@@ -169,7 +169,17 @@ void BuildEvents::CloseEvent(){
   //   cout << "BR AoQ = " << fbeam->GetAQ(1) << " Z = " << fbeam->GetZ(1) << endl;
   //   feurica->Print();
   // }
-  fmtr->Fill();
+  switch(fmode){
+  default:
+  case 0: //write all events
+    fmtr->Fill();
+    break;
+  case 1://isomer data BR and EU coincidence
+    if(fBRts>0 && fEUts >0)
+      fmtr->Fill();
+    break;
+  }
+
   fBRts = 0;
   fbeam->Clear();
   fEUts = 0;
@@ -233,7 +243,7 @@ bool BuildEvents::Merge(){
     fcurrentts = fEUts;
     fdetectors.erase(fdetectors.begin());
     if(!ReadEURICA())
-      cout << "failed to read BigRIPS, end of file" << endl;
+      cout << "failed to read EURICA, end of file" << endl;
     break;
     
   default:

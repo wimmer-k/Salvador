@@ -31,6 +31,8 @@ public:
   void Init(TTree* brtr, TTree* eutr);
   //! Set the window for event building
   void SetWindow(unsigned long long int window){fwindow = window;};
+  //! Set coincidence mode
+  void SetCoincMode(int mode){fmode = mode;};
   //! Set the verbose level
   void SetVerbose(int verbose){fverbose = verbose;};
   //! Set the last event
@@ -108,6 +110,9 @@ private:
 
   //! time window for eventbuilding
   unsigned long long fwindow;
+  //! modus for writing the merged data: 0 all, 1 only isomer (BR and EU)
+  int fmode;
+  
 };
 
 /*!

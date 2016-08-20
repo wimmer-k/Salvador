@@ -165,21 +165,21 @@ int main(int argc, char* argv[]){
   
   TH2F* triggertgam = new TH2F("triggertgam","triggertgam",1000,-500,500,10,0,10);hlist->Add(triggertgam);
   TH1F* mult = new TH1F("mult","mult",50,0,50);hlist->Add(mult);
+  TH2F* multtrig = new TH2F("multtrig","multtrig",20,0,20,50,0,50);hlist->Add(multtrig);
   TH1F* egam = new TH1F("egam","egam",4000,0,4000);hlist->Add(egam);
   TH1F* egamdc = new TH1F("egamdc","egamdc",4000,0,4000);hlist->Add(egamdc);
   TH2F* egamtgam = new TH2F("egamtgam","egamtgam",1000,-500,500,1000,0,4000);hlist->Add(egamtgam);
   TH2F* egamdctgam = new TH2F("egamdctgam","egamdctgam",1000,-500,500,1000,0,4000);hlist->Add(egamdctgam);
   TH2F* egammult = new TH2F("egammult","egammult",20,0,20,4000,0,4000);hlist->Add(egammult);
   TH2F* egamdcmult = new TH2F("egamdcmult","egamdcmult",20,0,20,4000,0,4000);hlist->Add(egamdcmult);
-  TH2F* egamtrig = new TH2F("egamtrig","egamtrig",20,0,20,4000,0,4000);hlist->Add(egamtrig);
-  TH2F* egamdctrig = new TH2F("egamdctrig","egamdctrig",20,0,20,4000,0,4000);hlist->Add(egamdctrig);
+  TH2F* egamtrig = new TH2F("egamtrig","egamtrig",10,0,10,4000,0,4000);hlist->Add(egamtrig);
   TH2F* egamID_mult[10];
   TH2F* egamdcID_mult[10];
+  TH2F* egamdctrig_mult[10];
   TH2F* egamdctheta_mult[10];
   TH2F* egamdcphi_mult[10];
   TH2F* egamegam_mult[10];
   TH2F* egamegamdc_mult[10];
-  
   TH1F* multAB = new TH1F("multAB","multAB",50,0,50);hlist->Add(multAB);
   TH1F* egamAB = new TH1F("egamAB","egamAB",4000,0,4000);hlist->Add(egamAB);
   TH1F* egamABdc = new TH1F("egamABdc","egamABdc",4000,0,4000);hlist->Add(egamABdc);
@@ -187,26 +187,27 @@ int main(int argc, char* argv[]){
   TH2F* egamABmultAB = new TH2F("egamABmultAB","egamABmultAB",20,0,20,4000,0,4000);hlist->Add(egamABmultAB);
   TH2F* egamABdcmult = new TH2F("egamABdcmult","egamABdcmult",20,0,20,4000,0,4000);hlist->Add(egamABdcmult);
   TH2F* egamABdcmultAB = new TH2F("egamABdcmultAB","egamABdcmultAB",20,0,20,4000,0,4000);hlist->Add(egamABdcmultAB);
-  TH2F* egamABtrig = new TH2F("egamABtrig","egamABtrig",20,0,20,4000,0,4000);hlist->Add(egamABtrig);
-  TH2F* egamABtrigAB = new TH2F("egamABtrigAB","egamABtrigAB",20,0,20,4000,0,4000);hlist->Add(egamABtrigAB);
-  TH2F* egamABdctrig = new TH2F("egamABdctrig","egamABdctrig",20,0,20,4000,0,4000);hlist->Add(egamABdctrig);
-  TH2F* egamABdctrigAB = new TH2F("egamABdctrigAB","egamABdctrigAB",20,0,20,4000,0,4000);hlist->Add(egamABdctrigAB);
+  TH2F* egamABtrig = new TH2F("egamABtrig","egamABtrig",10,0,10,4000,0,4000);hlist->Add(egamABtrig);
   TH2F* egamABID_mult[10];
   TH2F* egamABID_multAB[10];
   TH2F* egamABdcID_mult[10];
   TH2F* egamABdcID_multAB[10];
+  TH2F* egamABdctrig_mult[10];
+  TH2F* egamABdctrig_multAB[10];
  
   TH2F* egamegamAB_mult[10];
   TH2F* egamegamABdc_mult[10];
   TH2F* egamegamAB_multAB[10];
   TH2F* egamegamABdc_multAB[10];
 
-  egamID_mult[0] = new TH2F("egamID","egamID",200,0,200,400,0,4000);hlist->Add(egamID_mult[0]);
-  egamdcID_mult[0] = new TH2F("egamdcID","egamdcID",200,0,200,400,0,4000);hlist->Add(egamdcID_mult[0]);
+  egamID_mult[0] = new TH2F("egamID","egamID",200,0,200,4000,0,4000);hlist->Add(egamID_mult[0]);
+  egamdcID_mult[0] = new TH2F("egamdcID","egamdcID",200,0,200,4000,0,4000);hlist->Add(egamdcID_mult[0]);
+  egamdctrig_mult[0] = new TH2F("egamdctrig","egamdctrig",10,0,10,4000,0,4000);hlist->Add(egamdctrig_mult[0]);
   egamdctheta_mult[0] = new TH2F("egamdctheta","egamdctheta",200,0,4,400,0,4000);hlist->Add(egamdctheta_mult[0]);
   egamdcphi_mult[0] = new TH2F("egamdcphi","egamdcphi",200,-4,4,400,0,4000);hlist->Add(egamdcphi_mult[0]);
-  egamABID_mult[0] = new TH2F("egamABID","egamABID",200,0,200,400,0,4000);hlist->Add(egamABID_mult[0]);
-  egamABdcID_mult[0] = new TH2F("egamABdcID","egamABdcID",200,0,200,400,0,4000);hlist->Add(egamABdcID_mult[0]);
+  egamABID_mult[0] = new TH2F("egamABID","egamABID",200,0,200,4000,0,4000);hlist->Add(egamABID_mult[0]);
+  egamABdcID_mult[0] = new TH2F("egamABdcID","egamABdcID",200,0,200,4000,0,4000);hlist->Add(egamABdcID_mult[0]);
+  egamABdctrig_mult[0] = new TH2F("egamABdctrig","egamABdctrig",10,0,10,4000,0,4000);hlist->Add(egamABdctrig_mult[0]);
 
   egamegam_mult[0] = new TH2F("egamegam","egamegam",200,0,4000,200,0,4000);hlist->Add(egamegam_mult[0]);
   egamegamdc_mult[0] = new TH2F("egamegamdc","egamegamdc",200,0,4000,200,0,4000);hlist->Add(egamegamdc_mult[0]);
@@ -215,12 +216,15 @@ int main(int argc, char* argv[]){
   for(int m=1;m<10;m++){
     egamID_mult[m] = new TH2F(Form("egamIDmult%d",m),Form("egamIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamID_mult[m]);
     egamdcID_mult[m] = new TH2F(Form("egamdcIDmult%d",m),Form("egamdcIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamdcID_mult[m]);
+    egamdctrig_mult[m] = new TH2F(Form("egamdctrigmult%d",m),Form("egamdctrigmult%d",m),10,0,10,400,0,4000);hlist->Add(egamdctrig_mult[m]);
     egamdctheta_mult[m] = new TH2F(Form("egamdcthetamult%d",m),Form("egamdcthetamult%d",m),200,0,4,400,0,4000);hlist->Add(egamdctheta_mult[m]);
     egamdcphi_mult[m] = new TH2F(Form("egamdcphimult%d",m),Form("egamdcphimult%d",m),200,-4,4,400,0,4000);hlist->Add(egamdcphi_mult[m]);
     egamABID_mult[m] = new TH2F(Form("egamABIDmult%d",m),Form("egamABIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamABID_mult[m]);
     egamABID_multAB[m] = new TH2F(Form("egamABIDmultAB%d",m),Form("egamABIDmultAB%d",m),200,0,200,400,0,4000);hlist->Add(egamABID_multAB[m]);
     egamABdcID_mult[m] = new TH2F(Form("egamABdcIDmult%d",m),Form("egamABdcIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamABdcID_mult[m]);
     egamABdcID_multAB[m] = new TH2F(Form("egamABdcIDmultAB%d",m),Form("egamABdcIDmultAB%d",m),200,0,200,400,0,4000);hlist->Add(egamABdcID_multAB[m]);
+    egamABdctrig_mult[m] = new TH2F(Form("egamABdctrigmult%d",m),Form("egamABdctrigmult%d",m),10,0,10,400,0,4000);hlist->Add(egamABdctrig_mult[m]);
+    egamABdctrig_multAB[m] = new TH2F(Form("egamABdctrigmultAB%d",m),Form("egamABdctrigmultAB%d",m),10,0,10,400,0,4000);hlist->Add(egamABdctrig_multAB[m]);
 
     egamegam_mult[m] = new TH2F(Form("egamegammult%d",m),Form("egamegammult%d",m),200,0,4000,200,0,4000);hlist->Add(egamegam_mult[m]);
     egamegamdc_mult[m] = new TH2F(Form("egamegamdcmult%d",m),Form("egamegamdcmult%d",m),200,0,4000,200,0,4000);hlist->Add(egamegamdc_mult[m]);
@@ -230,6 +234,14 @@ int main(int argc, char* argv[]){
     egamegamABdc_multAB[m] = new TH2F(Form("egamegamABdcmultAB%d",m),Form("egamegamABdcmultAB%d",m),200,0,4000,200,0,4000);hlist->Add(egamegamABdc_multAB[m]);
   }
 
+  TH2F* egamdcmult_trig[10];
+  TH2F* egamABdcmult_trig[10];
+  TH2F* egamABdcmultAB_trig[10];
+  for(int i=0;i<10;i++){
+    egamdcmult_trig[i] = new TH2F(Form("egamdcmult_trig%d",i),Form("egamdcmult_trig%d",i),20,0,20,4000,0,4000);hlist->Add(egamdcmult_trig[i]);
+    egamABdcmult_trig[i] = new TH2F(Form("egamABdcmult_trig%d",i),Form("egamABdcmult_trig%d",i),20,0,20,4000,0,4000);hlist->Add(egamABdcmult_trig[i]);
+    egamABdcmultAB_trig[i] = new TH2F(Form("egamABdcmultAB_trig%d",i),Form("egamABdcmultAB_trig%d",i),20,0,20,4000,0,4000);hlist->Add(egamABdcmultAB_trig[i]);
+  }
 
 
   // //temp
@@ -382,6 +394,7 @@ int main(int argc, char* argv[]){
 
     // DALI
     mult->Fill(dali->GetMult());
+    multtrig->Fill(trigbit,dali->GetMult());
     for(unsigned short k=0;k<dali->GetMult();k++){
       egam->Fill(dali->GetHit(k)->GetEnergy());
       egamdc->Fill(dali->GetHit(k)->GetDCEnergy()); 
@@ -389,24 +402,26 @@ int main(int argc, char* argv[]){
       egamtgam->Fill(dali->GetHit(k)->GetTOffset(),dali->GetHit(k)->GetEnergy());
       egamdctgam->Fill(dali->GetHit(k)->GetTOffset(),dali->GetHit(k)->GetDCEnergy());    
       egamtrig->Fill(trigbit,dali->GetHit(k)->GetEnergy());
-      egamdctrig->Fill(trigbit,dali->GetHit(k)->GetDCEnergy());
+      //egamdctrig->Fill(trigbit,dali->GetHit(k)->GetDCEnergy());
       egammult->Fill(dali->GetMult(),dali->GetHit(k)->GetEnergy());
       egamdcmult->Fill(dali->GetMult(),dali->GetHit(k)->GetDCEnergy());
+      egamdcmult_trig[trigbit]->Fill(dali->GetMult(),dali->GetHit(k)->GetDCEnergy());
       egamID_mult[0]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
       egamdcID_mult[0]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
+      egamdctrig_mult[0]->Fill(trigbit,dali->GetHit(k)->GetDCEnergy());
       egamdctheta_mult[0]->Fill(dali->GetHit(k)->GetPos().Theta(),dali->GetHit(k)->GetDCEnergy());
       egamdcphi_mult[0]->Fill(dali->GetHit(k)->GetPos().Phi(),dali->GetHit(k)->GetDCEnergy());
       if(dali->GetMult()<9){
 	egamID_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
 	egamdcID_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
+	egamdctrig_mult[dali->GetMult()]->Fill(trigbit,dali->GetHit(k)->GetDCEnergy());
 	egamdctheta_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetPos().Theta(),dali->GetHit(k)->GetDCEnergy());
 	egamdcphi_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetPos().Phi(),dali->GetHit(k)->GetDCEnergy());
       }
       else{
 	egamID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
 	egamdcID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
-	egamID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetEnergy());
-	egamdcID_mult[9]->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetDCEnergy());
+	egamdctrig_mult[9]->Fill(trigbit,dali->GetHit(k)->GetDCEnergy());
 	egamdctheta_mult[9]->Fill(dali->GetHit(k)->GetPos().Theta(),dali->GetHit(k)->GetDCEnergy());
 	egamdcphi_mult[9]->Fill(dali->GetHit(k)->GetPos().Phi(),dali->GetHit(k)->GetDCEnergy());
       }
@@ -417,28 +432,35 @@ int main(int argc, char* argv[]){
       egamAB->Fill(dali->GetHitAB(k)->GetEnergy());
       egamABdc->Fill(dali->GetHitAB(k)->GetDCEnergy());
       egamABtrig->Fill(trigbit,dali->GetHitAB(k)->GetEnergy());
-      egamABdctrig->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
+      //egamABdctrig->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
       egamABmult->Fill(dali->GetMult(),dali->GetHitAB(k)->GetEnergy());    
       egamABmultAB->Fill(dali->GetMultAB(),dali->GetHitAB(k)->GetEnergy());    
       egamABID_mult[0]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetEnergy());
       egamABdcmult->Fill(dali->GetMult(),dali->GetHitAB(k)->GetDCEnergy());    
       egamABdcmultAB->Fill(dali->GetMultAB(),dali->GetHitAB(k)->GetDCEnergy());    
+      egamABdcmult_trig[trigbit]->Fill(dali->GetMult(),dali->GetHitAB(k)->GetDCEnergy());    
+      egamABdcmultAB_trig[trigbit]->Fill(dali->GetMultAB(),dali->GetHitAB(k)->GetDCEnergy());    
       egamABdcID_mult[0]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetDCEnergy());
+      egamABdctrig_mult[0]->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
       if(dali->GetMult()<9){
 	egamABID_mult[dali->GetMult()]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetEnergy());
 	egamABdcID_mult[dali->GetMult()]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetDCEnergy());
+	egamABdctrig_mult[dali->GetMult()]->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
       }
       else{
 	egamABID_mult[9]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetEnergy());
 	egamABdcID_mult[9]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetDCEnergy());
+	egamABdctrig_mult[9]->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
       }
       if(dali->GetMultAB()<9){
 	egamABID_multAB[dali->GetMultAB()]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetEnergy());
  	egamABdcID_multAB[dali->GetMultAB()]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetDCEnergy());
+ 	egamABdctrig_multAB[dali->GetMultAB()]->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
       }
       else{
 	egamABID_multAB[9]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetEnergy());
 	egamABdcID_multAB[9]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetDCEnergy());
+	egamABdctrig_multAB[9]->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
       }
     }
 
@@ -455,15 +477,24 @@ int main(int argc, char* argv[]){
 	  //   adiff_coinc->Fill(dali->GetHit(k)->GetPos().Angle(dali->GetHit(l)->GetPos()));
 	  //   radiff_coinc->Fill(dali->GetHit(k)->GetPos().Angle(dali->GetHit(l)->GetPos()),dali->GetHit(k)->GetPos().DeltaR(dali->GetHit(l)->GetPos()));
 	  // }
+	  double dcen[2];
+	  if(dali->GetHit(k)->GetDCEnergy() > dali->GetHit(l)->GetDCEnergy()){
+	    dcen[0] = dali->GetHit(k)->GetDCEnergy();
+	    dcen[1] = dali->GetHit(l)->GetDCEnergy();
+	  }
+	  else{
+	    dcen[0] = dali->GetHit(l)->GetDCEnergy();
+	    dcen[1] = dali->GetHit(k)->GetDCEnergy();
+	  }
 	  egamegam_mult[0]->Fill(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy());
-	  egamegamdc_mult[0]->Fill(dali->GetHit(k)->GetDCEnergy(),dali->GetHit(l)->GetDCEnergy());
+	  egamegamdc_mult[0]->Fill(dcen[0],dcen[1]);
 	  if(dali->GetMult()<9){
 	    egamegam_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy());
-	    egamegamdc_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetDCEnergy(),dali->GetHit(l)->GetDCEnergy());
+	    egamegamdc_mult[dali->GetMult()]->Fill(dcen[0],dcen[1]);
 	  }
 	  else{
 	    egamegam_mult[9]->Fill(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy());
-	    egamegamdc_mult[9]->Fill(dali->GetHit(k)->GetDCEnergy(),dali->GetHit(l)->GetDCEnergy());
+	    egamegamdc_mult[9]->Fill(dcen[0],dcen[1]);
 	  }
 	}
       }
@@ -471,23 +502,32 @@ int main(int argc, char* argv[]){
     if(dali->GetMultAB()>1){
       for(unsigned short k=0;k<dali->GetMultAB();k++){
 	for(unsigned short l=k+1;l<dali->GetMultAB();l++){
+	  double dcen[2];
+	  if(dali->GetHitAB(k)->GetDCEnergy() > dali->GetHitAB(l)->GetDCEnergy()){
+	    dcen[0] = dali->GetHitAB(k)->GetDCEnergy();
+	    dcen[1] = dali->GetHitAB(l)->GetDCEnergy();
+	  }
+	  else{
+	    dcen[0] = dali->GetHitAB(l)->GetDCEnergy();
+	    dcen[1] = dali->GetHitAB(k)->GetDCEnergy();
+	  }
 	  egamegamAB_mult[0]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
-	  egamegamABdc_mult[0]->Fill(dali->GetHitAB(k)->GetDCEnergy(),dali->GetHitAB(l)->GetDCEnergy());
+	  egamegamABdc_mult[0]->Fill(dcen[0],dcen[1]);
 	  if(dali->GetMult()<9){
 	    egamegamAB_mult[dali->GetMult()]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
-	    egamegamABdc_mult[dali->GetMult()]->Fill(dali->GetHitAB(k)->GetDCEnergy(),dali->GetHitAB(l)->GetDCEnergy());
+	    egamegamABdc_mult[dali->GetMult()]->Fill(dcen[0],dcen[1]);
 	  }
 	  else{
 	    egamegamAB_mult[9]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
-	    egamegamABdc_mult[9]->Fill(dali->GetHitAB(k)->GetDCEnergy(),dali->GetHitAB(l)->GetDCEnergy());
+	    egamegamABdc_mult[9]->Fill(dcen[0],dcen[1]);
 	  }
 	  if(dali->GetMultAB()<9){
 	    egamegamAB_multAB[dali->GetMultAB()]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
-	    egamegamABdc_multAB[dali->GetMultAB()]->Fill(dali->GetHitAB(k)->GetDCEnergy(),dali->GetHitAB(l)->GetDCEnergy());
+	    egamegamABdc_multAB[dali->GetMultAB()]->Fill(dcen[0],dcen[1]);
 	  }
 	  else{
 	    egamegamAB_multAB[9]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
-	    egamegamABdc_multAB[9]->Fill(dali->GetHitAB(k)->GetDCEnergy(),dali->GetHitAB(l)->GetDCEnergy());
+	    egamegamABdc_multAB[9]->Fill(dcen[0],dcen[1]);
 	  }
 	}
       }

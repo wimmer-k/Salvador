@@ -28,6 +28,7 @@ int main(int argc, char* argv[]){
   int LastEvent = -1;
   int Verbose = 0;
   long long int Window = 10000;
+  int Mode = 0;
   char* InputBigRIPS = NULL;
   char* InputEURICA = NULL;
   char* OutFile = NULL;
@@ -39,6 +40,7 @@ int main(int argc, char* argv[]){
   interface->Add("-o", "output file", &OutFile);    
   //interface->Add("-c", "cutfile", &CutFile);
   interface->Add("-w", "event building window", &Window);  
+  interface->Add("-m", "event building mode: 0 everything, 1 isomerdata", &Mode);  
   interface->Add("-le", "last event to be read", &LastEvent);  
   interface->Add("-v", "verbose level", &Verbose);  
   interface->CheckFlags(argc, argv);
@@ -79,6 +81,7 @@ int main(int argc, char* argv[]){
   BuildEvents* evts = new BuildEvents();
   evts->SetVerbose(Verbose);
   evts->SetWindow(Window);
+  evts->SetCoincMode(Mode);
   evts->Init(trbigrips,treurica);
   evts->SetLastEvent(LastEvent);
 
@@ -86,7 +89,7 @@ int main(int argc, char* argv[]){
   int ctr=0;
   int total = evts->GetNEvents();
   while(evts->Merge()){
-    if(ctr%100000 == 0){
+    if(ctr%10000 == 0){
       double time_end = get_time();
       cout << setw(5) << setiosflags(ios::fixed) << setprecision(1) << (100.*ctr)/total<<" % done\t" << 
   	(Float_t)ctr/(time_end - time_start) << " events/s " <<
@@ -98,74 +101,8 @@ int main(int argc, char* argv[]){
     ctr++;
   }
   
-  
-  evts->GetTree()->Write();
-  /*
-  if(LastEvent>0)
-    nentries = LastEvent;
-  
-  Int_t nbytes = 0;
-  Int_t status;
-  for(int i=0; i<nentries;i++){
-    if(signal_received){
-      break;
-    }
-    trigbit = 0;
-    for(int f=0;f<NFPLANES;f++){
-      fp[f]->Clear();
-    }
-    ppac->Clear();
-    beam->Clear();
-    dali->Clear();
-    if(Verbose>2)
-      cout << "getting entry " << i << endl;
-    status = tr->GetEvent(i);
-    if(Verbose>2)
-      cout << "status " << status << endl;
-    if(status == -1){
-      cerr<<"Error occured, couldn't read entry "<<i<<" from tree "<<tr->GetName()<<" in file "<<infile->GetName()<<endl;
-      return 5;
-    }
-    else if(status == 0){
-      cerr<<"Error occured, entry "<<i<<" in tree "<<tr->GetName()<<" in file "<<infile->GetName()<<" doesn't exist"<<endl;
-      return 6;
-    }
-    nbytes += status;
-    
-    //start analysis
-    for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
-      if(InPartCut[in]->IsInside(beam->GetAQ(1),beam->GetZ(1))){
-	splittree[in][OutPartCut[in].size()]->Fill();
-	for(UShort_t ou=0;ou<OutPartCut[in].size();ou++){ // loop over outgoing cuts
-	  if(OutPartCut[in][ou]->IsInside(beam->GetAQ(5),beam->GetZ(5))){
-	    splittree[in][ou]->Fill();
-	  }
-	}//outpartcuts
-      }//inpartcuts
-    }
- 
-    if(i%10000 == 0){
-      double time_end = get_time();
-      cout << setw(5) << setiosflags(ios::fixed) << setprecision(1) << (100.*i)/nentries <<
-	" % done\t" << (Float_t)i/(time_end - time_start) << " events/s " << 
-	(nentries-i)*(time_end - time_start)/(Float_t)i << "s to go \r" << flush;
-    }
-  }
-  cout << endl;
-  cout << "creating outputfile " << endl;
-  TFile* ofile = new TFile(OutFile,"recreate");
-  ofile->cd();
-  Long64_t filesize =0;
-  for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
-    for(UShort_t ou=0;ou<OutPartCut[in].size()+1;ou++){ // loop over outgoing cuts
-      splittree[in][ou]->Write("",TObject::kOverwrite);
-      filesize += splittree[in][ou]->GetZipBytes();
-    }
-  }
-  cout<<"Size of input tree  "<<setw(7)<<tr->GetZipBytes()/(1024*1024)<<" MB"<<endl
-      <<"size of splitted trees "<<setw(7)<<filesize/(1024*1024)<<" MB"<<endl
-      <<"=> size of splitted tree(s) is "<<setw(5)<<setiosflags(ios::fixed)<<setprecision(1)<<(100.*filesize)/tr->GetZipBytes()<<" % of size of input tree"<<endl;
-  */
+  evts->CloseEvent();
+  evts->GetTree()->Write("",TObject::kOverwrite);
   ofile->Close();
   inbigrips->Close();
   ineurica->Close();
