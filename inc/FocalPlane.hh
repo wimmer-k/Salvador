@@ -71,7 +71,8 @@ public:
   void SetTime(double timeL, double timeR){
     ftimeL = timeL;
     ftimeR = timeR;
-    ftime = timeL + timeR;
+    if(!isnan(timeL) && !isnan(timeR))
+      ftime = (timeL + timeR)/2;
   }
   //! Set the charge
   void SetCharge(double chargeL, double chargeR){

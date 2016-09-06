@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
   TStopwatch timer;
   timer.Start();
   signal(SIGINT,signalhandler);
-  cout << "\"Metamorphosis of Narcissus\" (1937), Salvator Dali" << endl;
+  cout << "\"Metamorphosis of Narcissus\" (1937), Salvador Dali" << endl;
   cout << "Unpacker for BigRIPS/DALI" << endl;
   char* InputFile;
   char* OutputFile = NULL;
@@ -104,15 +104,11 @@ int main(int argc, char* argv[]){
   //--------------------------------------------------------------------------------------------------	
   TArtBigRIPSParameters* para = TArtBigRIPSParameters::Instance();
   para->LoadParameter(set->PPACFile());
-  // if(!set->WithDALI())
-  //   para->LoadParameter(set->PPACDefFile());
+  if(!set->WithDALI())
+    para->LoadParameter(set->PPACDefFile());
   para->LoadParameter(set->PlasticFile());
   para->LoadParameter(set->ICFile());
   para->LoadParameter(set->FocalFile());
-  // para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSPPAC.xml");
-  // para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSPlastic.xml");
-  // para->LoadParameter("/home/wimmer/ribf94/db/BigRIPSIC.xml");
-  // para->LoadParameter("/home/wimmer/ribf94/db/FocalPlane.xml");
   if(set->WithDALI())
     para->SetFocusPosOffset(8,138.5);
 
@@ -131,17 +127,13 @@ int main(int argc, char* argv[]){
   //para->PrintListOfPPACPara();
 
   // Definition of observables we want to reconstruct
-  std::cout << "Defining bigrips parameters" << std::endl;
+  cout << "Defining bigrips parameters" << endl;
 
   TArtRIPS* recorips[4];
   recorips[0] = recopid->DefineNewRIPS(3,5,set->MatrixFile(0),"D3"); // F3 - F5
   recorips[1] = recopid->DefineNewRIPS(5,7,set->MatrixFile(1),"D5"); // F5 - F7
   recorips[2] = recopid->DefineNewRIPS(8,9,set->MatrixFile(2),"D7"); // F8 - F9
   recorips[3] = recopid->DefineNewRIPS(9,11,set->MatrixFile(3),"D8"); // F9 - F11  
-  // recorips[0] = recopid->DefineNewRIPS(3,5,"/home/wimmer/ribf94/matrix/mat1.mat","D3"); // F3 - F5
-  // recorips[1] = recopid->DefineNewRIPS(5,7,"/home/wimmer/ribf94/matrix/mat2.mat","D5"); // F5 - F7
-  // recorips[2] = recopid->DefineNewRIPS(8,9,"/home/wimmer/ribf94/matrix/F8F9_LargeAccAchr.mat","D7"); // F8 - F9
-  // recorips[3] = recopid->DefineNewRIPS(9,11,"/home/wimmer/ribf94/matrix/F9F11_LargeAccAchr.mat","D8"); // F9 - F11  
 
   // Reconstruction of TOF DefineNewTOF(first plane, second plane, time offset)
   TArtTOF* recotof[6];
@@ -149,10 +141,18 @@ int main(int argc, char* argv[]){
   recotof[1] = recopid->DefineNewTOF("F3pl","F7pl",set->TimeOffset(1),5); // F5 - F7
   recotof[2] = recopid->DefineNewTOF("F3pl","F7pl",set->TimeOffset(2),5); // F3 - F7
 
-  recotof[3] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(3),9); // F8 - F9
-  recotof[4] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(4),9); // F9 - F11
-  recotof[5] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(5),9); // F8 - F11
+  if(set->WithDALI()){
+    recotof[3] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(3),9); // F8 - F9
+    recotof[4] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(4),9); // F9 - F11
+    recotof[5] = recopid->DefineNewTOF("F8pl","F11pl-1",set->TimeOffset(5),9); // F8 - F11
+  }
+  else{
+    recotof[3] = recopid->DefineNewTOF("F7pl","F11pl-1",set->TimeOffset(3),9); // F7 - F9
+    recotof[4] = recopid->DefineNewTOF("F7pl","F11pl-1",set->TimeOffset(4),9); // F9 - F11
+    recotof[5] = recopid->DefineNewTOF("F7pl","F11pl-1",set->TimeOffset(5),9); // F7 - F11
+  }
   
+
   TArtTOF* tof7to8  = recopid->DefineNewTOF("F7pl","F8pl"); // F7 - F8
 
   // Reconstruction of IC observables for ID
@@ -205,6 +205,7 @@ int main(int argc, char* argv[]){
     tr->Branch("dali",&dali,320000);
   }
 
+  unsigned long long int last_timestamp = 0;
   int ctr =0;
   while(estore->GetNextEvent() && !signal_received){
     //clearing
@@ -223,10 +224,6 @@ int main(int argc, char* argv[]){
     brcalib->ClearData();
     brcalib->ReconstructData();
     
-    //Reconstructiong the PID
-    recopid->ClearData();
-    recopid->ReconstructData();
-
 
     //trigger bit information
     TArtRawEventObject* rawevent = (TArtRawEventObject*)sman->FindDataContainer("RawEvent");
@@ -247,6 +244,10 @@ int main(int argc, char* argv[]){
       TArtEventInfo* info = (TArtEventInfo*)info_a->At(0);
       unsigned int bit = info->GetTriggerBit();
       timestamp = info->GetTimeStamp();
+      if(timestamp<last_timestamp){
+	cout << "timestamp was reset, this TS = " << timestamp << ", last one was " << last_timestamp << " difference " << timestamp-last_timestamp << endl;
+      }
+      last_timestamp = timestamp;
       //timestamp = info->GetEventNumber();
       //cout << trigbit << "\t" << bit << "\t" << timestamp << endl;
     }
@@ -256,11 +257,15 @@ int main(int argc, char* argv[]){
       SinglePPAC* dppac = new SinglePPAC;
       tppac = ppaccalib->GetPPAC(p);
       if(tppac){
-	dppac->Set(tppac->GetID(),tppac->GetX(),tppac->GetY(),tppac->GetXZPos(),tppac->GetTSumX(),tppac->GetTSumY());
+	if(set->WithDALI())
+	  dppac->Set(tppac->GetID(),tppac->GetX(),tppac->GetY(),tppac->GetXZPos(),tppac->GetTSumX(),tppac->GetTSumY());
+	else
+	  dppac->Set(tppac->GetID(),tppac->GetX(),tppac->GetY(),tppac->GetXZPos(),tppac->GetYZPos(),tppac->GetTSumX(),tppac->GetTSumY());
 	if(tppac->IsFiredX()||tppac->IsFiredY())
 	  ppacs->AddPPAC(dppac);
       }
     }
+
 
     //focal plane detector information
     TArtFocalPlane* tfpl;
@@ -270,15 +275,90 @@ int main(int argc, char* argv[]){
     Track track;
     Plastic plastic;
     MUSIC music;
+
     for(unsigned short f=0;f<NFPLANES;f++){
       fp[f]->Clear();
       track.Clear();
       tfpl = cfpl->FindFocalPlane(fpID[f]);
-      if(tfpl){
-	vec=tfpl->GetOptVector(); 
-	track.Set((*vec)(0), (*vec)(2), (*vec)(1), (*vec)(3));
+      if(!set->WithDALI()){
+	TMatrixD xvec(2,1); xvec.Zero();
+	TMatrixD yvec(2,1); yvec.Zero();
+	TMatrixD xmat(2,2); xmat.Zero();
+	TMatrixD ymat(2,2); ymat.Zero();
+	int first = firstPPAC(fpID[f]);
+	if(first<0)
+	  continue;
+	double zpos = tfpl->GetZoffset();
+	int nfiredx[3] = {0, 0, 0}; //total, upstream, downstream
+	int nfiredy[3] = {0, 0, 0};
+	for(unsigned short p=0;p<4;p++){
+	  SinglePPAC* dppac = ppacs->GetPPACID(first+p);
+	  double x = dppac->GetX();
+	  double y = dppac->GetY();
+	  double zx = dppac->GetXZ() - zpos;
+	  double zy = dppac->GetYZ() - zpos;
+	  if(dppac->FiredX()){
+	    xvec(0,0) += zx*x;
+	    xvec(1,0) += x;
+	    xmat(0,1) += zx;
+	    xmat(1,0) += zx;
+	    xmat(0,0) += zx*zx;
+	    xmat(1,1) ++;
+	    nfiredx[0]++;
+	    if(p<2)
+	      nfiredx[1]++;
+	    else
+	      nfiredx[2]++;
+	  }
+	  if(dppac->FiredY()){
+	    yvec(0,0) += zy*y;
+	    yvec(1,0) += y;
+	    ymat(0,1) += zy;
+	    ymat(1,0) += zy;
+	    ymat(0,0) += zy*zy;
+	    ymat(1,1) ++;
+	    nfiredy[0]++;
+	    if(p<2)
+	      nfiredy[1]++;
+	    else
+	      nfiredy[2]++;
+	  }
+	}
+	if(nfiredx[1]>0 && nfiredx[2]>0){
+	  TMatrixD rxvec = xmat.Invert()*xvec;
+	  tfpl->SetOptVector(0,rxvec(1,0));
+	  tfpl->SetOptVector(1,TMath::ATan(rxvec(0,0))*1000);
+	}
+	else{
+	  tfpl->SetOptVector(0,-99999);
+	  tfpl->SetOptVector(1,-99999);
+	}
+	if(nfiredy[1]>0 && nfiredy[2]>0){
+	  TMatrixD ryvec = ymat.Invert()*yvec;
+	  tfpl->SetOptVector(2,ryvec(1,0));
+	  tfpl->SetOptVector(3,TMath::ATan(ryvec(0,0))*1000);
+	}
+	else{
+	  tfpl->SetOptVector(2,-99999);
+	  tfpl->SetOptVector(3,-99999);
+	}
+	tfpl->SetNumFiredPPACX(nfiredx[0]);
+	tfpl->SetNumFiredPPACY(nfiredy[0]);
+	tfpl->CopyPos();
       }
 
+      if(vl>2)
+	cout << "FP " << fpID[f] ;
+      if(tfpl){
+	if(vl>2)
+	  cout << "\tnfiredx  = " << tfpl->GetNumFiredPPACX()<< ", nfiredy  = " << tfpl->GetNumFiredPPACY();
+	vec=tfpl->GetOptVector(); 
+	if(vl>2)
+	  cout << "\tx = " << (*vec)(0) <<", y = "<< (*vec)(2)<<", a = "<< (*vec)(1) <<",b = " << (*vec)(3);
+	track.Set((*vec)(0), (*vec)(2), (*vec)(1), (*vec)(3));
+      }
+      if(vl>2)
+	cout << endl;
       plastic.Clear();
       tpla = plasticcalib->FindPlastic(Form("F%dpl",fpID[f]));
       if(fpID[f]==11)
@@ -300,8 +380,11 @@ int main(int argc, char* argv[]){
       fp[f]->SetMUSIC(music);
     }
     
-    //beam parameters and PID
+    //Reconstructiong the PID
+    recopid->ClearData();
+    recopid->ReconstructData();
 
+    //beam parameters and PID
     beam->SetTOFBeta(0,recotof[2]->GetTOF(),recotof[2]->GetBeta());
     beam->SetTOFBeta(1,recotof[5]->GetTOF(),recotof[5]->GetBeta());
     beam->SetTOFBeta(2,tof7to8->GetTOF(),tof7to8->GetBeta());

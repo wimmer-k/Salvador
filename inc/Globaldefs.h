@@ -29,3 +29,21 @@ int fpNr(int id){
       return -1;
   }
 }
+int firstPPAC(int id){
+  if(id<3 || id>11)
+    return -1;
+  switch (id){
+    case 3:
+      return 5;
+    case 5:
+      return 10;
+    case 7:
+      return 15;
+    case 11:
+      return 33;
+    default:
+      return -1;
+  }
+  
+
+}

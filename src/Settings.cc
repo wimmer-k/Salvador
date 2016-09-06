@@ -23,7 +23,7 @@ void Settings::ReadSettings(){
   fDALIfile = set->GetValue("DALI.File","/home/wimmer/ribf94/db/DALI.xml");
 
   fPPACfile = set->GetValue("BigRIPS.PPAC.File","/home/wimmer/ribf94/db/BigRIPSPPAC.xml");
-  fPPACdefaultfile = set->GetValue("BigRIPS.PPAC,Def.File","/home/wimmer/ribf94/db/BigRIPSPPAC.xml");
+  fPPACdefaultfile = set->GetValue("BigRIPS.PPAC.Def.File","/home/wimmer/ribf94/db/BigRIPSPPAC.xml");
   fplasticfile = set->GetValue("BigRIPS.Plastic.File","/home/wimmer/ribf94/db/BigRIPSPlastic.xml");
   fICfile = set->GetValue("BigRIPS.IC.File","/home/wimmer/ribf94/db/BigRIPSIC.xml");
   ffocalfile = set->GetValue("BigRIPS.Focal.File","/home/wimmer/ribf94/db/FocalPlane.xml");

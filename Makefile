@@ -19,7 +19,7 @@ CFLAGS		= -Wall -Wno-long-long -g -O3 $(ROOTCFLAGS) -fPIC
 
 INCLUDES        = -I./inc -I$(COMMON_DIR) -I$(TARTSYS)/include -I$(EURICASYS)
 BASELIBS 	= -lm $(ROOTLIBS) $(ROOTGLIBS) -L$(LIB_DIR) -L$(TARTSYS)/lib -lSpectrum -lXMLParser
-ALLIBS  	=  $(BASELIBS) -lCommandLineInterface -lanaroot -lananadeko -lanacore -lanabrips -lanaloop -lanadali -lSalvator
+ALLIBS  	=  $(BASELIBS) -lCommandLineInterface -lanaroot -lananadeko -lanacore -lanabrips -lanaloop -lanadali -lSalvador
 LIBS 		= $(ALLIBS)
 LFLAGS		= -g -fPIC -shared
 CFLAGS += -Wl,--no-as-needed
@@ -29,47 +29,34 @@ CFLAGS += -Wno-unused-variable -Wno-write-strings
 LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o build/DALI.o build/DALIDictionary.o 
 
 O_FILES = build/Reconstruction.o build/Settings.o
-EU_O_FILES = build/BuildEvents.o
 
-all: Metamorphosis FriedBacon BurningGiraffe Disintegration Persistence MergeEURICA
+all: Metamorphosis FriedBacon BurningGiraffe Disintegration Persistence
 
-Metamorphosis: Metamorphosis.cc $(LIB_DIR)/libSalvator.so build/Settings.o
+Metamorphosis: Metamorphosis.cc $(LIB_DIR)/libSalvador.so build/Settings.o
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) build/Settings.o -o $(BIN_DIR)/$@ 
 
-FriedBacon: FriedBacon.cc $(LIB_DIR)/libSalvator.so build/Settings.o
+FriedBacon: FriedBacon.cc $(LIB_DIR)/libSalvador.so build/Settings.o
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) build/Settings.o -o $(BIN_DIR)/$@ 
 
-BurningGiraffe: BurningGiraffe.cc $(LIB_DIR)/libSalvator.so
+BurningGiraffe: BurningGiraffe.cc $(LIB_DIR)/libSalvador.so
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
 
-Disintegration: Disintegration.cc $(LIB_DIR)/libSalvator.so
+Disintegration: Disintegration.cc $(LIB_DIR)/libSalvador.so
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
 
-Persistence: Persistence.cc $(LIB_DIR)/libSalvator.so $(O_FILES)
+Persistence: Persistence.cc $(LIB_DIR)/libSalvador.so $(O_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
 
-MergeEURICA: MergeEURICA.cc $(LIB_DIR)/libSalvator.so $(LIB_DIR)/libEURICA.so $(EU_O_FILES)
-	@echo "Compiling $@"
-	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -lEURICA -lGo4EURICA $(EU_O_FILES) -o $(BIN_DIR)/$@ 
-
-IsomerHistos: IsomerHistos.cc $(LIB_DIR)/libSalvator.so $(LIB_DIR)/libEURICA.so 
-	@echo "Compiling $@"
-	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -lEURICA -lGo4EURICA -o $(BIN_DIR)/$@ 
-
-$(LIB_DIR)/libSalvator.so: $(LIB_O_FILES) 
+$(LIB_DIR)/libSalvador.so: $(LIB_O_FILES) 
 	@echo "Making $@"
 	@$(CPP) $(LFLAGS) -o $@ $^ -lc
 
-$(LIB_DIR)/libEURICA.so: build/EURICA.o build/EURICADictionary.o 
-	@echo "Making $@"
-	@$(CPP) $(LFLAGS) -o $@ $^ -lc
-
-build/Reconstruction.o: src/Reconstruction.cc inc/Reconstruction.hh $(LIB_DIR)/libSalvator.so 
+build/Reconstruction.o: src/Reconstruction.cc inc/Reconstruction.hh $(LIB_DIR)/libSalvador.so 
 	@echo "Compiling $@"
 	@mkdir -p $(dir $@)
 	@$(CPP) $(CFLAGS) $(INCLUDES) -c $< -o $@ 

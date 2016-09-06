@@ -32,7 +32,7 @@ int main(int argc, char* argv[]){
   TStopwatch timer;
   timer.Start();
   signal(SIGINT,signalhandler);
-  cout << "\"Soft Self-portrait with Fried Bacon\" (1941), Salvator Dali" << endl;
+  cout << "\"Soft Self-portrait with Fried Bacon\" (1941), Salvador Dali" << endl;
   cout << "Unpacker for calibration data DALI" << endl;
   char* InputFile;
   char* OutputFile = NULL;

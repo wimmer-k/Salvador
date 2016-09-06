@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
   TStopwatch timer;
   timer.Start();
   signal(SIGINT,signalhandler);
-  cout << "\"La Desintegracion de la Persistencia de la Memoria\" (1954), Salvator Dali" << endl;
+  cout << "\"La Desintegracion de la Persistencia de la Memoria\" (1954), Salvador Dali" << endl;
   cout << "Treesplitter for DALI" << endl;
   int LastEvent = -1;
   int Verbose = 0;

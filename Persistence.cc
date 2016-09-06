@@ -29,7 +29,7 @@ int main(int argc, char* argv[]){
   TStopwatch timer;
   timer.Start();
   signal(SIGINT,signalhandler);
-  cout << "\"La persistencia de la memoria\" (1931), Salvator Dali" << endl;
+  cout << "\"La persistencia de la memoria\" (1931), Salvador Dali" << endl;
   cout << "Analyzer for DALI (Add-back and Doppler-correction also for simulated data)" << endl;
   int LastEvent =-1;
   int Verbose =0;

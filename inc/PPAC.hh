@@ -75,6 +75,17 @@ public:
     ftsumx = tsumx;
     ftsumy = tsumy;
   }
+  //! Set everything
+  void Set(short id, double x, double y, double xz, double yz, double tsumx, double tsumy){
+    fID = id;
+    fx = x;
+    fy = y;
+    fxz = xz;
+    fyz = yz;
+    fz = (xz+yz)/2;
+    ftsumx = tsumx;
+    ftsumy = tsumy;
+  }
 
   //! Get the ID
   short GetID(){return fID;}
@@ -84,6 +95,10 @@ public:
   double GetY(){return fy;}
   //! Get the z position
   double GetZ(){return fz;}
+  //! Get the z position
+  double GetXZ(){return fxz;}
+  //! Get the z position
+  double GetYZ(){return fyz;}
   //! Get the timing sum x
   double GetTsumX(){return ftsumx;}
   //! Get the timing sum y
@@ -116,6 +131,10 @@ protected:
   double fy;
   //! z position
   double fz;
+  //! xz position
+  double fxz;
+  //! yz position
+  double fyz;
   //! timing sum x
   double ftsumx;
   //! timing sum y
