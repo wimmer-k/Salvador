@@ -280,6 +280,7 @@ int main(int argc, char* argv[]){
       fp[f]->Clear();
       track.Clear();
       tfpl = cfpl->FindFocalPlane(fpID[f]);
+      
       if(!set->WithDALI()){
 	TMatrixD xvec(2,1); xvec.Zero();
 	TMatrixD yvec(2,1); yvec.Zero();

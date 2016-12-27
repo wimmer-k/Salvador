@@ -272,7 +272,7 @@ void Reconstruction::SetPositions(DALI* dali){
     DALIHit* hit = dali->GetHit(g);
     short id = hit->GetID();
     if(id<0||id>MAXNCRYSTAL){
-      cout << "invalid ID in DALI" <<endl;
+      cout << "invalid ID in DALI: " << id <<endl;
       hit->Print();
       return;
     } 
@@ -334,3 +334,24 @@ TVector3 Reconstruction::TargetPosition(TVector3 inc, TVector3 ppac){
   return TVector3(x,y,fset->TargetPosition());
 }
 
+/*!
+  Gate on the F5X position
+  \return is inside the gate
+*/
+bool Reconstruction::F5XGate(double f5xpos){
+  if(f5xpos < fset->F5XGate(0) || f5xpos > fset->F5XGate(1))
+      return false;
+  return true;
+}
+
+/*!
+  Gate on changing charge states in ZeroDegree
+  \return changes in charge state
+*/
+bool Reconstruction::ChargeChange(double delta2, double delta3){
+  if(fset->DeltaGate(0)<100)//no gate set
+    return true;
+  if((delta2-delta3) < fset->DeltaGate(0) || (delta2-delta3) > fset->DeltaGate(1))
+      return true;
+  return false;
+}

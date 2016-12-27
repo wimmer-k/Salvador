@@ -81,6 +81,10 @@ public:
 
   //! Get the target position with respect to nominal focus
   double TargetPosition(){return ftargetposition;}
+  //! Get the gate on the F5X position
+  double F5XGate(int i){return ff5xgate[i];}
+  //! Get the gate on the change in delta for charge changes
+  double DeltaGate(int i){return fdeltagate[i];}
 
 private:
   //! filename of the settings file
@@ -137,5 +141,9 @@ private:
 
   //! target position with respect to nominal focus
   double ftargetposition;
+  //! gate on the F5X position
+  double ff5xgate[2];
+  //! gate on the delta change
+  double fdeltagate[2];
 };
 #endif

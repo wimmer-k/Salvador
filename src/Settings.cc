@@ -55,6 +55,11 @@ void Settings::ReadSettings(){
   fDALIbadfile = set->GetValue("Bad.Channels",(char*)"settings/baddali.dat");
 
   ftargetposition = set->GetValue("Target.Position",129.5);
+  ff5xgate[0] = set->GetValue("F5X.Gate.Low", -200.);
+  ff5xgate[1] = set->GetValue("F5X.Gate.High", 200.);
+  fdeltagate[0] = set->GetValue("Delta.Gate.Low", -999.);
+  fdeltagate[1] = set->GetValue("Delta.Gate.High", 999.);
+
   if(fverbose>0)
     PrintSettings();
 }
@@ -97,5 +102,8 @@ void Settings::PrintSettings(){
 
   cout << "beta\t" << fbeta << endl;  
   cout << "target position\t" << ftargetposition << endl;
+  cout << "gate on F5X position\t" <<ff5xgate[0] << " to " << ff5xgate[1] << endl;
+  cout << "gate on delta for charge changes\t" <<fdeltagate[0] << " to " << fdeltagate[1] << endl;
+
 }
 

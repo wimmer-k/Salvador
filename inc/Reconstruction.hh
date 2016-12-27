@@ -53,6 +53,10 @@ public:
   TVector3 TargetPosition(TVector3 inc, TVector3 ppac);
   //! recalibration to be done
   bool DoReCalibration(){return fset->DoReCalibration();}
+  //!  gate on the F5X position
+  bool F5XGate(double f5xpos);
+  //!  gate on changing charge state in ZeroDegree
+  bool ChargeChange(double delta2, double delta3);
 
 private:
   //! settings for reconstruction

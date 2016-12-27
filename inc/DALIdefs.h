@@ -1,1 +1,1 @@
-#define MAXNCRYSTAL 200
+#define MAXNCRYSTAL 300

@@ -39,6 +39,7 @@ int main(int argc, char* argv[]){
   char* TreeName = (char*)"tr";
   int writeTree = 1;
   double beta =0;
+  int minID = 79;
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input files", &InputFiles);
@@ -49,6 +50,7 @@ int main(int argc, char* argv[]){
   interface->Add("-v", "verbose level", &Verbose);  
   interface->Add("-wt", "write tree", &writeTree);  
   interface->Add("-b", "beta (overrides settings file)", &beta);
+  interface->Add("-id", "minimum DALI ID for additional gamma-gamma spectra", &minID);
 
   interface->CheckFlags(argc, argv);
   //Complain about missing mandatory arguments
@@ -168,10 +170,14 @@ int main(int argc, char* argv[]){
   TH2F* multtrig = new TH2F("multtrig","multtrig",20,0,20,50,0,50);hlist->Add(multtrig);
   TH1F* egam = new TH1F("egam","egam",4000,0,4000);hlist->Add(egam);
   TH1F* egamdc = new TH1F("egamdc","egamdc",4000,0,4000);hlist->Add(egamdc);
+  TH1F* egam_IDgate = new TH1F("egam_IDgate","egam_IDgate",4000,0,4000);hlist->Add(egam_IDgate);
+  TH1F* egamdc_IDgate = new TH1F("egamdc_IDgate","egamdc_IDgate",4000,0,4000);hlist->Add(egamdc_IDgate);
   TH2F* egamtgam = new TH2F("egamtgam","egamtgam",1000,-500,500,1000,0,4000);hlist->Add(egamtgam);
   TH2F* egamdctgam = new TH2F("egamdctgam","egamdctgam",1000,-500,500,1000,0,4000);hlist->Add(egamdctgam);
   TH2F* egammult = new TH2F("egammult","egammult",20,0,20,4000,0,4000);hlist->Add(egammult);
   TH2F* egamdcmult = new TH2F("egamdcmult","egamdcmult",20,0,20,4000,0,4000);hlist->Add(egamdcmult);
+  TH2F* egammult_IDgate = new TH2F("egammult_IDgate","egammult_IDgate",20,0,20,4000,0,4000);hlist->Add(egammult_IDgate);
+  TH2F* egamdcmult_IDgate = new TH2F("egamdcmult_IDgate","egamdcmult_IDgate",20,0,20,4000,0,4000);hlist->Add(egamdcmult_IDgate);
   TH2F* egamtrig = new TH2F("egamtrig","egamtrig",10,0,10,4000,0,4000);hlist->Add(egamtrig);
   TH2F* egamID_mult[10];
   TH2F* egamdcID_mult[10];
@@ -180,6 +186,8 @@ int main(int argc, char* argv[]){
   TH2F* egamdcphi_mult[10];
   TH2F* egamegam_mult[10];
   TH2F* egamegamdc_mult[10];
+  TH2F* egamegam_IDgate_mult[10];
+  TH2F* egamegamdc_IDgate_mult[10];
   TH1F* multAB = new TH1F("multAB","multAB",50,0,50);hlist->Add(multAB);
   TH1F* egamAB = new TH1F("egamAB","egamAB",4000,0,4000);hlist->Add(egamAB);
   TH1F* egamABdc = new TH1F("egamABdc","egamABdc",4000,0,4000);hlist->Add(egamABdc);
@@ -187,6 +195,12 @@ int main(int argc, char* argv[]){
   TH2F* egamABmultAB = new TH2F("egamABmultAB","egamABmultAB",20,0,20,4000,0,4000);hlist->Add(egamABmultAB);
   TH2F* egamABdcmult = new TH2F("egamABdcmult","egamABdcmult",20,0,20,4000,0,4000);hlist->Add(egamABdcmult);
   TH2F* egamABdcmultAB = new TH2F("egamABdcmultAB","egamABdcmultAB",20,0,20,4000,0,4000);hlist->Add(egamABdcmultAB);
+  TH1F* egamAB_IDgate = new TH1F("egamAB_IDgate","egamAB_IDgate",4000,0,4000);hlist->Add(egamAB_IDgate);
+  TH1F* egamABdc_IDgate = new TH1F("egamABdc_IDgate","egamABdc_IDgate",4000,0,4000);hlist->Add(egamABdc_IDgate);
+  TH2F* egamABmult_IDgate = new TH2F("egamABmult_IDgate","egamABmult_IDgate",20,0,20,4000,0,4000);hlist->Add(egamABmult_IDgate);
+  TH2F* egamABmultAB_IDgate = new TH2F("egamABmultAB_IDgate","egamABmultAB_IDgate",20,0,20,4000,0,4000);hlist->Add(egamABmultAB_IDgate);
+  TH2F* egamABdcmult_IDgate = new TH2F("egamABdcmult_IDgate","egamABdcmult_IDgate",20,0,20,4000,0,4000);hlist->Add(egamABdcmult_IDgate);
+  TH2F* egamABdcmultAB_IDgate = new TH2F("egamABdcmultAB_IDgate","egamABdcmultAB_IDgate",20,0,20,4000,0,4000);hlist->Add(egamABdcmultAB_IDgate);
   TH2F* egamABtrig = new TH2F("egamABtrig","egamABtrig",10,0,10,4000,0,4000);hlist->Add(egamABtrig);
   TH2F* egamABID_mult[10];
   TH2F* egamABID_multAB[10];
@@ -199,6 +213,10 @@ int main(int argc, char* argv[]){
   TH2F* egamegamABdc_mult[10];
   TH2F* egamegamAB_multAB[10];
   TH2F* egamegamABdc_multAB[10];
+  TH2F* egamegamAB_IDgate_mult[10];
+  TH2F* egamegamABdc_IDgate_mult[10];
+  TH2F* egamegamAB_IDgate_multAB[10];
+  TH2F* egamegamABdc_IDgate_multAB[10];
 
   egamID_mult[0] = new TH2F("egamID","egamID",200,0,200,4000,0,4000);hlist->Add(egamID_mult[0]);
   egamdcID_mult[0] = new TH2F("egamdcID","egamdcID",200,0,200,4000,0,4000);hlist->Add(egamdcID_mult[0]);
@@ -213,6 +231,10 @@ int main(int argc, char* argv[]){
   egamegamdc_mult[0] = new TH2F("egamegamdc","egamegamdc",200,0,4000,200,0,4000);hlist->Add(egamegamdc_mult[0]);
   egamegamAB_mult[0] = new TH2F("egamegamAB","egamegamAB",200,0,4000,200,0,4000);hlist->Add(egamegamAB_mult[0]);
   egamegamABdc_mult[0] = new TH2F("egamegamABdc","egamegamABdc",200,0,4000,200,0,4000);hlist->Add(egamegamABdc_mult[0]);
+  egamegam_IDgate_mult[0] = new TH2F("egamegam_IDgate","egamegam_IDgate",200,0,4000,200,0,4000);hlist->Add(egamegam_IDgate_mult[0]);
+  egamegamdc_IDgate_mult[0] = new TH2F("egamegamdc_IDgate","egamegamdc_IDgate",200,0,4000,200,0,4000);hlist->Add(egamegamdc_IDgate_mult[0]);
+  egamegamAB_IDgate_mult[0] = new TH2F("egamegamAB_IDgate","egamegamAB_IDgate",200,0,4000,200,0,4000);hlist->Add(egamegamAB_IDgate_mult[0]);
+  egamegamABdc_IDgate_mult[0] = new TH2F("egamegamABdc_IDgate","egamegamABdc_IDgate",200,0,4000,200,0,4000);hlist->Add(egamegamABdc_IDgate_mult[0]);
   for(int m=1;m<10;m++){
     egamID_mult[m] = new TH2F(Form("egamIDmult%d",m),Form("egamIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamID_mult[m]);
     egamdcID_mult[m] = new TH2F(Form("egamdcIDmult%d",m),Form("egamdcIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamdcID_mult[m]);
@@ -232,6 +254,13 @@ int main(int argc, char* argv[]){
     egamegamABdc_mult[m] = new TH2F(Form("egamegamABdcmult%d",m),Form("egamegamABdcmult%d",m),200,0,4000,200,0,4000);hlist->Add(egamegamABdc_mult[m]);
     egamegamAB_multAB[m] = new TH2F(Form("egamegamABmultAB%d",m),Form("egamegamABmultAB%d",m),200,0,4000,200,0,4000);hlist->Add(egamegamAB_multAB[m]);
     egamegamABdc_multAB[m] = new TH2F(Form("egamegamABdcmultAB%d",m),Form("egamegamABdcmultAB%d",m),200,0,4000,200,0,4000);hlist->Add(egamegamABdc_multAB[m]);
+
+    egamegam_IDgate_mult[m] = new TH2F(Form("egamegammult%d_IDgate",m),Form("egamegammult%d_IDgate",m),200,0,4000,200,0,4000);hlist->Add(egamegam_IDgate_mult[m]);
+    egamegamdc_IDgate_mult[m] = new TH2F(Form("egamegamdcmult%d_IDgate",m),Form("egamegamdcmult%d_IDgate",m),200,0,4000,200,0,4000);hlist->Add(egamegamdc_IDgate_mult[m]);
+    egamegamAB_IDgate_mult[m] = new TH2F(Form("egamegamABmult%d_IDgate",m),Form("egamegamABmult%d_IDgate",m),200,0,4000,200,0,4000);hlist->Add(egamegamAB_IDgate_mult[m]);
+    egamegamABdc_IDgate_mult[m] = new TH2F(Form("egamegamABdcmult%d_IDgate",m),Form("egamegamABdcmult%d_IDgate",m),200,0,4000,200,0,4000);hlist->Add(egamegamABdc_IDgate_mult[m]);
+    egamegamAB_IDgate_multAB[m] = new TH2F(Form("egamegamABmultAB%d_IDgate",m),Form("egamegamABmultAB%d_IDgate",m),200,0,4000,200,0,4000);hlist->Add(egamegamAB_IDgate_multAB[m]);
+    egamegamABdc_IDgate_multAB[m] = new TH2F(Form("egamegamABdcmultAB%d_IDgate",m),Form("egamegamABdcmultAB%d_IDgate",m),200,0,4000,200,0,4000);hlist->Add(egamegamABdc_IDgate_multAB[m]);
   }
 
   TH2F* egamdcmult_trig[10];
@@ -284,6 +313,14 @@ int main(int argc, char* argv[]){
     }
     nbytes += status;
     
+    //gate on F5X position 
+    if(!rec->F5XGate(fp[fpNr(5)]->GetTrack()->GetX()))
+      continue;
+
+    //gate on charge changes in ZeroDegree
+    if(rec->ChargeChange(beam->GetDelta(2),beam->GetDelta(3)))
+      continue;
+
     //analysis
 
     // filter over and underflow
@@ -425,6 +462,12 @@ int main(int argc, char* argv[]){
 	egamdctheta_mult[9]->Fill(dali->GetHit(k)->GetPos().Theta(),dali->GetHit(k)->GetDCEnergy());
 	egamdcphi_mult[9]->Fill(dali->GetHit(k)->GetPos().Phi(),dali->GetHit(k)->GetDCEnergy());
       }
+      if(dali->GetHit(k)->GetID()>=minID){
+	egam_IDgate->Fill(dali->GetHit(k)->GetEnergy());
+	egamdc_IDgate->Fill(dali->GetHit(k)->GetDCEnergy()); 
+	egammult_IDgate->Fill(dali->GetMult(),dali->GetHit(k)->GetEnergy());
+	egamdcmult_IDgate->Fill(dali->GetMult(),dali->GetHit(k)->GetDCEnergy());
+      }
     }
 
     multAB->Fill(dali->GetMultAB());
@@ -462,6 +505,14 @@ int main(int argc, char* argv[]){
 	egamABdcID_multAB[9]->Fill(dali->GetHitAB(k)->GetID(),dali->GetHitAB(k)->GetDCEnergy());
 	egamABdctrig_multAB[9]->Fill(trigbit,dali->GetHitAB(k)->GetDCEnergy());
       }
+      if(dali->GetHitAB(k)->GetID()>=minID){
+	egamAB_IDgate->Fill(dali->GetHitAB(k)->GetEnergy());
+	egamABdc_IDgate->Fill(dali->GetHitAB(k)->GetDCEnergy()); 
+	egamABmult_IDgate->Fill(dali->GetMult(),dali->GetHitAB(k)->GetEnergy());
+	egamABmultAB_IDgate->Fill(dali->GetMultAB(),dali->GetHitAB(k)->GetEnergy());
+	egamABdcmult_IDgate->Fill(dali->GetMult(),dali->GetHitAB(k)->GetDCEnergy());
+ 	egamABdcmultAB_IDgate->Fill(dali->GetMultAB(),dali->GetHitAB(k)->GetDCEnergy());
+      }
     }
 
     if(dali->GetMult()>1){
@@ -496,6 +547,18 @@ int main(int argc, char* argv[]){
 	    egamegam_mult[9]->Fill(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy());
 	    egamegamdc_mult[9]->Fill(dcen[0],dcen[1]);
 	  }
+	  if(dali->GetHit(k)->GetID()>=minID && dali->GetHit(l)->GetID()>=minID){
+	    egamegam_IDgate_mult[0]->Fill(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy());
+	    egamegamdc_IDgate_mult[0]->Fill(dcen[0],dcen[1]);
+	    if(dali->GetMult()<9){
+	      egamegam_IDgate_mult[dali->GetMult()]->Fill(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy());
+	      egamegamdc_IDgate_mult[dali->GetMult()]->Fill(dcen[0],dcen[1]);
+	    }
+	    else{
+	      egamegam_IDgate_mult[9]->Fill(dali->GetHit(k)->GetEnergy(),dali->GetHit(l)->GetEnergy());
+	      egamegamdc_IDgate_mult[9]->Fill(dcen[0],dcen[1]);
+	    }
+	  }//ID gated
 	}
       }
     }
@@ -528,6 +591,26 @@ int main(int argc, char* argv[]){
 	  else{
 	    egamegamAB_multAB[9]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
 	    egamegamABdc_multAB[9]->Fill(dcen[0],dcen[1]);
+	  }
+	  if(dali->GetHitAB(k)->GetID()>=minID && dali->GetHitAB(l)->GetID()>=minID){
+	    egamegamAB_IDgate_mult[0]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
+	    egamegamABdc_IDgate_mult[0]->Fill(dcen[0],dcen[1]);
+	    if(dali->GetMult()<9){
+	      egamegamAB_IDgate_mult[dali->GetMult()]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
+	      egamegamABdc_IDgate_mult[dali->GetMult()]->Fill(dcen[0],dcen[1]);
+	    }
+	    else{
+	      egamegamAB_IDgate_mult[9]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
+	      egamegamABdc_IDgate_mult[9]->Fill(dcen[0],dcen[1]);
+	    }
+	    if(dali->GetMultAB()<9){
+	      egamegamAB_IDgate_multAB[dali->GetMultAB()]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
+	      egamegamABdc_IDgate_multAB[dali->GetMultAB()]->Fill(dcen[0],dcen[1]);
+	    }
+	    else{
+	      egamegamAB_IDgate_multAB[9]->Fill(dali->GetHitAB(k)->GetEnergy(),dali->GetHitAB(l)->GetEnergy());
+	      egamegamABdc_IDgate_multAB[9]->Fill(dcen[0],dcen[1]);
+	    }
 	  }
 	}
       }
