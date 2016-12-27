@@ -313,6 +313,7 @@ int main(int argc, char* argv[]){
     }
     nbytes += status;
     
+
     //gate on F5X position 
     if(!rec->F5XGate(fp[fpNr(5)]->GetTrack()->GetX()))
       continue;
