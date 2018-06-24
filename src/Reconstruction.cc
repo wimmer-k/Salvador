@@ -8,6 +8,15 @@ using namespace std;
 Reconstruction::Reconstruction(char* settings){
   fset = new Settings(settings);
   fbeta = fset->Beta();
+
+  double pp[3] = {-fset->MINOSlength()/2, 0, fset->MINOSlength()/2};
+  double bb[3] = {fset->BetaBefore(), fbeta, fset->BetaAfter()};
+  TGraph *gbeta = new TGraph(3,pp,bb);
+  if(fset->MINOSlength()>0){
+    fminos = new TF1("fminos","pol2",-fset->MINOSlength()/2,fset->MINOSlength()/2);
+    gbeta->Fit(fminos,"Rn");
+  }
+  
   ReadBadChannels(fset->BadChFile());
   ReadPositions(fset->DALIPosFile());
   if(fset->DoReCalibration())
@@ -291,6 +300,18 @@ void Reconstruction::DopplerCorrect(DALI* dali){
 }
 
 /*!
+  Do the Doppler correction including the target positons
+  \param dali the input DALI object
+  \return event by events beta
+*/
+double Reconstruction::DopplerCorrect(DALI* dali, double zreac){
+  double beta = fminos->Eval(zreac);
+  //cout << fbeta <<"\t" << beta << "\t" << zreac << endl;
+  dali->DopplerCorrect(beta,zreac);
+  return beta;
+}
+
+/*!
   Calculate the ppac position as the average of A and B PPACs
   \param pina A PPAC
   \param pinb B PPAC
@@ -317,7 +338,18 @@ TVector3 Reconstruction::PPACPosition(SinglePPAC* pina, SinglePPAC* pinb){
   }
   return TVector3(x,y,z);
 }
-
+/*!
+  Align the F8 PPAC3 with respect to the others, calibration parameters from the empty target runs
+  \param ppac uncalibrated PPAC position
+*/
+void Reconstruction::AlignPPAC(SinglePPAC* pin0, SinglePPAC* pin1){
+  double x = pin0->GetX() + fset->PPAC3PositionX0();
+  double y = pin0->GetY() + fset->PPAC3PositionY0();
+  pin0->SetXY(x,y);
+  x = pin1->GetX() + fset->PPAC3PositionX1();
+  y = pin1->GetY() + fset->PPAC3PositionY1();
+  pin1->SetXY(x,y);
+}
 /*!
   Calculate the ppac position as the average of A and B PPACs
   \param inc incoming beam
@@ -345,13 +377,24 @@ bool Reconstruction::F5XGate(double f5xpos){
 }
 
 /*!
+  Gate on changing charge states in BigRIPS
+  \return changes in charge state
+*/
+bool Reconstruction::ChargeChangeBR(double delta0, double delta1){
+  if(fset->DeltaGate(0)<100)//no gate set
+    return false;
+  if((delta0-delta1) < fset->DeltaGate(0) || (delta0-delta1) > fset->DeltaGate(1))
+      return true;
+  return false;
+}
+/*!
   Gate on changing charge states in ZeroDegree
   \return changes in charge state
 */
-bool Reconstruction::ChargeChange(double delta2, double delta3){
+bool Reconstruction::ChargeChangeZD(double delta2, double delta3){
   if(fset->DeltaGate(0)<100)//no gate set
-    return true;
-  if((delta2-delta3) < fset->DeltaGate(0) || (delta2-delta3) > fset->DeltaGate(1))
+    return false;
+  if((delta2-delta3) < fset->DeltaGate(2) || (delta2-delta3) > fset->DeltaGate(3))
       return true;
   return false;
 }

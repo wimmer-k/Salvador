@@ -7,6 +7,7 @@
 
 #include "TObject.h"
 #include "TVector3.h"
+#include "TRotation.h"
 
 using namespace std;
 
@@ -38,6 +39,11 @@ public:
     ftargetpos.SetXYZ(0,0,-99999);
     fincdir.SetXYZ(0,0,-99999);
     foutdir.SetXYZ(0,0,-99999);
+    fscadir.SetXYZ(0,0,-99999);
+    TVector3 X(1,0,0);
+    TVector3 Y(0,1,0);
+    TVector3 Z(0,0,1);
+    //fincrot.RotateAxes(X,Y,Z);
   }
   //! Set the A/Q ratio
   void SetAQ(unsigned short j, double aoq){
@@ -92,10 +98,16 @@ public:
   //! Set the direction of the incoming beam
   void SetIncomingDirection(TVector3 dir){
     fincdir = dir;
+    fincrot.SetZAxis(fincdir.Unit());
+    fincrot = fincrot.Inverse();
   }
   //! Set the direction of the scattered beam
-  void SetScatteredDirection(TVector3 dir){
+  void SetOutgoingDirection(TVector3 dir){
     foutdir = dir;
+    if(fincdir.Z()>-99999){
+      fscadir = dir;
+      fscadir.Transform(fincrot);
+    }
   }
 
   //! Correct the A/Q ratio based on position
@@ -131,16 +143,20 @@ public:
   }
   //! Get Delta
   double GetDelta(unsigned short j){
-    if(j<0 || j>2) return sqrt(-1.);
+    if(j<0 || j>3) return sqrt(-1.);
     return fdelta[j];
   }
-  //! Get the direction of the incoming beam
+  //! Get the direction of the incoming beam in lab system
   TVector3 GetIncomingDirection(){
     return fincdir;
   }
-  //! Get the direction of the scattered beam
-  TVector3 GetScatteredDirection(){
+  //! Get the direction of the outgoing beam in lab system
+  TVector3 GetOutgoingDirection(){
     return foutdir;
+  }
+  //! Get the direction of the scattering (in beam coordinate system)
+  TVector3 GetScatteredDirection(){
+    return fscadir;
   }
   //! Get the target position
   TVector3 GetTargetPosition(){
@@ -157,14 +173,14 @@ public:
 
   //! Get the scattering angle phi
   double GetPhi(){
-    if(fincdir.Z()>-99999 && foutdir.Z()>-99999)
-      return foutdir.DeltaPhi(fincdir);
+    if(fscadir.Z()>-99999)
+      return fscadir.Phi();
     return sqrt(-1.);
   }
   //! Get the scattering angle theta
   double GetTheta(){
-    if(fincdir.Z()>-99999 && foutdir.Z()>-99999)
-      return foutdir.Angle(fincdir);
+    if(fscadir.Z()>-99999)
+      return fscadir.Theta();
     return sqrt(-1.);
   }
 
@@ -188,10 +204,14 @@ protected:
 
   //! target position 
   TVector3 ftargetpos;
-  //! incoming direction
+  //! incoming direction in lab system
   TVector3 fincdir;
-  //! scattered direction
+  //! outgoing direction in lab system
   TVector3 foutdir;
+  //! rotation matrix beam coordinate system
+  TRotation fincrot;
+  //! ejectile vector in beam coordinate system
+  TVector3 fscadir;
 
   /// \cond CLASSIMP
   ClassDef(Beam,1);

@@ -27,6 +27,8 @@ public:
 
   //! Get the vorbose level
   int VerboseLevel(){return fverbose;}
+  //! Set the vorbose level
+  void SetVerboseLevel(int vl){fverbose = vl;}
 
   //! Get if DALI is to be used
   bool WithDALI(){return fwithDALI;}
@@ -67,6 +69,13 @@ public:
   //! Get the gate on the DALI - beam timing
   double TimingGate(int i){return ftimegate[i];}
 
+  //! Get the beta in front of MINOS for the Doppler correction
+  double BetaBefore(){return fbetaM[0];}
+  //! Get the beta after MINOS for the Doppler correction
+  double BetaAfter(){return fbetaM[1];}
+  //! Get the lenght of the MINOS target
+  double MINOSlength(){return fminoslength;}
+
   
   //! Get the type of addback to be used, 1 distance, 2 angles
   int AddbackType(){return faddbacktype;}
@@ -79,6 +88,14 @@ public:
   //! Get the time difference between hits to be considered for addback
   double AddbackTimeDiff(int i){return faddbacktdiff[i];}
 
+  //! Get the alignment shift (X0) for the PPAC3 at F8 after the target
+  double PPAC3PositionX0(){return fppac3align[0];}
+  //! Get the alignment shift (Y0) for the PPAC3 at F8 after the target
+  double PPAC3PositionY0(){return fppac3align[1];}
+  //! Get the alignment shift (X1) for the PPAC3 at F8 after the target
+  double PPAC3PositionX1(){return fppac3align[2];}
+  //! Get the alignment shift (Y1) for the PPAC3 at F8 after the target
+  double PPAC3PositionY1(){return fppac3align[3];}
   //! Get the target position with respect to nominal focus
   double TargetPosition(){return ftargetposition;}
   //! Get the gate on the F5X position
@@ -127,6 +144,10 @@ private:
   double fbeta;
   //! timing gate DALI - beam
   double ftimegate[2];
+  //! beta for Doppler correction with MINOS before and after target
+  double fbetaM[2];
+  //! length of minos
+  double fminoslength;
 
   //! type of addback
   int faddbacktype;
@@ -139,11 +160,13 @@ private:
   //! time difference between two hits for addback
   double faddbacktdiff[2];
 
+  //! alignment of PPAc at F8
+  double fppac3align[4];
   //! target position with respect to nominal focus
   double ftargetposition;
   //! gate on the F5X position
   double ff5xgate[2];
   //! gate on the delta change
-  double fdeltagate[2];
+  double fdeltagate[4];
 };
 #endif

@@ -111,6 +111,11 @@ public:
   void DopplerCorrect(double beta){
     fDCen = fen/sqrt(1-beta*beta)*(1-beta*cos(fpos.Theta()));
   }
+  //! Apply the Doppler correction with the given beta, and a position, assuming motion in the +z direction.
+  void DopplerCorrect(double beta,double zreac){
+    fpos.SetZ(fpos.Z()-zreac);
+    fDCen = fen/sqrt(1-beta*beta)*(1-beta*cos(fpos.Theta()));
+  }
   //! Printing information 
   void Print(Option_t *option = "") const {
     cout << "ID " << fID;
@@ -197,6 +202,15 @@ public:
     }
     for(vector<DALIHit*>::iterator hit=fhitsAB.begin(); hit!=fhitsAB.end(); hit++){
       (*hit)->DopplerCorrect(beta);
+    }
+  }
+  //! Do the Doppler correction
+  void DopplerCorrect(double beta, double zreac){
+    for(vector<DALIHit*>::iterator hit=fhits.begin(); hit!=fhits.end(); hit++){
+      (*hit)->DopplerCorrect(beta, zreac);
+    }
+    for(vector<DALIHit*>::iterator hit=fhitsAB.begin(); hit!=fhitsAB.end(); hit++){
+      (*hit)->DopplerCorrect(beta, zreac);
     }
   }
   //! Returns the multiplicity of the event

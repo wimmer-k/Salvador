@@ -18,12 +18,12 @@ CPP             = g++
 CFLAGS		= -Wall -Wno-long-long -g -O3 $(ROOTCFLAGS) -fPIC
 
 INCLUDES        = -I./inc -I$(COMMON_DIR) -I$(TARTSYS)/include -I$(EURICASYS)
-BASELIBS 	= -lm $(ROOTLIBS) $(ROOTGLIBS) -L$(LIB_DIR) -L$(TARTSYS)/lib -lSpectrum -lXMLParser
+BASELIBS 	= -lm $(ROOTLIBS) $(ROOTGLIBS) -L$(LIB_DIR) -L$(TARTSYS)/lib -lSpectrum -lPhysics -lMatrix -lXMLParser
 ALLIBS  	=  $(BASELIBS) -lCommandLineInterface -lanaroot -lananadeko -lanacore -lanabrips -lanaloop -lanadali -lSalvador
 LIBS 		= $(ALLIBS)
 LFLAGS		= -g -fPIC -shared
 CFLAGS += -Wl,--no-as-needed
-LFLAGS += -Wl,--no-as-needed
+LFLAGS += -Wl,--no-as-needed 
 CFLAGS += -Wno-unused-variable -Wno-write-strings
 
 LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o build/DALI.o build/DALIDictionary.o 
@@ -52,9 +52,13 @@ Persistence: Persistence.cc $(LIB_DIR)/libSalvador.so $(O_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
 
+Temptation: Temptation.cc $(LIB_DIR)/libSalvador.so $(O_FILES)
+	@echo "Compiling $@"
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
+
 $(LIB_DIR)/libSalvador.so: $(LIB_O_FILES) 
 	@echo "Making $@"
-	@$(CPP) $(LFLAGS) -o $@ $^ -lc
+	$(CPP) $(LFLAGS) -o $@ $^ -lc
 
 build/Reconstruction.o: src/Reconstruction.cc inc/Reconstruction.hh $(LIB_DIR)/libSalvador.so 
 	@echo "Compiling $@"

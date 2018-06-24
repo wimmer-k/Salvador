@@ -100,11 +100,17 @@ int main(int argc, char* argv[]){
   TH2F* z_vs_aoqc[6];
   TH2F* euz_vs_aoq[6];
   TH2F* euz_vs_aoqc[6];
-  for(unsigned short f=0;f<6;f++){
+  TH2F* euaoq_vs_time[6];
+  TH2F* euz_vs_time[6];
+   for(unsigned short f=0;f<6;f++){
     z_vs_aoq[f] = new TH2F(Form("z_vs_aoq_%d",f),Form("z_vs_aoq_%d",f),1000,1.8,2.2,1000,30,40);hlist->Add(z_vs_aoq[f]);
     z_vs_aoqc[f] = new TH2F(Form("z_vs_aoqc_%d",f),Form("z_vs_aoqc_%d",f),1000,1.8,2.2,1000,30,40);hlist->Add(z_vs_aoqc[f]);
     euz_vs_aoq[f] = new TH2F(Form("euz_vs_aoq_%d",f),Form("euz_vs_aoq_%d",f),1000,2.5,3.5,1000,15,30);hlist->Add(euz_vs_aoq[f]);
     euz_vs_aoqc[f] = new TH2F(Form("euz_vs_aoqc_%d",f),Form("euz_vs_aoqc_%d",f),1000,2.5,3.5,1000,15,30);hlist->Add(euz_vs_aoqc[f]);
+    euaoq_vs_time[f] = new TH2F(Form("euaoq_vs_time_%d",f),Form("euaoq_vs_time_%d",f),5000,0,50e6,1000,2.5,3.0);hlist->Add(euaoq_vs_time[f]);
+    euz_vs_time[f] = new TH2F(Form("euz_vs_time_%d",f),Form("euz_vs_time_%d",f),5000,0,50e6,1000,15,30);hlist->Add(euz_vs_time[f]);
+
+  
   } 
 
   TChain* tr;
@@ -204,6 +210,8 @@ int main(int argc, char* argv[]){
       z_vs_aoqc[f]->Fill(beam->GetCorrAQ(f),beam->GetZ(f));
       euz_vs_aoq[f]->Fill(beam->GetAQ(f),beam->GetZ(f));
       euz_vs_aoqc[f]->Fill(beam->GetCorrAQ(f),beam->GetZ(f));
+      euaoq_vs_time[f]->Fill(i,beam->GetAQ(f));
+      euz_vs_time[f]->Fill(i,beam->GetZ(f));
     }
     if(i%10000 == 0){
       double time_end = get_time();

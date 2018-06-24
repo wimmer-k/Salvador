@@ -39,6 +39,9 @@ void Settings::ReadSettings(){
   }
 
   fbeta = set->GetValue("AverageBeta",0.5);
+  fbetaM[0] = set->GetValue("BeforeBeta",0.5);
+  fbetaM[1] = set->GetValue("AfterBeta",0.5);
+  fminoslength = set->GetValue("LengthMINOS",5.0);
   foverflow = set->GetValue("Overflow.Threshold",8000);
   funderflow = set->GetValue("Underflow.Threshold",0);
   faddbacktype = set->GetValue("Addback.Type",1);
@@ -54,11 +57,17 @@ void Settings::ReadSettings(){
   fDALIposfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
   fDALIbadfile = set->GetValue("Bad.Channels",(char*)"settings/baddali.dat");
 
+  fppac3align[0] = set->GetValue("PPAC3.Align.X0",0.0);
+  fppac3align[1] = set->GetValue("PPAC3.Align.Y0",0.0);
+  fppac3align[2] = set->GetValue("PPAC3.Align.X1",0.0);
+  fppac3align[3] = set->GetValue("PPAC3.Align.Y1",0.0);
   ftargetposition = set->GetValue("Target.Position",129.5);
   ff5xgate[0] = set->GetValue("F5X.Gate.Low", -200.);
   ff5xgate[1] = set->GetValue("F5X.Gate.High", 200.);
-  fdeltagate[0] = set->GetValue("Delta.Gate.Low", -999.);
-  fdeltagate[1] = set->GetValue("Delta.Gate.High", 999.);
+  fdeltagate[2] = set->GetValue("Delta.Gate.Low", -999.);
+  fdeltagate[3] = set->GetValue("Delta.Gate.High", 999.);
+  fdeltagate[0] = set->GetValue("Delta.Gate.BR.Low", -999.);
+  fdeltagate[1] = set->GetValue("Delta.Gate.BR.High", 999.);
 
   if(fverbose>0)
     PrintSettings();
@@ -101,9 +110,12 @@ void Settings::PrintSettings(){
   cout << "addback time difference\t" <<faddbacktdiff[0] << " to " << faddbacktdiff[1] << endl;
 
   cout << "beta\t" << fbeta << endl;  
+  cout << "align PPAC 3 x0 = " << fppac3align[0] << " , y0 = " << fppac3align[1] << endl;
+  cout << "align PPAC 3 x1 = " << fppac3align[2] << " , y1 = " << fppac3align[3] << endl;
   cout << "target position\t" << ftargetposition << endl;
   cout << "gate on F5X position\t" <<ff5xgate[0] << " to " << ff5xgate[1] << endl;
-  cout << "gate on delta for charge changes\t" <<fdeltagate[0] << " to " << fdeltagate[1] << endl;
+  cout << "gate on delta for charge changes BR\t" <<fdeltagate[0] << " to " << fdeltagate[1] << endl;
+  cout << "gate on delta for charge changes ZD\t" <<fdeltagate[2] << " to " << fdeltagate[3] << endl;
 
 }
 
