@@ -8,6 +8,8 @@
 #define MAGENTA    "\033[1;35m"
 #define CYAN       "\033[1;36m"
 #define WHITE      "\033[1;37m"
+
+
 int fpID[6] = {3,5,7,8,9,11};
 int fpNr(int id){
   if(id<3 || id>11)

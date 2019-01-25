@@ -1,0 +1,384 @@
+#ifndef __WASABI_HH
+#define __WASABI_HH
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <math.h>
+
+#include "TObject.h"
+//#include "TVector3.h"
+//#include "TMath.h"
+#include "WASABIdefs.h"
+using namespace std;
+/*!
+  Container for the WASABI Raw ADC information
+*/
+class WASABIRawADC : public TObject {
+public:
+  //! default constructor
+  WASABIRawADC(){
+    Clear();
+  }
+  //! useful constructor
+  WASABIRawADC(short adc, short ch, short val){
+    fadc = adc;
+    fch = ch;
+    fval = val;
+  }
+  //! Clear the ADC information
+  void Clear(Option_t *option = ""){
+    fadc = sqrt(-1.);
+    fch = sqrt(-1.);
+    fval = sqrt(-1.);
+  }
+  //! Set the ADC number
+  void SetADC(short adc){ fadc = adc;}
+  //! Set the ADC channel
+  void SetChan(short ch){ fch = ch;}
+  //! Set the ADC value
+  void SetVal(short val){ fval = val;}
+
+  //! Get the ADC number
+  short GetADC(){ return fadc;}
+  //! Get the ADC channel
+  short GetChan(){ return fch;}
+  //! Get the ADC value
+  short GetVal(){ return fval;}
+  //! Printing information 
+  void Print(Option_t *option = "") const {
+    cout << "adc " << fadc;
+    cout << "\tch " << fch;
+    cout << "\tval " << fval << endl;
+    return;
+  }
+protected:
+  //! adc number
+  short fadc;
+  //! adc channel
+  short fch;
+  //! adc value
+  short fval;
+  /// \cond CLASSIMP
+  ClassDef(WASABIRawADC,1);
+  /// \endcond
+};
+
+/*!
+  Container for the WASABI Raw TDC information
+*/
+class WASABIRawTDC : public TObject {
+public:
+  //! default constructor
+  WASABIRawTDC(){
+    Clear();
+  }
+  //! useful constructor
+  WASABIRawTDC(short tdc, short ch, short val){
+    ftdc = tdc;
+    fch = ch;
+    fval.push_back(val);
+  }
+  //! add time to a channel
+  void AddRawTDC(short val){
+    fval.push_back(val);
+  }
+  //! Clear the TDC information
+  void Clear(Option_t *option = ""){
+    ftdc = sqrt(-1.);
+    fch = sqrt(-1.);
+    fval.clear();
+  }
+  //! Printing information 
+  void Print(Option_t *option = "") const {
+    cout << "tdc " << ftdc;
+    cout << "\tch " << fch;
+    cout << "\tval " << fval.size();
+    for(unsigned short i=0; i<fval.size();i++){
+      cout << ", " << fval.at(i);
+    }
+    cout << endl;
+    return;
+  }
+  //! Get the TDC number
+  short GetTDC(){ return ftdc;}
+  //! Get the TDC channel
+  short GetChan(){ return fch;}
+  //! Get the TDC values
+  vector<short> GetTime(){ return fval;}
+  //! Get a TDC value
+  short GetTime(short n){ return fval.at(n);}
+  
+protected:
+  //! tdc number
+  short ftdc;
+  //! tdc channel
+  short fch;
+  //! tdc value
+  vector<short> fval;
+  /// \cond CLASSIMP
+  ClassDef(WASABIRawTDC,1);
+  /// \endcond
+};
+
+/*!
+  Container for the WASABIRaw information
+*/
+class WASABIRaw : public TObject {
+public:
+  //! default constructor
+  WASABIRaw(){
+    Clear();
+  }
+  //! Clear the WASABI raw information
+  void Clear(Option_t *option = ""){
+    fADCmult = 0;
+    for(vector<WASABIRawADC*>::iterator adc=fadcs.begin(); adc!=fadcs.end(); adc++){
+      delete *adc;
+    }
+    fadcs.clear();
+    fTDCmult = 0;
+    for(vector<WASABIRawTDC*>::iterator tdc=ftdcs.begin(); tdc!=ftdcs.end(); tdc++){
+      delete *tdc;
+    }
+    ftdcs.clear();
+  }
+  //! Add an adc
+  void AddADC(WASABIRawADC* adc){
+    fadcs.push_back(adc);
+    fADCmult++;
+  }
+  //! Add a tdc
+  void AddTDC(WASABIRawTDC* tdc){
+    for(vector<WASABIRawTDC*>::iterator stored=ftdcs.begin(); stored!=ftdcs.end(); stored++){
+      if(tdc->GetTDC() == (*stored)->GetTDC() && tdc->GetChan() == (*stored)->GetChan()){
+	(*stored)->AddRawTDC(tdc->GetTime(0));
+	return;
+      }
+    }
+    ftdcs.push_back(tdc);
+    fTDCmult++;
+  }
+  
+  //! Set all adcs
+  void SetADCs(vector<WASABIRawADC*> adcs){
+    fADCmult = adcs.size();
+    fadcs = adcs;
+  }
+  //! Returns the ADCmultiplicity of the event
+  unsigned short GetADCmult(){return fADCmult;}
+  //! Returns the whole vector of adcs
+  vector<WASABIRawADC*> GetADCs(){return fadcs;}
+  //! Returns the adc number n
+  WASABIRawADC* GetADC(unsigned short n){return fadcs.at(n);}
+  
+  //! Set all tdcs
+  void SetTDCs(vector<WASABIRawTDC*> tdcs){
+    fTDCmult = tdcs.size();
+    ftdcs = tdcs;
+  }
+  //! Returns the TDCmultiplicity of the event
+  unsigned short GetTDCmult(){return fTDCmult;}
+  //! Returns the whole vector of tdcs
+  vector<WASABIRawTDC*> GetTDCs(){return ftdcs;}
+  //! Returns the tdc number n
+  WASABIRawTDC* GetTDC(unsigned short n){return ftdcs.at(n);}
+  
+  //! Printing information
+  void Print(Option_t *option = "") const {
+    cout << "ADC multiplicity " << fADCmult << " event" << endl;
+    for(unsigned short i=0;i<fadcs.size();i++)
+      fadcs.at(i)->Print();
+    cout << "TDC multiplicity " << fTDCmult << " event" << endl;
+    for(unsigned short i=0;i<ftdcs.size();i++)
+      ftdcs.at(i)->Print();
+  } 
+  
+protected:
+  //! ADCmultiplicity
+  unsigned short fADCmult;
+  //! vector with the adcs
+  vector<WASABIRawADC*> fadcs;
+  //! TDCmultiplicity
+  unsigned short fTDCmult;
+  //! vector with the tdcs
+  vector<WASABIRawTDC*> ftdcs;
+
+  /// \cond CLASSIMP
+  ClassDef(WASABIRaw,1);
+  /// \endcond
+};
+
+
+/*!
+  Container for the WASABI Hit information
+*/
+class WASABIHit : public TObject {
+public:
+  //! default constructor
+  WASABIHit(){
+    Clear();
+  }
+  //! useful constructor
+  WASABIHit(short strip, double en, double t, bool iscal){
+    fstrip = strip;
+    fen = en;
+    ftime = t;
+    fiscal = iscal;
+  }
+  //! Clear the ADC information
+  void Clear(Option_t *option = ""){
+    fstrip = sqrt(-1.);
+    fen = sqrt(-1.);
+    ftime = sqrt(-1.);
+    fiscal = false;
+  }
+
+  //! Get the strip number
+  short GetStrip(){ return fstrip;}
+  //! Get the energy
+  double GetEn(){ return fen;}
+  //! Get the ADC value
+  double GetTime(){ return ftime;}
+  //! Is is calibrated
+  bool IsCal(){return fiscal;}
+  //! Printing information 
+  void Print(Option_t *option = "") const {
+    cout << "pos x = " << fstrip;
+    cout << "\ten " << fen;
+    if(fiscal)
+      cout << " (calibrated) ";
+    else
+      cout << " (raw) ";
+    cout << "\ttime " << ftime << endl;
+    return;
+  }
+protected:
+  //! position, strip number
+  short fstrip;
+  //! energy, calibrated
+  double fen;
+  //! timing
+  double ftime;
+  //! is it calibrated
+  bool fiscal;
+  
+  /// \cond CLASSIMP
+  ClassDef(WASABIHit,1);
+  /// \endcond
+};
+
+
+/*!
+  Container for the WASABI DSSSD information
+*/
+class DSSSD : public TObject {
+public:
+  //! default constructor
+  DSSSD(){
+    fdsssd = -1;
+    Clear();
+  }
+  //! constructor
+  DSSSD(short dsssdnr){
+    fdsssd = dsssdnr;
+    Clear();
+  }
+  //! Clear the music information
+  void Clear(Option_t *option = ""){
+    fmultX = 0;
+    for(vector<WASABIHit*>::iterator hit=fhitsX.begin(); hit!=fhitsX.end(); hit++){
+      delete *hit;
+    }
+    fhitsX.clear();
+    fmultY = 0;
+    for(vector<WASABIHit*>::iterator hit=fhitsY.begin(); hit!=fhitsY.end(); hit++){
+      delete *hit;
+    }
+    fhitsY.clear();
+  }
+  //! setting the dsssd number
+  void SetDSSSD(short dsssd){fdsssd = dsssd;}
+  //! Add a hit in X
+  void AddHitX(WASABIHit* hit){
+    fhitsX.push_back(hit);
+    fmultX++;
+  }
+  //! Add a hit in Y
+  void AddHitY(WASABIHit* hit){
+    fhitsY.push_back(hit);
+    fmultY++;
+  }
+
+  //! Returns the DSSSD number
+  short GetDSSSD(){return fdsssd;}
+  //! Returns the X multiplicity of the event
+  unsigned short GetMultX(){return fmultX;}
+  //! Returns the whole vector of hits in X
+  vector<WASABIHit*> GetHitsX(){return fhitsX;}
+  //! Returns the X hit number n
+  WASABIHit* GetHitX(unsigned short n){return fhitsX.at(n);}
+  //! Returns the Y multiplicity of the event
+  unsigned short GetMultY(){return fmultY;}
+  //! Returns the whole vector of hits in Y
+  vector<WASABIHit*> GetHitsY(){return fhitsY;}
+  //! Returns the Y hit number n
+  WASABIHit* GetHitY(unsigned short n){return fhitsY.at(n);}
+  //! Printing information 
+  void Print(Option_t *option = "") const {
+    cout << "DSSSD number " << fdsssd << endl;
+    cout << "X multiplicity " << fmultX << " event" << endl;
+    for(unsigned short i=0;i<fhitsX.size();i++)
+      fhitsX.at(i)->Print();
+    cout << "Y multiplicity " << fmultY << " event" << endl;
+    for(unsigned short i=0;i<fhitsY.size();i++)
+      fhitsY.at(i)->Print();
+  }
+
+protected:
+  short fdsssd;
+  //! HIT multiplicity in X
+  unsigned short fmultX;
+  //! vector with the X hits
+  vector<WASABIHit*> fhitsX;
+  //! HIT multiplicity in Y
+  unsigned short fmultY;
+  //! vector with the Y hits
+  vector<WASABIHit*> fhitsY;
+  /// \cond CLASSIMP
+  ClassDef(DSSSD,1);
+  /// \endcond
+};
+
+/*!
+  Container for the WASABI information
+*/
+class WASABI : public TObject {
+public:
+  //! default constructor
+  WASABI(){
+    for(int i=0; i<NDSSSD; i++)
+      fdsssd[i] = new DSSSD(i);    
+    //Clear();
+  }
+  //! Clear the music information
+  void Clear(Option_t *option = ""){
+    for(int i=0; i<NDSSSD; i++){
+      fdsssd[i]->Clear();
+      fdsssd[i]->SetDSSSD(i);
+    }
+  }
+  //! return the DSSSD information
+  DSSSD* GetDSSSD(int i){return fdsssd[i];}
+  //! printing information
+  void Print(Option_t *option = "") const {
+    for(int i=0; i<NDSSSD; i++)
+      fdsssd[i]->Print();
+  }
+protected:
+  DSSSD* fdsssd[NDSSSD];
+  /// \cond CLASSIMP
+  ClassDef(WASABI,1);
+  /// \endcond
+};
+  
+#endif

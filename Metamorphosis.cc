@@ -185,8 +185,8 @@ int main(int argc, char* argv[]){
   tr->Branch("eventnumber",&eventnumber,"eventnumber/I");
   //branch for timestamp
   unsigned long long int timestamp = 0;
-  if(!set->WithDALI())
-    tr->Branch("timestamp",&timestamp,"timestamp/l");
+  //if(!set->WithDALI())
+  tr->Branch("timestamp",&timestamp,"timestamp/l");
   //branches for each focal plane
   FocalPlane* fp[NFPLANES];
   for(unsigned short f=0;f<NFPLANES;f++){
@@ -238,19 +238,21 @@ int main(int argc, char* argv[]){
         }
       }
     }
-    if(!set->WithDALI()){
-      //timestamp information
-      TClonesArray* info_a = (TClonesArray*)sman->FindDataContainer("EventInfo");
-      TArtEventInfo* info = (TArtEventInfo*)info_a->At(0);
-      unsigned int bit = info->GetTriggerBit();
-      timestamp = info->GetTimeStamp();
-      if(timestamp<last_timestamp){
-	cout << "timestamp was reset, this TS = " << timestamp << ", last one was " << last_timestamp << " difference " << timestamp-last_timestamp << endl;
-      }
-      last_timestamp = timestamp;
-      //timestamp = info->GetEventNumber();
-      //cout << trigbit << "\t" << bit << "\t" << timestamp << endl;
+    //if(!set->WithDALI()){
+    //timestamp information
+    TClonesArray* info_a = (TClonesArray*)sman->FindDataContainer("EventInfo");
+    TArtEventInfo* info = (TArtEventInfo*)info_a->At(0);
+    unsigned int bit = info->GetTriggerBit();
+    timestamp = info->GetTimeStamp();
+    if(timestamp<last_timestamp){
+      cout << "timestamp was reset, this TS = " << timestamp << ", last one was " << last_timestamp << " difference " << timestamp-last_timestamp << endl;
     }
+    //
+    if(vl>0)
+      cout << trigbit << "\t" << bit << "\t" << timestamp << "\t" << timestamp-last_timestamp << endl;
+    last_timestamp = timestamp;
+    //timestamp = info->GetEventNumber();
+    //}
 
     TArtPPAC* tppac;
     for(unsigned short p=0;p<NPPACS;p++){

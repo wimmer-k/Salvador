@@ -26,9 +26,11 @@ CFLAGS += -Wl,--no-as-needed
 LFLAGS += -Wl,--no-as-needed 
 CFLAGS += -Wno-unused-variable -Wno-write-strings
 
-LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o build/DALI.o build/DALIDictionary.o 
+LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build/BeamDictionary.o build/PPAC.o build/PPACDictionary.o build/DALI.o build/DALIDictionary.o build/WASABI.o build/WASABIDictionary.o 
 
 O_FILES = build/Reconstruction.o build/Settings.o
+
+W_FILES = build/Calibration.o build/WASABISettings.o
 
 all: Metamorphosis FriedBacon BurningGiraffe Disintegration Persistence
 
@@ -56,11 +58,24 @@ Temptation: Temptation.cc $(LIB_DIR)/libSalvador.so $(O_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
 
+Flames: Flames.cc $(LIB_DIR)/libSalvador.so $(W_FILES)
+	@echo "Compiling $@"
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(W_FILES) -o $(BIN_DIR)/$@ 
+
+Swans: Swans.cc $(LIB_DIR)/libSalvador.so
+	@echo "Compiling $@"
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
+
 $(LIB_DIR)/libSalvador.so: $(LIB_O_FILES) 
 	@echo "Making $@"
-	$(CPP) $(LFLAGS) -o $@ $^ -lc
+	@$(CPP) $(LFLAGS) -o $@ $^ -lc
 
 build/Reconstruction.o: src/Reconstruction.cc inc/Reconstruction.hh $(LIB_DIR)/libSalvador.so 
+	@echo "Compiling $@"
+	@mkdir -p $(dir $@)
+	@$(CPP) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
+
+build/Calibration.o: src/Calibration.cc inc/Calibration.hh $(LIB_DIR)/libSalvador.so 
 	@echo "Compiling $@"
 	@mkdir -p $(dir $@)
 	@$(CPP) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
