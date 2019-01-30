@@ -30,7 +30,7 @@ LIB_O_FILES = build/FocalPlane.o build/FocalPlaneDictionary.o build/Beam.o build
 
 O_FILES = build/Reconstruction.o build/Settings.o
 
-W_FILES = build/Calibration.o build/WASABISettings.o
+W_FILES = build/Calibration.o build/BuildEvents.o build/WASABISettings.o
 
 all: Metamorphosis FriedBacon BurningGiraffe Disintegration Persistence
 
@@ -62,6 +62,10 @@ Flames: Flames.cc $(LIB_DIR)/libSalvador.so $(W_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(W_FILES) -o $(BIN_DIR)/$@ 
 
+Galatea: Galatea.cc $(LIB_DIR)/libSalvador.so $(W_FILES)
+	@echo "Compiling $@"
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(W_FILES) -o $(BIN_DIR)/$@ 
+
 Swans: Swans.cc $(LIB_DIR)/libSalvador.so
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
@@ -71,6 +75,11 @@ $(LIB_DIR)/libSalvador.so: $(LIB_O_FILES)
 	@$(CPP) $(LFLAGS) -o $@ $^ -lc
 
 build/Reconstruction.o: src/Reconstruction.cc inc/Reconstruction.hh $(LIB_DIR)/libSalvador.so 
+	@echo "Compiling $@"
+	@mkdir -p $(dir $@)
+	@$(CPP) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
+
+build/BuildEvents.o: src/BuildEvents.cc inc/BuildEvents.hh $(LIB_DIR)/libSalvador.so 
 	@echo "Compiling $@"
 	@mkdir -p $(dir $@)
 	@$(CPP) $(CFLAGS) $(INCLUDES) -c $< -o $@ 

@@ -23,10 +23,12 @@ public:
   WASABISettings* GetSettings(){return fset;}
   //! Read in the ADC mapping
   void ReadADCMap(char* mapfile);
+  //! Read in the TDC mapping
+  void ReadTDCMap(char* mapfile);
   //! Read in the ADC thresholds
   void ReadADCThresholds(char* threshfile);
   //! Read in the energy calibration
-  void ReadCalibration(char* calfile);
+  void ReadCalibration(char* adccalfile ,char* tdccalfile);
   //! apply mapping and calibration
   WASABI* BuildWASABI(WASABIRaw *raw);
   
@@ -35,22 +37,31 @@ private:
   TRandom* fRand;
   //! settings for calibration
   WASABISettings* fset;
+  
   //! mapping index to DSSSD number
   short fDSSSD[NADCS*NADCCH];
   //! mapping index to Strip number
   short fStrip[NADCS*NADCCH];
   //! ADC thresholds
   short fThresh[NADCS*NADCCH];
-  //! Gains Xstrips
+  //! gains X strips
   double fgainX[NDSSSD][NXSTRIPS];
-  //! Offsets Xstrips
+  //! offsets X strips
   double foffsetX[NDSSSD][NXSTRIPS];
-  //! Gains Ystrips
+  //! gains Y strips
   double fgainY[NDSSSD][NYSTRIPS];
-  //! Offsets Ystrips
+  //! offsets Y strips
   double foffsetY[NDSSSD][NYSTRIPS];
-
-
   
+  //! mapping index to DSSSD number for the TDCs
+  short fTDCDSSSD[NTDCS*NTDCCH];
+  //! mapping index to Strip number for the TDCs
+  short fTDCStrip[NTDCS*NTDCCH];
+
+  //! time offsets X strips
+  double fToffsetX[NDSSSD][NXSTRIPS];
+  //! time offsets Y strips
+  double fToffsetY[NDSSSD][NYSTRIPS];
+
 };
 #endif

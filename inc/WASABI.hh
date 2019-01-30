@@ -6,8 +6,6 @@
 #include <math.h>
 
 #include "TObject.h"
-//#include "TVector3.h"
-//#include "TMath.h"
 #include "WASABIdefs.h"
 using namespace std;
 /*!
@@ -104,9 +102,9 @@ public:
   //! Get the TDC channel
   short GetChan(){ return fch;}
   //! Get the TDC values
-  vector<short> GetTime(){ return fval;}
+  vector<short> GetVal(){ return fval;}
   //! Get a TDC value
-  short GetTime(short n){ return fval.at(n);}
+  short GetVal(short n){ return fval.at(n);}
   
 protected:
   //! tdc number
@@ -151,7 +149,7 @@ public:
   void AddTDC(WASABIRawTDC* tdc){
     for(vector<WASABIRawTDC*>::iterator stored=ftdcs.begin(); stored!=ftdcs.end(); stored++){
       if(tdc->GetTDC() == (*stored)->GetTDC() && tdc->GetChan() == (*stored)->GetChan()){
-	(*stored)->AddRawTDC(tdc->GetTime(0));
+	(*stored)->AddRawTDC(tdc->GetVal(0));
 	return;
       }
     }
@@ -182,6 +180,16 @@ public:
   vector<WASABIRawTDC*> GetTDCs(){return ftdcs;}
   //! Returns the tdc number n
   WASABIRawTDC* GetTDC(unsigned short n){return ftdcs.at(n);}
+
+  WASABIRawTDC* GetTDC(short tdc, short ch){
+    for(vector<WASABIRawTDC*>::iterator stored=ftdcs.begin(); stored!=ftdcs.end(); stored++){
+      if(tdc == (*stored)->GetTDC() && ch == (*stored)->GetChan()){
+	return (*stored);
+      }
+    }
+    cout << "warning TDC " << tdc << " channel " << ch << " not found!" << endl;
+    return new WASABIRawTDC();
+  }
   
   //! Printing information
   void Print(Option_t *option = "") const {
@@ -219,26 +227,34 @@ public:
     Clear();
   }
   //! useful constructor
-  WASABIHit(short strip, double en, double t, bool iscal){
+  WASABIHit(short strip, double en, bool iscal){
     fstrip = strip;
     fen = en;
-    ftime = t;
     fiscal = iscal;
+    ftime.clear();
   }
   //! Clear the ADC information
   void Clear(Option_t *option = ""){
     fstrip = sqrt(-1.);
     fen = sqrt(-1.);
-    ftime = sqrt(-1.);
+    ftime.clear();
     fiscal = false;
   }
-
+  //! Set the time
+  void SetTime(double timeval){ ftime.push_back(timeval);}
+  
   //! Get the strip number
   short GetStrip(){ return fstrip;}
   //! Get the energy
   double GetEn(){ return fen;}
-  //! Get the ADC value
-  double GetTime(){ return ftime;}
+  //! Get the time values
+  vector<double> GetTime(){ return ftime;}
+  //! Get the first time value
+  double GetTime0(){
+    if(ftime.size()>0)
+      return ftime.at(0);
+    return sqrt(-1);
+  }
   //! Is is calibrated
   bool IsCal(){return fiscal;}
   //! Printing information 
@@ -249,7 +265,7 @@ public:
       cout << " (calibrated) ";
     else
       cout << " (raw) ";
-    cout << "\ttime " << ftime << endl;
+    cout << "\ttime " << ftime.size() << " values, first one = " << ftime.at(0) << endl;
     return;
   }
 protected:
@@ -258,7 +274,7 @@ protected:
   //! energy, calibrated
   double fen;
   //! timing
-  double ftime;
+  vector<double> ftime;
   //! is it calibrated
   bool fiscal;
   
@@ -286,11 +302,14 @@ public:
   //! Clear the music information
   void Clear(Option_t *option = ""){
     fmultX = 0;
+    fvetoX = false;
     for(vector<WASABIHit*>::iterator hit=fhitsX.begin(); hit!=fhitsX.end(); hit++){
       delete *hit;
     }
     fhitsX.clear();
+    
     fmultY = 0;
+    fvetoY = false;
     for(vector<WASABIHit*>::iterator hit=fhitsY.begin(); hit!=fhitsY.end(); hit++){
       delete *hit;
     }
@@ -308,24 +327,93 @@ public:
     fhitsY.push_back(hit);
     fmultY++;
   }
-
+  //! Set a veto on X
+  void SetVetoX(){fvetoX = true;}
+  //! Set a veto on Y
+  void SetVetoY(){fvetoY = true;}
+  
   //! Returns the DSSSD number
   short GetDSSSD(){return fdsssd;}
+  
   //! Returns the X multiplicity of the event
   unsigned short GetMultX(){return fmultX;}
   //! Returns the whole vector of hits in X
   vector<WASABIHit*> GetHitsX(){return fhitsX;}
   //! Returns the X hit number n
   WASABIHit* GetHitX(unsigned short n){return fhitsX.at(n);}
+  //! Returns the hit at strip number
+  WASABIHit* GetStripHitX(short s){
+    if(s<0 || s > NXSTRIPS){
+      cout << "looking for X strip number " << s <<", not found!" << endl;
+      return new WASABIHit();
+    }
+    for(vector<WASABIHit*>::iterator hit=fhitsX.begin(); hit!=fhitsX.end(); hit++){
+      if((*hit)->GetStrip() ==s)
+	return (*hit);
+    }
+    cout << "looking for X strip number " << s <<", not found!" << endl;
+    return new WASABIHit();    
+  }
+  //! Add the timing information to strip s
+  void SetStripTimeX(short s, double timeval){
+    if(s<0 || s > NXSTRIPS){
+      cout << "looking for X strip number " << s <<", not found!" << endl;
+      return;
+    }
+    for(vector<WASABIHit*>::iterator hit=fhitsX.begin(); hit!=fhitsX.end(); hit++){
+      if((*hit)->GetStrip() ==s)
+	(*hit)->SetTime(timeval);
+    }
+    //cout << "looking for X strip number " << s <<", not found!" << endl;
+    return;    
+  }
+  
   //! Returns the Y multiplicity of the event
   unsigned short GetMultY(){return fmultY;}
   //! Returns the whole vector of hits in Y
   vector<WASABIHit*> GetHitsY(){return fhitsY;}
   //! Returns the Y hit number n
   WASABIHit* GetHitY(unsigned short n){return fhitsY.at(n);}
+  //! Returns the hit at strip number
+  WASABIHit* GetStripHitY(short s){
+    if(s<0 || s > NYSTRIPS){
+      cout << "looking for Y strip number " << s <<", not found!" << endl;
+      return new WASABIHit();
+    }
+    for(vector<WASABIHit*>::iterator hit=fhitsY.begin(); hit!=fhitsY.end(); hit++){
+      if((*hit)->GetStrip() ==s)
+	return (*hit);
+    }
+    cout << "looking for Y strip number " << s <<", not found!" << endl;
+    return new WASABIHit();    
+  }
+  //! Add the timing information to strip s
+  void SetStripTimeY(short s, double timeval){
+    if(s<0 || s > NYSTRIPS){
+      cout << "looking for Y strip number " << s <<", not found!" << endl;
+      return;
+    }
+    for(vector<WASABIHit*>::iterator hit=fhitsY.begin(); hit!=fhitsY.end(); hit++){
+      if((*hit)->GetStrip() ==s)
+	(*hit)->SetTime(timeval);
+    }
+    //cout << "looking for Y strip number " << s <<", not found!" << endl;
+    return;    
+  }
+
+
+  //! Is vetoed in X
+  bool IsVetoX(){return fvetoX;}
+  //! Is vetoed in Y
+  bool IsVetoY(){return fvetoY;}
+  
   //! Printing information 
   void Print(Option_t *option = "") const {
     cout << "DSSSD number " << fdsssd << endl;
+    if(fvetoX)
+      cout << "veto on X strips " << endl; 
+    if(fvetoY)
+      cout << "veto on Y strips " << endl; 
     cout << "X multiplicity " << fmultX << " event" << endl;
     for(unsigned short i=0;i<fhitsX.size();i++)
       fhitsX.at(i)->Print();
@@ -335,6 +423,7 @@ public:
   }
 
 protected:
+  // DSSSD number
   short fdsssd;
   //! HIT multiplicity in X
   unsigned short fmultX;
@@ -344,6 +433,10 @@ protected:
   unsigned short fmultY;
   //! vector with the Y hits
   vector<WASABIHit*> fhitsY;
+  //! veto in X
+  bool fvetoX;
+  //! veto in Y
+  bool fvetoY;
   /// \cond CLASSIMP
   ClassDef(DSSSD,1);
   /// \endcond

@@ -41,9 +41,28 @@ public:
   //! File containing energy calibrations
   char* CalFile(){return (char*)fcalfile.c_str();}
 
+  //! File containing the mapping TDC channel to detector and strip
+  char* TDCMapFile(){return (char*)fTDCmapfile.c_str();}
+  //! Reference channels for the TDC
   short TDCrefchannel(int tdc){
     if(tdc>-1 && tdc<NTDCS)
       return fTDCref[tdc];
+    return -1;
+  }
+  //! File containing time offsets
+  char* TOffsetFile(){return (char*)ftoffsetfile.c_str();}
+
+  //! veto X condition on DSSSD
+  double VetoX(int dsssd){
+    if(dsssd>-1 && dsssd<NDSSSD)
+      return fvetoX[dsssd];
+    return -1;
+  }
+  //! veto Y condition on DSSSD
+  double VetoY(int dsssd){
+    if(dsssd>-1 && dsssd<NDSSSD)
+      return fvetoY[dsssd];
+    return -1;
   }
   
   
@@ -58,8 +77,19 @@ private:
   string fADCthreshfile;
   //! filename for the ADC energy calibration
   string fcalfile;
+  
+  //! filename for the TDC mapping
+  string fTDCmapfile;
   //! reference channel of the TDCs
   short fTDCref[NTDCS];
+  //! filename for the time offsets
+  string ftoffsetfile;
+  
+  //! veto for X strips
+  double fvetoX[NDSSSD];
+  //! veto for Y strips
+  double fvetoY[NDSSSD];
+  
 
 };
 #endif

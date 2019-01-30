@@ -77,7 +77,8 @@ int main(int argc, char* argv[]){
   //histograms
   //TH1F* trigger = new TH1F("trigger","trigger",10,0,10);hlist->Add(trigger);
   TH1F* adc[NADCS][NADCCH];
-  TH2F* adcthresh = new TH2F("adcthresh","adcthresh",NADCS*NADCCH,0,NADCS*NADCCH,200,0,200);;hlist->Add(adcthresh);
+  TH2F* adcthresh = new TH2F("adcthresh","adcthresh",NADCS*NADCCH,0,NADCS*NADCCH,2000,0,2000);hlist->Add(adcthresh);
+  TH2F* tdcoffset = new TH2F("tdcoffset","tdcoffset",NTDCS*NTDCCH,0,NTDCS*NTDCCH,200,0,20000);hlist->Add(tdcoffset);
 //  for(int i=0;i<NADCS;i++){
 //    for(int j=0;j<NADCCH;j++){
 //      adc[i][j] = new TH1F(Form("adc_%d_%d",i,j),Form("adc_%d_%d",i,j),4096,0,4096);hlist->Add(adc[i][j]);
@@ -88,16 +89,33 @@ int main(int argc, char* argv[]){
   TH1F* multstripY[NDSSSD];
   TH2F* en_stripX[NDSSSD];
   TH2F* en_stripY[NDSSSD];
+  TH2F* ti_stripX[NDSSSD];
+  TH2F* ti_stripY[NDSSSD];
+  TH2F* en_stripX_veto[NDSSSD];
+  TH2F* en_stripY_veto[NDSSSD];
   TH2F* en_XY[NDSSSD];
   TH2F* strip_XY[NDSSSD];
+  TH2F* cal_stripX[NDSSSD][NXSTRIPS];
+  TH2F* cal_stripY[NDSSSD][NYSTRIPS];
+  
   for(int i=0;i<NDSSSD;i++){
     multstripX[i] = new TH1F(Form("multstripX_%d",i),Form("multstripX_%d",i),100,0,100);hlist->Add(multstripX[i]);
     multstripY[i] = new TH1F(Form("multstripY_%d",i),Form("multstripY_%d",i),100,0,100);hlist->Add(multstripY[i]);
-    en_stripX[i] = new TH2F(Form("en_stripX_%d",i),Form("en_stripX_%d",i),NXSTRIPS,0,NXSTRIPS,2000,0,2000);hlist->Add(en_stripX[i]);
-    en_stripY[i] = new TH2F(Form("en_stripY_%d",i),Form("en_stripY_%d",i),NYSTRIPS,0,NYSTRIPS,2000,0,2000);hlist->Add(en_stripY[i]);
+    en_stripX[i] = new TH2F(Form("en_stripX_%d",i),Form("en_stripX_%d",i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_stripX[i]);
+    en_stripY[i] = new TH2F(Form("en_stripY_%d",i),Form("en_stripY_%d",i),NYSTRIPS,0,NYSTRIPS,2000,0,4000);hlist->Add(en_stripY[i]);
+    ti_stripX[i] = new TH2F(Form("ti_stripX_%d",i),Form("ti_stripX_%d",i),NXSTRIPS,0,NXSTRIPS,2000,-50000,50000);hlist->Add(ti_stripX[i]);
+    ti_stripY[i] = new TH2F(Form("ti_stripY_%d",i),Form("ti_stripY_%d",i),NYSTRIPS,0,NYSTRIPS,2000,-50000,50000);hlist->Add(ti_stripY[i]);
+    en_stripX_veto[i] = new TH2F(Form("en_stripX_veto_%d",i),Form("en_stripX_veto_%d",i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_stripX_veto[i]);
+    en_stripY_veto[i] = new TH2F(Form("en_stripY_veto_%d",i),Form("en_stripY_veto_%d",i),NYSTRIPS,0,NYSTRIPS,2000,0,4000);hlist->Add(en_stripY_veto[i]);
 
-    en_XY[i] = new TH2F(Form("en_XY_%d",i),Form("en_XY_%d",i),2000,0,2000,2000,0,2000);hlist->Add(en_XY[i]);
+    en_XY[i] = new TH2F(Form("en_XY_%d",i),Form("en_XY_%d",i),2000,0,4000,2000,0,4000);hlist->Add(en_XY[i]);
     strip_XY[i] = new TH2F(Form("strip_XY_%d",i),Form("strip_XY_%d",i),NXSTRIPS,0,NXSTRIPS,NYSTRIPS,0,NYSTRIPS);hlist->Add(strip_XY[i]);
+    for(int j=0;j<NXSTRIPS;j++){
+      cal_stripX[i][j] = new TH2F(Form("cal_stripX_%d_%d",i,j),Form("cal_stripX_%d_%d",i,j),2000,0,4000,2000,0,4000);hlist->Add(cal_stripX[i][j]);
+    }
+    for(int j=0;j<NYSTRIPS;j++){
+      cal_stripY[i][j] = new TH2F(Form("cal_stripY_%d_%d",i,j),Form("cal_stripY_%d_%d",i,j),2000,0,4000,2000,0,4000);hlist->Add(cal_stripY[i][j]);
+    }
   }
 
   
@@ -136,18 +154,29 @@ int main(int argc, char* argv[]){
     vector<WASABIRawADC*> adcs = wasabiRAW->GetADCs();
     for(vector<WASABIRawADC*>::iterator hit=adcs.begin(); hit!=adcs.end(); hit++){
       //adc[(*hit)->GetADC()][(*hit)->GetChan()]->Fill((*hit)->GetVal());
-      adcthresh->Fill((*hit)->GetADC()*32+(*hit)->GetChan(),(*hit)->GetVal());
+      adcthresh->Fill((*hit)->GetADC()*NADCCH+(*hit)->GetChan(),(*hit)->GetVal());
     }
-
+    vector<WASABIRawTDC*> tdcs = wasabiRAW->GetTDCs();
+    for(vector<WASABIRawTDC*>::iterator hit=tdcs.begin(); hit!=tdcs.end(); hit++){
+      for(unsigned short v = 0; v<(*hit)->GetVal().size(); v++){
+	tdcoffset->Fill((*hit)->GetTDC()*NTDCCH+(*hit)->GetChan(),(*hit)->GetVal().at(v));
+      }
+    }
     
     for(int d=0;d<NDSSSD;d++){
-      vector<WASABIHit*> hitsX = wasabi->GetDSSSD(d)->GetHitsX();
-      vector<WASABIHit*> hitsY = wasabi->GetDSSSD(d)->GetHitsY();
-      multstripX[d]->Fill(wasabi->GetDSSSD(d)->GetMultX());
-      multstripY[d]->Fill(wasabi->GetDSSSD(d)->GetMultY());
+      DSSSD *dsssd = wasabi->GetDSSSD(d);
+      vector<WASABIHit*> hitsX = dsssd->GetHitsX();
+      vector<WASABIHit*> hitsY = dsssd->GetHitsY();
+      multstripX[d]->Fill(dsssd->GetMultX());
+      multstripY[d]->Fill(dsssd->GetMultY());
+      bool vetoX = dsssd->IsVetoX();
+      bool vetoY = dsssd->IsVetoY();
       
       for(vector<WASABIHit*>::iterator hit=hitsX.begin(); hit!=hitsX.end(); hit++){
 	en_stripX[d]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
+	ti_stripX[d]->Fill((*hit)->GetStrip(), (*hit)->GetTime0());
+	if(!vetoX)
+	  en_stripX_veto[d]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
 	for(vector<WASABIHit*>::iterator hity=hitsY.begin(); hity!=hitsY.end(); hity++){
 	  if((*hit)->IsCal()){
 	    if((*hity)->IsCal()){
@@ -159,6 +188,15 @@ int main(int argc, char* argv[]){
       }
       for(vector<WASABIHit*>::iterator hit=hitsY.begin(); hit!=hitsY.end(); hit++){
 	en_stripY[d]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
+	ti_stripY[d]->Fill((*hit)->GetStrip(), (*hit)->GetTime0());
+	if(!vetoY)
+	  en_stripY_veto[d]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
+      }
+      if(dsssd->GetMultX()==1 && dsssd->GetMultY()==1){
+	if(!hitsX.at(0)->IsCal() && hitsY.at(0)->IsCal())
+	  cal_stripX[d][hitsX.at(0)->GetStrip()]->Fill(hitsX.at(0)->GetEn() , hitsY.at(0)->GetEn());
+	if(hitsX.at(0)->IsCal() && !hitsY.at(0)->IsCal())
+	  cal_stripY[d][hitsY.at(0)->GetStrip()]->Fill(hitsY.at(0)->GetEn() , hitsX.at(0)->GetEn());
       }
     }
     
