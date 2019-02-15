@@ -117,7 +117,7 @@ int main(int argc, char* argv[]){
 //      adc[i][j] = new TH1F(Form("adc_%d_%d",i,j),Form("adc_%d_%d",i,j),4096,0,4096);hlist->Add(adc[i][j]);
 //    }
 //  }
-
+  TH2F* implantmap[NDSSSD];
   TH1F* multstripX[NDSSSD];
   TH1F* multstripY[NDSSSD];
   TH2F* en_stripX[NDSSSD];
@@ -148,6 +148,7 @@ int main(int argc, char* argv[]){
   TH2F* egamID = new TH2F("egamID","egamID",17*5,0,17*5,2000,0,2000);;hlist->Add(egamID);
   
   for(int i=0;i<NDSSSD;i++){
+    implantmap[i] = new TH2F(Form("implantmap_%d",i),Form("implantmap_%d",i),60,0,60,40,0,40);hlist->Add(implantmap[i]);
     multstripX[i] = new TH1F(Form("multstripX_%d",i),Form("multstripX_%d",i),100,0,100);hlist->Add(multstripX[i]);
     multstripY[i] = new TH1F(Form("multstripY_%d",i),Form("multstripY_%d",i),100,0,100);hlist->Add(multstripY[i]);
     en_stripX[i] = new TH2F(Form("en_stripX_%d",i),Form("en_stripX_%d",i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_stripX[i]);
@@ -180,19 +181,24 @@ int main(int argc, char* argv[]){
     // }
   }
 
+  vector< vector<TH2F*> > implantmap_cut;
   vector< vector<TH2F*> > en_stripX_cut;
   vector< vector<TH2F*> > en_multX_cut;
   vector< vector<TH2F*> > en_F11X_cut;	  
 
+  implantmap_cut.resize(NDSSSD);
   en_stripX_cut.resize(NDSSSD);
   en_multX_cut.resize(NDSSSD);
   en_F11X_cut.resize(NDSSSD);  
 
   for(int i=0;i<NDSSSD;i++){
+    implantmap_cut[i].resize(PartCut.size());
     en_stripX_cut[i].resize(PartCut.size());
     en_multX_cut[i].resize(PartCut.size());
     en_F11X_cut[i].resize(PartCut.size());
     for(unsigned short j=0; j<PartCut.size();j++){
+      implantmap_cut[i][j] = new TH2F(Form("implantmap_%s_%d",PartCut[j]->GetName(),i),Form("implantmap_%s_%d",PartCut[j]->GetName(),i),60,0,60,40,0,40);hlist->Add(implantmap_cut[i][j]);
+      
       en_stripX_cut[i][j] =  new TH2F(Form("en_stripX_%s_%d",PartCut[j]->GetName(),i),Form("en_stripX_%s_%d",PartCut[j]->GetName(),i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_stripX_cut[i][j]);
       en_multX_cut[i][j] =  new TH2F(Form("en_multX_%s_%d",PartCut[j]->GetName(),i),Form("en_multX_%s_%d",PartCut[j]->GetName(),i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_multX_cut[i][j]);
       en_F11X_cut[i][j] =  new TH2F(Form("en_F11X_%s_%d",PartCut[j]->GetName(),i),Form("en_F11X_%s_%d",PartCut[j]->GetName(),i),200,-100,100,2000,0,4000);hlist->Add(en_F11X_cut[i][j]);
@@ -267,6 +273,15 @@ int main(int argc, char* argv[]){
 	multstripX_veto[d]->Fill(dsssd->GetMultX());
       if(!vetoY)
 	multstripY_veto[d]->Fill(dsssd->GetMultY());
+
+      if(dsssd->ImplantX()>-1 && dsssd->ImplantY()>-1){
+	implantmap[d]->Fill(dsssd->ImplantX(),dsssd->ImplantY());
+        for(unsigned short j=0; j<PartCut.size();j++){
+	  if(PartCut[j]->IsInside(beam->GetAQ(1),beam->GetZ(1))){
+	    implantmap_cut[d][j]->Fill(dsssd->ImplantX(),dsssd->ImplantY());
+	  }
+	}
+      }
      
       for(vector<WASABIHit*>::iterator hit=hitsX.begin(); hit!=hitsX.end(); hit++){
 	en_stripX[d]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
@@ -316,7 +331,7 @@ int main(int argc, char* argv[]){
 	  ti_cal_stripY[d]->Fill((*hit)->GetStrip(), (*hit)->GetTime0());
 	if(d==1 && (*hit)->GetStrip()>19 && (*hit)->GetEn()>4000)
 	  ti_cal_stripY[d]->Fill((*hit)->GetStrip(), (*hit)->GetTime0());	
-	if(d==3 && (*hit)->GetEn()>3000)
+	if(d==2 && (*hit)->GetEn()>3000)
 	  ti_cal_stripY[d]->Fill((*hit)->GetStrip(), (*hit)->GetTime0());	
 	// if(!vetoY && (*hit)->GetEn()> 500 && (*hit)->GetEn()< 900)
 	//   ti_cut_stripY[d]->Fill((*hit)->GetStrip(), (*hit)->GetTime0());

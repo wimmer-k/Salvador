@@ -179,8 +179,9 @@ public:
   //! Returns the whole vector of tdcs
   vector<WASABIRawTDC*> GetTDCs(){return ftdcs;}
   //! Returns the tdc number n
+  // param n the number of the TDC hit
   WASABIRawTDC* GetTDC(unsigned short n){return ftdcs.at(n);}
-
+  //! Returns the hit in TDC module tdc and channel ch
   WASABIRawTDC* GetTDC(short tdc, short ch){
     for(vector<WASABIRawTDC*>::iterator stored=ftdcs.begin(); stored!=ftdcs.end(); stored++){
       if(tdc == (*stored)->GetTDC() && ch == (*stored)->GetChan()){
@@ -435,7 +436,7 @@ public:
   }
 
 protected:
-  // DSSSD number
+  //! DSSSD number
   short fdsssd;
   //! HIT multiplicity in X
   unsigned short fmultX;
@@ -450,10 +451,10 @@ protected:
   //! veto in Y
   bool fvetoY;
   //! implantation point X
-  int fimplantX
+  int fimplantX;
   //! implantation point Y
-  int fimplantY
-  
+  int fimplantY;
+
   /// \cond CLASSIMP
   ClassDef(DSSSD,1);
   /// \endcond
@@ -485,6 +486,7 @@ public:
       fdsssd[i]->Print();
   }
 protected:
+  //! sub DSSSD
   DSSSD* fdsssd[NDSSSD];
   /// \cond CLASSIMP
   ClassDef(WASABI,1);

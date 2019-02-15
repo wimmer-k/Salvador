@@ -64,6 +64,18 @@ public:
       return fvetoY[dsssd];
     return -1;
   }
+  //! overflow X condition on DSSSD
+  double OverflowX(int dsssd){
+    if(dsssd>-1 && dsssd<NDSSSD)
+      return foverflowX[dsssd];
+    return -1;
+  }
+  //! overflow Y condition on DSSSD
+  double OverflowY(int dsssd){
+    if(dsssd>-1 && dsssd<NDSSSD)
+      return foverflowY[dsssd];
+    return -1;
+  }
   //! thresh X condition on DSSSD
   double ThreshX(int dsssd){
     if(dsssd>-1 && dsssd<NDSSSD)
@@ -101,6 +113,11 @@ private:
   double fvetoX[NDSSSD];
   //! veto for Y strips
   double fvetoY[NDSSSD];
+  
+  //! overflow for X strips
+  double foverflowX[NDSSSD];
+  //! overflow for Y strips
+  double foverflowY[NDSSSD];
   
   //! thresh for X strips
   double fthreshX[NDSSSD];

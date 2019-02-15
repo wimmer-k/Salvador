@@ -44,7 +44,7 @@ void Calibration::ReadTDCMap(char* mapfile){
 }
 /*!
   Read in the ADC thresholds
-  \param the file containing the thresholds
+  \param threshfile the file containing the thresholds
 */
 void Calibration::ReadADCThresholds(char* threshfile){
   TEnv *adcthresh = new TEnv(threshfile);
@@ -56,8 +56,8 @@ void Calibration::ReadADCThresholds(char* threshfile){
 }
 /*!
   Read in the energy calibration
-  \param the file containing the gains and offsets for the ADC
-  \param the file containing the offsets for the TDC
+  \param adccalfile the file containing the gains and offsets for the ADC
+  \param tdccalfile the file containing the offsets for the TDC
 */
 void Calibration::ReadCalibration(char* adccalfile, char* tdccalfile){
   TEnv *adccal = new TEnv(adccalfile);
@@ -183,7 +183,42 @@ WASABI* Calibration::BuildWASABI(WASABIRaw *raw){
     }
     
 
-  }
+  }//loop tdcs
+
+  //find strip with fastest timing for implantation
+  for(int i=0; i<NDSSSD; i++){
+    DSSSD* dsssd = event->GetDSSSD(i);
+    vector<WASABIHit*> hitsX = dsssd->GetHitsX();
+    vector<WASABIHit*> hitsY = dsssd->GetHitsY();
+    int fasteststrip =-1;
+    double fastesttime = 10000;
+    for(vector<WASABIHit*>::iterator hit=hitsX.begin(); hit!=hitsX.end(); hit++){
+      if((*hit)->GetEn()>fset->OverflowX(i)){
+	if((*hit)->GetTime0()<fastesttime){
+	  fastesttime = (*hit)->GetTime0();
+	  fasteststrip = (*hit)->GetStrip();
+	}	
+      }//overflow
+    }// xhits
+    if(fasteststrip>-1)
+      dsssd->SetImplantX(fasteststrip);
+
+    fasteststrip =-1;
+    fastesttime = 10000;
+    for(vector<WASABIHit*>::iterator hit=hitsY.begin(); hit!=hitsY.end(); hit++){
+      if((*hit)->GetEn()>fset->OverflowY(i)){
+	if((*hit)->GetTime0()<fastesttime){
+	  fastesttime = (*hit)->GetTime0();
+	  fasteststrip = (*hit)->GetStrip();
+	}	
+      }//overflow
+    }// yhits
+    if(fasteststrip>-1)
+      dsssd->SetImplantY(fasteststrip);
+    
+  }//loop DSSSDs
+
+
   // for(int i=0; i<NDSSSD; i++)
   //   event->GetDSSSD(i)->Print();
   //event->Print();

@@ -29,6 +29,8 @@ void WASABISettings::ReadSettings(){
   for(int i=0;i<NDSSSD;i++){
     fvetoX[i] = set->GetValue(Form("VetoDSSSD.%d.X",i), -1.0);
     fvetoY[i] = set->GetValue(Form("VetoDSSSD.%d.Y",i), -1.0);
+    foverflowX[i] = set->GetValue(Form("OverflowDSSSD.%d.X",i), -1.0);
+    foverflowY[i] = set->GetValue(Form("OverflowDSSSD.%d.Y",i), -1.0);
     fthreshX[i] = set->GetValue(Form("ThreshDSSSD.%d.X",i), -1.0);
     fthreshY[i] = set->GetValue(Form("ThreshDSSSD.%d.Y",i), -1.0);
   }
@@ -50,6 +52,8 @@ void WASABISettings::PrintSettings(){
   for(int i=0;i<NDSSSD;i++){
     cout << Form("VetoDSSSD.%d.X\t",i) << fvetoX[i] << endl;
     cout << Form("VetoDSSSD.%d.Y\t",i) << fvetoY[i] << endl;
+    cout << Form("OverflowDSSSD.%d.X\t",i) << foverflowX[i] << endl;
+    cout << Form("OverflowDSSSD.%d.Y\t",i) << foverflowY[i] << endl;
     cout << Form("ThreshDSSSD.%d.X\t",i) << fthreshX[i] << endl;
     cout << Form("ThreshDSSSD.%d.Y\t",i) << fthreshY[i] << endl;
   }

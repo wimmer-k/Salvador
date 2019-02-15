@@ -47,7 +47,7 @@ public:
   void SetPositions(DALI* dali);
   //! apply the Doppler correction
   void DopplerCorrect(DALI* dali);
-  //! apply the Doppler correction
+  //! apply the Doppler correction with a certain reaction point
   double DopplerCorrect(DALI* dali, double zreac);
   //! check the positions of two hits and decide if they are added back
   bool Addback(DALIHit* hit0, DALIHit* hit1);

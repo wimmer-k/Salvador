@@ -302,6 +302,7 @@ void Reconstruction::DopplerCorrect(DALI* dali){
 /*!
   Do the Doppler correction including the target positons
   \param dali the input DALI object
+  \param zreac the reaction point in the target
   \return event by events beta
 */
 double Reconstruction::DopplerCorrect(DALI* dali, double zreac){
@@ -340,7 +341,8 @@ TVector3 Reconstruction::PPACPosition(SinglePPAC* pina, SinglePPAC* pinb){
 }
 /*!
   Align the F8 PPAC3 with respect to the others, calibration parameters from the empty target runs
-  \param ppac uncalibrated PPAC position
+  \param pin0 uncalibrated PPAC 0 position
+  \param pin1 uncalibrated PPAC 1 position
 */
 void Reconstruction::AlignPPAC(SinglePPAC* pin0, SinglePPAC* pin1){
   double x = pin0->GetX() + fset->PPAC3PositionX0();
