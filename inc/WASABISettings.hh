@@ -64,6 +64,18 @@ public:
       return fvetoY[dsssd];
     return -1;
   }
+  //! thresh X condition on DSSSD
+  double ThreshX(int dsssd){
+    if(dsssd>-1 && dsssd<NDSSSD)
+      return fthreshX[dsssd];
+    return -1;
+  }
+  //! thresh Y condition on DSSSD
+  double ThreshY(int dsssd){
+    if(dsssd>-1 && dsssd<NDSSSD)
+      return fthreshY[dsssd];
+    return -1;
+  }
   
   
 private:
@@ -89,6 +101,11 @@ private:
   double fvetoX[NDSSSD];
   //! veto for Y strips
   double fvetoY[NDSSSD];
+  
+  //! thresh for X strips
+  double fthreshX[NDSSSD];
+  //! thresh for Y strips
+  double fthreshY[NDSSSD];
   
 
 };

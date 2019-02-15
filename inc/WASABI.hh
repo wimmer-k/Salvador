@@ -307,6 +307,7 @@ public:
       delete *hit;
     }
     fhitsX.clear();
+    fimplantX = -1;
     
     fmultY = 0;
     fvetoY = false;
@@ -314,6 +315,7 @@ public:
       delete *hit;
     }
     fhitsY.clear();
+    fimplantY = -1;
   }
   //! setting the dsssd number
   void SetDSSSD(short dsssd){fdsssd = dsssd;}
@@ -332,6 +334,11 @@ public:
   //! Set a veto on Y
   void SetVetoY(){fvetoY = true;}
   
+  //! Set implantation point X
+  void SetImplantX(int strip){fimplantX = strip;}
+  //! Set implantation point Y
+  void SetImplantY(int strip){fimplantY = strip;}
+
   //! Returns the DSSSD number
   short GetDSSSD(){return fdsssd;}
   
@@ -407,6 +414,11 @@ public:
   //! Is vetoed in Y
   bool IsVetoY(){return fvetoY;}
   
+  //! Implantation X
+  int ImplantX(){return fimplantX;}
+  //! Implantation Y
+  int ImplantY(){return fimplantY;}
+
   //! Printing information 
   void Print(Option_t *option = "") const {
     cout << "DSSSD number " << fdsssd << endl;
@@ -437,6 +449,11 @@ protected:
   bool fvetoX;
   //! veto in Y
   bool fvetoY;
+  //! implantation point X
+  int fimplantX
+  //! implantation point Y
+  int fimplantY
+  
   /// \cond CLASSIMP
   ClassDef(DSSSD,1);
   /// \endcond

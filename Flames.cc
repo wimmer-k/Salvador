@@ -46,7 +46,8 @@ int main(int argc, char* argv[]){
   interface->Add("-n", "nmax", &nmax);
   interface->Add("-v", "verbose", &vl);
   interface->CheckFlags(argc, argv);
-
+  cout << "verbose " << vl << endl;
+  
   if(InputFile == NULL || OutputFile == NULL){
     cerr<<"You have to provide at least one input file and the output file!"<<endl;
     exit(1);
@@ -87,6 +88,9 @@ int main(int argc, char* argv[]){
   //branch for timestamp
   unsigned long long int timestamp = 0;
   tr->Branch("timestamp",&timestamp,"timestamp/l");
+  //branch for trigger
+  unsigned long long int trigger = 0;
+  tr->Branch("trigger",&trigger,"trigger/I");
   //branch for wasabi RAW, maybe to be removed
   WASABIRaw* wasabiRAW = new WASABIRaw;
   tr->Branch("wasabiRAW",&wasabiRAW,320000);
@@ -102,6 +106,7 @@ int main(int argc, char* argv[]){
     //clearing
     timestamp = 0;
     eventnumber = 0;
+    trigger = -1;
     wasabiRAW->Clear();
     wasabi->Clear();
     
@@ -110,6 +115,7 @@ int main(int argc, char* argv[]){
     TArtEventInfo* info = (TArtEventInfo*)info_a->At(0);
     timestamp = info->GetTimeStamp();
     eventnumber = info->GetEventNumber();
+    trigger = info->GetTriggerBit();
     if(timestamp<last_timestamp){
       cout << "timestamp was reset, this TS = " << timestamp << ", last one was " << last_timestamp << " difference " << timestamp-last_timestamp << endl;
     }
@@ -117,9 +123,6 @@ int main(int argc, char* argv[]){
       cout << eventnumber << "\t" << timestamp << "\t" << timestamp-last_timestamp << endl;
     last_timestamp = timestamp;
 
-
-    
-    //trigger bit information
     TArtRawEventObject* rawevent = (TArtRawEventObject*)sman->FindDataContainer("RawEvent");
     for(int i=0;i<rawevent -> GetNumSeg();i++){
       TArtRawSegmentObject* seg = rawevent -> GetSegment(i);

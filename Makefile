@@ -6,7 +6,8 @@ BIN_DIR = $(HOME)/bin
 LIB_DIR = $(HOME)/lib
 COMMON_DIR = $(HOME)/common/
 TARTSYS=/usr/local/anaroot5
-EURICASYS=$(HOME)/ribf140/Go4EURICA
+EURICAINC=$(HOME)/progs/bathtubopera/inc
+GO4INC=$(HOME)/ribf140/Go4EURICA
 
 
 ROOTCFLAGS   := $(shell root-config --cflags)
@@ -17,9 +18,9 @@ ROOTINC      := -I$(shell root-config --incdir)
 CPP             = g++
 CFLAGS		= -Wall -Wno-long-long -g -O3 $(ROOTCFLAGS) -fPIC
 
-INCLUDES        = -I./inc -I$(COMMON_DIR) -I$(TARTSYS)/include -I$(EURICASYS)
+INCLUDES        = -I./inc -I$(COMMON_DIR) -I$(TARTSYS)/include -I$(EURICAINC) -I$(GO4INC)
 BASELIBS 	= -lm $(ROOTLIBS) $(ROOTGLIBS) -L$(LIB_DIR) -L$(TARTSYS)/lib -lSpectrum -lPhysics -lMatrix -lXMLParser
-ALLIBS  	=  $(BASELIBS) -lCommandLineInterface -lanaroot -lananadeko -lanacore -lanabrips -lanaloop -lanadali -lSalvador
+ALLIBS  	=  $(BASELIBS) -lCommandLineInterface -lanaroot -lananadeko -lanacore -lanabrips -lanaloop -lanadali -lSalvador -lEURICA -lGo4EURICA
 LIBS 		= $(ALLIBS)
 LFLAGS		= -g -fPIC -shared
 CFLAGS += -Wl,--no-as-needed
@@ -62,7 +63,7 @@ Flames: Flames.cc $(LIB_DIR)/libSalvador.so $(W_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(W_FILES) -o $(BIN_DIR)/$@ 
 
-Galatea: Galatea.cc $(LIB_DIR)/libSalvador.so $(W_FILES)
+Galatea: Galatea.cc $(LIB_DIR)/libSalvador.so $(LIB_DIR)/libEURICA.so $(W_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(W_FILES) -o $(BIN_DIR)/$@ 
 

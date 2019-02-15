@@ -110,6 +110,7 @@ public:
   //! Apply the Doppler correction with the given beta, assuming motion in the +z direction.
   void DopplerCorrect(double beta){
     fDCen = fen/sqrt(1-beta*beta)*(1-beta*cos(fpos.Theta()));
+    //cout << fen << "\t" << beta << "\t" << fpos.Theta() << "\t" << fDCen << endl;
   }
   //! Apply the Doppler correction with the given beta, and a position, assuming motion in the +z direction.
   void DopplerCorrect(double beta,double zreac){

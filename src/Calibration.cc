@@ -114,6 +114,8 @@ WASABI* Calibration::BuildWASABI(WASABIRaw *raw){
       }
       if(fset->VetoX(dsssd) > 0 && en > fset->VetoX(dsssd))
 	event->GetDSSSD(dsssd)->SetVetoX();
+      if(fset->ThreshX(dsssd) > 0 && en < fset->ThreshX(dsssd))
+	continue;
       event->GetDSSSD(dsssd)->AddHitX(new WASABIHit(strip,en,cal));
       //cout << " added X strip " << strip << " with energy " << en << endl;
     }
@@ -126,6 +128,8 @@ WASABI* Calibration::BuildWASABI(WASABIRaw *raw){
       }
       if(fset->VetoY(dsssd) > 0 && en > fset->VetoY(dsssd))
 	event->GetDSSSD(dsssd)->SetVetoY();
+      if(fset->ThreshY(dsssd) > 0 && en < fset->ThreshY(dsssd))
+	continue;
       event->GetDSSSD(dsssd)->AddHitY(new WASABIHit(strip,en,cal));
       //cout << " added Y strip " << strip << " with energy " << en << endl;
     }
@@ -170,9 +174,10 @@ WASABI* Calibration::BuildWASABI(WASABIRaw *raw){
       //cout << "ystrips ";
        for(unsigned short v = 0; v<(*tdc)->GetVal().size(); v++){
 	double tval  = (*tdc)->GetVal()[v]+fRand->Uniform(0,1) - references[tdcnr];
+	cout << tval << "\t";
 	tval -= fToffsetY[dsssd][strip];
  	event->GetDSSSD(dsssd)->SetStripTimeY(strip,tval);
-	//cout << tval << "\t";
+	cout << tval << endl;
       }
        //cout << endl;
     }

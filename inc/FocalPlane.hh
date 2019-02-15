@@ -8,6 +8,9 @@
 #include "TObject.h"
 #include "FocalPlanedefs.h"
 using namespace std;
+extern int fpID[6];
+int fpNr(int id);
+int firstPPAC(int id);
 
 /*!
   Container for the MUSIC information
