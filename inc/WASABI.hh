@@ -352,6 +352,20 @@ public:
     }
     fhitsABY.clear();
   }
+  //! Clear the addback  information
+  void ClearAddback(Option_t *option = ""){
+    fmultABX = 0;
+    for(vector<WASABIHit*>::iterator hit=fhitsABX.begin(); hit!=fhitsABX.end(); hit++){
+      delete *hit;
+    }
+    fhitsABX.clear();
+    
+    fmultABY = 0;
+    for(vector<WASABIHit*>::iterator hit=fhitsABY.begin(); hit!=fhitsABY.end(); hit++){
+      delete *hit;
+    }
+    fhitsABY.clear();
+  }
   //! setting the dsssd number
   void SetDSSSD(short dsssd){fdsssd = dsssd;}
   //! Add a hit in X
@@ -363,6 +377,17 @@ public:
   void AddHitY(WASABIHit* hit){
     fhitsY.push_back(hit);
     fmultY++;
+  }
+  
+  //! Set hits in X
+  void SetHitsX(vector<WASABIHit*> hits){
+    fhitsX = hits;
+    fmultX = hits.size();
+  }
+  //! Set hits in Y
+  void SetHitsY(vector<WASABIHit*> hits){
+    fhitsY = hits;
+    fmultY = hits.size();
   }
   //! Set a veto on X
   void SetVetoX(){fvetoX = true;}

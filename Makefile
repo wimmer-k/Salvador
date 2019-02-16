@@ -16,7 +16,7 @@ ROOTGLIBS    := $(shell root-config --glibs)
 ROOTINC      := -I$(shell root-config --incdir)
 
 CPP             = g++
-CFLAGS		= -Wall -Wno-long-long -g -O3 $(ROOTCFLAGS) -fPIC
+CFLAGS		= -Wall -Wno-long-long -g -O3 $(ROOTCFLAGS) -fPIC -std=c++11
 
 INCLUDES        = -I./inc -I$(COMMON_DIR) -I$(TARTSYS)/include -I$(EURICAINC) -I$(GO4INC)
 BASELIBS 	= -lm $(ROOTLIBS) $(ROOTGLIBS) -L$(LIB_DIR) -L$(TARTSYS)/lib -lSpectrum -lPhysics -lMatrix -lXMLParser
