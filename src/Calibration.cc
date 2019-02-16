@@ -174,10 +174,8 @@ WASABI* Calibration::BuildWASABI(WASABIRaw *raw){
       //cout << "ystrips ";
        for(unsigned short v = 0; v<(*tdc)->GetVal().size(); v++){
 	double tval  = (*tdc)->GetVal()[v]+fRand->Uniform(0,1) - references[tdcnr];
-	cout << tval << "\t";
 	tval -= fToffsetY[dsssd][strip];
  	event->GetDSSSD(dsssd)->SetStripTimeY(strip,tval);
-	cout << tval << endl;
       }
        //cout << endl;
     }
@@ -215,10 +213,11 @@ WASABI* Calibration::BuildWASABI(WASABIRaw *raw){
     }// yhits
     if(fasteststrip>-1)
       dsssd->SetImplantY(fasteststrip);
-    
+
+    dsssd->Addback();
   }//loop DSSSDs
 
-
+  
   // for(int i=0; i<NDSSSD; i++)
   //   event->GetDSSSD(i)->Print();
   //event->Print();

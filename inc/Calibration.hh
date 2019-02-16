@@ -31,7 +31,11 @@ public:
   void ReadCalibration(char* adccalfile ,char* tdccalfile);
   //! apply mapping and calibration
   WASABI* BuildWASABI(WASABIRaw *raw);
-  
+  //! sort the hits by energy, high to low
+  vector<WASABIHit*> Sort(vector<WASABIHit*> hits);
+  //! sort the hits by energy, low to high
+  vector<WASABIHit*> Revert(vector<WASABIHit*> hits);
+   
 private:
   //! radom generator for smearing ADC values
   TRandom* fRand;

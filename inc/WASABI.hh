@@ -4,10 +4,13 @@
 #include <vector>
 #include <cstdlib>
 #include <math.h>
+#include <algorithm>
 
 #include "TObject.h"
 #include "WASABIdefs.h"
 using namespace std;
+class WASABIHitComparer;
+
 /*!
   Container for the WASABI Raw ADC information
 */
@@ -233,6 +236,7 @@ public:
     fen = en;
     fiscal = iscal;
     ftime.clear();
+    fhitsadded = 1;
   }
   //! Clear the ADC information
   void Clear(Option_t *option = ""){
@@ -240,6 +244,7 @@ public:
     fen = sqrt(-1.);
     ftime.clear();
     fiscal = false;
+    fhitsadded = 0;
   }
   //! Set the time
   void SetTime(double timeval){ ftime.push_back(timeval);}
@@ -256,17 +261,32 @@ public:
       return ftime.at(0);
     return sqrt(-1);
   }
+  //! Get the number of hits that were added back to create one hit
+  unsigned short GetHitsAdded(){return fhitsadded;}
   //! Is is calibrated
   bool IsCal(){return fiscal;}
   //! Printing information 
+  //! Addback a hit
+  void AddBackHit(WASABIHit* hit){
+    if(fen<hit->GetEn()){
+      cout << " error hits not sorted by energy" << endl;
+      return;
+    }
+    fen+=hit->GetEn();
+    fhitsadded+=hit->GetHitsAdded();
+  }
   void Print(Option_t *option = "") const {
-    cout << "pos x = " << fstrip;
-    cout << "\ten " << fen;
+    cout << "strip = " << fstrip;
+    cout << "\ten = " << fen;
     if(fiscal)
       cout << " (calibrated) ";
     else
       cout << " (raw) ";
-    cout << "\ttime " << ftime.size() << " values, first one = " << ftime.at(0) << endl;
+    cout << "\ttime " << ftime.size() << " values, first one = " << ftime.at(0);
+    if(fhitsadded>1)
+      cout << "\thits added " << fhitsadded << endl;
+    else
+      cout << endl;
     return;
   }
 protected:
@@ -278,7 +298,9 @@ protected:
   vector<double> ftime;
   //! is it calibrated
   bool fiscal;
-  
+   //! how many hits were added back to create one hit
+  unsigned short fhitsadded;
+
   /// \cond CLASSIMP
   ClassDef(WASABIHit,1);
   /// \endcond
@@ -300,7 +322,7 @@ public:
     fdsssd = dsssdnr;
     Clear();
   }
-  //! Clear the music information
+  //! Clear the DSSSD information
   void Clear(Option_t *option = ""){
     fmultX = 0;
     fvetoX = false;
@@ -317,6 +339,18 @@ public:
     }
     fhitsY.clear();
     fimplantY = -1;
+
+    fmultABX = 0;
+    for(vector<WASABIHit*>::iterator hit=fhitsABX.begin(); hit!=fhitsABX.end(); hit++){
+      delete *hit;
+    }
+    fhitsABX.clear();
+    
+    fmultABY = 0;
+    for(vector<WASABIHit*>::iterator hit=fhitsABY.begin(); hit!=fhitsABY.end(); hit++){
+      delete *hit;
+    }
+    fhitsABY.clear();
   }
   //! setting the dsssd number
   void SetDSSSD(short dsssd){fdsssd = dsssd;}
@@ -340,7 +374,17 @@ public:
   //! Set implantation point Y
   void SetImplantY(int strip){fimplantY = strip;}
 
-  //! Returns the DSSSD number
+   //! Add an addback hit in X
+  void AddABHitX(WASABIHit* hit){
+    fhitsABX.push_back(hit);
+    fmultABX++;
+  }
+  //! Add an addback hit in Y
+  void AddABHitY(WASABIHit* hit){
+    fhitsABY.push_back(hit);
+    fmultABY++;
+  }
+ //! Returns the DSSSD number
   short GetDSSSD(){return fdsssd;}
   
   //! Returns the X multiplicity of the event
@@ -376,6 +420,26 @@ public:
     return;    
   }
   
+  //! Returns the X multiplicity of the event after addback
+  unsigned short GetMultABX(){return fmultABX;}
+  //! Returns the whole vector of addback hits in X
+  vector<WASABIHit*> GetHitsABX(){return fhitsABX;}
+  //! Returns the addback X hit number n
+  WASABIHit* GetHitABX(unsigned short n){return fhitsABX.at(n);}
+  //! Returns the addback hit at strip number
+  WASABIHit* GetStripHitABX(short s){
+    if(s<0 || s > NXSTRIPS){
+      cout << "looking for addback X strip number " << s <<", not found!" << endl;
+      return new WASABIHit();
+    }
+    for(vector<WASABIHit*>::iterator hit=fhitsABX.begin(); hit!=fhitsABX.end(); hit++){
+      if((*hit)->GetStrip() ==s)
+	return (*hit);
+    }
+    cout << "looking for addback X strip number " << s <<", not found!" << endl;
+    return new WASABIHit();    
+  }
+  
   //! Returns the Y multiplicity of the event
   unsigned short GetMultY(){return fmultY;}
   //! Returns the whole vector of hits in Y
@@ -409,7 +473,38 @@ public:
     return;    
   }
 
+  //! Returns the Y multiplicity of the event after addback
+  unsigned short GetMultABY(){return fmultABY;}
+  //! Returns the whole vector of addback hits in Y
+  vector<WASABIHit*> GetHitsABY(){return fhitsABY;}
+  //! Returns the addback Y hit number n
+  WASABIHit* GetHitABY(unsigned short n){return fhitsABY.at(n);}
+  //! Returns the addback hit at strip number
+  WASABIHit* GetStripHitABY(short s){
+    if(s<0 || s > NYSTRIPS){
+      cout << "looking for addback Y strip number " << s <<", not found!" << endl;
+      return new WASABIHit();
+    }
+    for(vector<WASABIHit*>::iterator hit=fhitsABY.begin(); hit!=fhitsABY.end(); hit++){
+      if((*hit)->GetStrip() ==s)
+	return (*hit);
+    }
+    cout << "looking for addback Y strip number " << s <<", not found!" << endl;
+    return new WASABIHit();    
+  }
+  
 
+
+
+  //! sort the hits by energy, high to low
+  vector<WASABIHit*> Sort(vector<WASABIHit*> hits);
+  //! sort the hits by energy, low to high
+  vector<WASABIHit*> Revert(vector<WASABIHit*> hits);
+  //! addback
+  void Addback();
+  //! check if addback
+  bool Addback(WASABIHit* hit0, WASABIHit* hit1);
+  
   //! Is vetoed in X
   bool IsVetoX(){return fvetoX;}
   //! Is vetoed in Y
@@ -430,9 +525,15 @@ public:
     cout << "X multiplicity " << fmultX << " event" << endl;
     for(unsigned short i=0;i<fhitsX.size();i++)
       fhitsX.at(i)->Print();
+    cout << "X AB multiplicity " << fmultABX << " event" << endl;
+    for(unsigned short i=0;i<fhitsABX.size();i++)
+      fhitsABX.at(i)->Print();
     cout << "Y multiplicity " << fmultY << " event" << endl;
     for(unsigned short i=0;i<fhitsY.size();i++)
       fhitsY.at(i)->Print();
+    cout << "Y AB multiplicity " << fmultABY << " event" << endl;
+    for(unsigned short i=0;i<fhitsABY.size();i++)
+      fhitsABY.at(i)->Print();
   }
 
 protected:
@@ -446,6 +547,14 @@ protected:
   unsigned short fmultY;
   //! vector with the Y hits
   vector<WASABIHit*> fhitsY;
+  //! HIT multiplicity after addback in X
+  unsigned short fmultABX;
+  //! vector with the addback X hits
+  vector<WASABIHit*> fhitsABX;
+  //! HIT multiplicity after addback in Y
+  unsigned short fmultABY;
+  //! vector with the addback Y hits
+  vector<WASABIHit*> fhitsABY;
   //! veto in X
   bool fvetoX;
   //! veto in Y
@@ -471,7 +580,7 @@ public:
       fdsssd[i] = new DSSSD(i);    
     //Clear();
   }
-  //! Clear the music information
+  //! Clear the wasabi information
   void Clear(Option_t *option = ""){
     for(int i=0; i<NDSSSD; i++){
       fdsssd[i]->Clear();
@@ -491,6 +600,17 @@ protected:
   /// \cond CLASSIMP
   ClassDef(WASABI,1);
   /// \endcond
+};
+
+/*!
+  Compare two hits by their energies
+*/
+class WASABIHitComparer {
+public:
+  //! compares energies of the hits
+  bool operator() ( WASABIHit *lhs, WASABIHit *rhs) {
+    return (*lhs).GetEn() > (*rhs).GetEn();
+  }
 };
   
 #endif
