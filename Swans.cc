@@ -249,6 +249,13 @@ int main(int argc, char* argv[]){
     }
   }
 
+  TH2F* cen_stripX =  new TH2F("cen_stripX","cen_stripX",NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_stripX);
+  TH2F* cen_multX =  new TH2F("cen_multX","cen_multX",NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_multX);
+  TH2F* cen_F11X =  new TH2F("cen_F11X","cen_F11X",200,-100,100,2000,0,4000);hlist->Add(cen_F11X);
+  TH2F* cen_stripABX =  new TH2F("cen_stripABX","cen_stripABX",NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_stripABX);
+  TH2F* cen_multABX =  new TH2F("cen_multABX","cen_multABX",NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_multABX);
+  TH2F* cen_F11ABX =  new TH2F("cen_F11ABX","cen_F11ABX",200,-100,100,2000,0,4000);hlist->Add(cen_F11ABX);
+
   vector<TH2F*> cen_stripX_cut;
   vector<TH2F*> cen_multX_cut;
   vector<TH2F*> cen_F11X_cut;	  
@@ -457,23 +464,34 @@ int main(int argc, char* argv[]){
 
 
     //special histos
-    if(wasabi->GetDSSSD(0)->ImplantX()>-1 && wasabi->GetDSSSD(0)->ImplantY()>-1 && !wasabi->GetDSSSD(1)->IsVetoX()){
-      vector<WASABIHit*> hitsX = wasabi->GetDSSSD(1)->GetHitsX();
-      wasabi->GetDSSSD(1)->ClearAddback();
-      vector<WASABIHit*> output;
-      output.clear();
-      for(vector<WASABIHit*>::iterator hit=hitsX.begin(); hit!=hitsX.end(); hit++){
-	// search for the iterator of given string in set
-	set<int>::iterator it = badstrips.find((*hit)->GetStrip());
-	if(it == badstrips.end())
-	  output.push_back((*hit));
-      }
-      wasabi->GetDSSSD(1)->SetHitsX(output);
-      wasabi->GetDSSSD(1)->Addback();
+    vector<WASABIHit*> hitsX = wasabi->GetDSSSD(1)->GetHitsX();
+    wasabi->GetDSSSD(1)->ClearAddback();
+    vector<WASABIHit*> output;
+    output.clear();
+    for(vector<WASABIHit*>::iterator hit=hitsX.begin(); hit!=hitsX.end(); hit++){
+      // search for the iterator of given string in set
+      set<int>::iterator it = badstrips.find((*hit)->GetStrip());
+      if(it == badstrips.end())
+	output.push_back((*hit));
+    }
+    wasabi->GetDSSSD(1)->SetHitsX(output);
+    wasabi->GetDSSSD(1)->Addback();
 
-      vector<WASABIHit*> chitsX = wasabi->GetDSSSD(1)->GetHitsX();
-      vector<WASABIHit*> chitsABX = wasabi->GetDSSSD(1)->GetHitsABX();
+    vector<WASABIHit*> chitsX = wasabi->GetDSSSD(1)->GetHitsX();
+    vector<WASABIHit*> chitsABX = wasabi->GetDSSSD(1)->GetHitsABX();
+    
+    for(vector<WASABIHit*>::iterator hit=chitsX.begin(); hit!=chitsX.end(); hit++){
+      cen_stripX->Fill((*hit)->GetStrip(), (*hit)->GetEn());
+      cen_multX->Fill(wasabi->GetDSSSD(1)->GetMultX(), (*hit)->GetEn());
+      cen_F11X->Fill(fp[fpNr(11)]->GetTrack()->GetX(), (*hit)->GetEn());
+    }
+    for(vector<WASABIHit*>::iterator hit=chitsABX.begin(); hit!=chitsABX.end(); hit++){
+      cen_stripABX->Fill((*hit)->GetStrip(), (*hit)->GetEn());
+      cen_multABX->Fill(wasabi->GetDSSSD(1)->GetMultABX(), (*hit)->GetEn());
+      cen_F11ABX->Fill(fp[fpNr(11)]->GetTrack()->GetX(), (*hit)->GetEn());
+    }
       
+    if(wasabi->GetDSSSD(0)->ImplantX()>-1 && wasabi->GetDSSSD(0)->ImplantY()>-1 && !wasabi->GetDSSSD(1)->IsVetoX()){
       for(unsigned short j=0; j<PartCut.size();j++){
 	if(PartCut[j]->IsInside(beam->GetAQ(1),beam->GetZ(1))){
 	  for(vector<WASABIHit*>::iterator hit=chitsX.begin(); hit!=chitsX.end(); hit++){
