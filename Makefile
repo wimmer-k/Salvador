@@ -5,7 +5,8 @@
 BIN_DIR = $(HOME)/bin
 LIB_DIR = $(HOME)/lib
 COMMON_DIR = $(HOME)/common/
-TARTSYS=/usr/local/anaroot5
+####TARTSYS=/usr/local/anaroot5
+TARTSYS=$(HOME)/progs/anaroot
 EURICAINC=$(HOME)/progs/bathtubopera/inc
 GO4INC=$(HOME)/ribf140/Go4EURICA
 

@@ -37,6 +37,7 @@ int main(int argc, char* argv[]){
   vector<char*> InputFiles;
   char *OutFile = NULL;
   char* CutFile = NULL;
+  double baselineoffset = 0;
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input files", &InputFiles);
@@ -44,6 +45,7 @@ int main(int argc, char* argv[]){
   interface->Add("-le", "last event to be read", &LastEvent);  
   interface->Add("-v", "verbose level", &Verbose);  
   interface->Add("-c", "cutfile", &CutFile);  
+  interface->Add("-b", "baselineoffset", &baselineoffset);  
 
   interface->CheckFlags(argc, argv);
   //Complain about missing mandatory arguments
@@ -216,68 +218,132 @@ int main(int argc, char* argv[]){
   vector< vector<TH2F*> > implantmap_cut;
   vector< vector<TH2F*> > en_stripX_cut;
   vector< vector<TH2F*> > en_multX_cut;
+  vector< vector<TH2F*> > en_betaX_cut;	  
+  vector< vector<TH2F*> > en_F5X_cut;	  
+  vector< vector<TH2F*> > en_betamul1X_cut;	  
+  vector< vector<TH2F*> > en_F5mul1X_cut;	  
+  vector< vector<TH2F*> > en_F7X_cut;	  
   vector< vector<TH2F*> > en_F11X_cut;	  
   vector< vector<TH2F*> > en_stripABX_cut;
   vector< vector<TH2F*> > en_multABX_cut;
+  vector< vector<TH2F*> > en_betaABX_cut;	  
+  vector< vector<TH2F*> > en_F5ABX_cut;	  
+  vector< vector<TH2F*> > en_F7ABX_cut;	  
   vector< vector<TH2F*> > en_F11ABX_cut;	  
 
   implantmap_cut.resize(NDSSSD);
   en_stripX_cut.resize(NDSSSD);
   en_multX_cut.resize(NDSSSD);
+  en_betaX_cut.resize(NDSSSD);  
+  en_F5X_cut.resize(NDSSSD);  
+  en_betamul1X_cut.resize(NDSSSD);  
+  en_F5mul1X_cut.resize(NDSSSD);  
+  en_F7X_cut.resize(NDSSSD);  
   en_F11X_cut.resize(NDSSSD);  
   en_stripABX_cut.resize(NDSSSD);
   en_multABX_cut.resize(NDSSSD);
+  en_betaABX_cut.resize(NDSSSD);  
+  en_F5ABX_cut.resize(NDSSSD);  
+  en_F7ABX_cut.resize(NDSSSD);  
   en_F11ABX_cut.resize(NDSSSD);  
 
   for(int i=0;i<NDSSSD;i++){
     implantmap_cut[i].resize(PartCut.size());
     en_stripX_cut[i].resize(PartCut.size());
     en_multX_cut[i].resize(PartCut.size());
+    en_betaX_cut[i].resize(PartCut.size());
+    en_F5X_cut[i].resize(PartCut.size());
+    en_betamul1X_cut[i].resize(PartCut.size());
+    en_F5mul1X_cut[i].resize(PartCut.size());
+    en_F7X_cut[i].resize(PartCut.size());
     en_F11X_cut[i].resize(PartCut.size());
     en_stripABX_cut[i].resize(PartCut.size());
     en_multABX_cut[i].resize(PartCut.size());
+    en_betaABX_cut[i].resize(PartCut.size());
+    en_F5ABX_cut[i].resize(PartCut.size());
+    en_F7ABX_cut[i].resize(PartCut.size());
     en_F11ABX_cut[i].resize(PartCut.size());
     for(unsigned short j=0; j<PartCut.size();j++){
       implantmap_cut[i][j] = new TH2F(Form("implantmap_%s_%d",PartCut[j]->GetName(),i),Form("implantmap_%s_%d",PartCut[j]->GetName(),i),60,0,60,40,0,40);hlist->Add(implantmap_cut[i][j]);
       
       en_stripX_cut[i][j] =  new TH2F(Form("en_stripX_%s_%d",PartCut[j]->GetName(),i),Form("en_stripX_%s_%d",PartCut[j]->GetName(),i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_stripX_cut[i][j]);
       en_multX_cut[i][j] =  new TH2F(Form("en_multX_%s_%d",PartCut[j]->GetName(),i),Form("en_multX_%s_%d",PartCut[j]->GetName(),i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_multX_cut[i][j]);
+      en_betaX_cut[i][j] =  new TH2F(Form("en_betaX_%s_%d",PartCut[j]->GetName(),i),Form("en_betaX_%s_%d",PartCut[j]->GetName(),i),200,0.50,0.52,2000,0,4000);hlist->Add(en_betaX_cut[i][j]);
+      en_F5X_cut[i][j] =  new TH2F(Form("en_F5X_%s_%d",PartCut[j]->GetName(),i),Form("en_F5X_%s_%d",PartCut[j]->GetName(),i),200,-100,100,2000,0,4000);hlist->Add(en_F5X_cut[i][j]);
+      en_betamul1X_cut[i][j] =  new TH2F(Form("en_betamul1X_%s_%d",PartCut[j]->GetName(),i),Form("en_betamul1X_%s_%d",PartCut[j]->GetName(),i),200,0.50,0.52,2000,0,4000);hlist->Add(en_betamul1X_cut[i][j]);
+      en_F5mul1X_cut[i][j] =  new TH2F(Form("en_F5mul1X_%s_%d",PartCut[j]->GetName(),i),Form("en_F5mul1X_%s_%d",PartCut[j]->GetName(),i),200,-100,100,2000,0,4000);hlist->Add(en_F5mul1X_cut[i][j]);
+      en_F7X_cut[i][j] =  new TH2F(Form("en_F7X_%s_%d",PartCut[j]->GetName(),i),Form("en_F7X_%s_%d",PartCut[j]->GetName(),i),200,-100,100,2000,0,4000);hlist->Add(en_F7X_cut[i][j]);
       en_F11X_cut[i][j] =  new TH2F(Form("en_F11X_%s_%d",PartCut[j]->GetName(),i),Form("en_F11X_%s_%d",PartCut[j]->GetName(),i),200,-100,100,2000,0,4000);hlist->Add(en_F11X_cut[i][j]);
       en_stripABX_cut[i][j] =  new TH2F(Form("en_stripABX_%s_%d",PartCut[j]->GetName(),i),Form("en_stripABX_%s_%d",PartCut[j]->GetName(),i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_stripABX_cut[i][j]);
       en_multABX_cut[i][j] =  new TH2F(Form("en_multABX_%s_%d",PartCut[j]->GetName(),i),Form("en_multABX_%s_%d",PartCut[j]->GetName(),i),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(en_multABX_cut[i][j]);
+      en_betaABX_cut[i][j] =  new TH2F(Form("en_betaABX_%s_%d",PartCut[j]->GetName(),i),Form("en_betaABX_%s_%d",PartCut[j]->GetName(),i),200,0.50,0.52,2000,0,4000);hlist->Add(en_betaABX_cut[i][j]);
+      en_F5ABX_cut[i][j] =  new TH2F(Form("en_F5ABX_%s_%d",PartCut[j]->GetName(),i),Form("en_F5ABX_%s_%d",PartCut[j]->GetName(),i),200,-100,100,2000,0,4000);hlist->Add(en_F5ABX_cut[i][j]);
+      en_F7ABX_cut[i][j] =  new TH2F(Form("en_F7ABX_%s_%d",PartCut[j]->GetName(),i),Form("en_F7ABX_%s_%d",PartCut[j]->GetName(),i),200,-100,100,2000,0,4000);hlist->Add(en_F7ABX_cut[i][j]);
       en_F11ABX_cut[i][j] =  new TH2F(Form("en_F11ABX_%s_%d",PartCut[j]->GetName(),i),Form("en_F11ABX_%s_%d",PartCut[j]->GetName(),i),200,-100,100,2000,0,4000);hlist->Add(en_F11ABX_cut[i][j]);
     }
   }
 
   TH2F* cen_stripX =  new TH2F("cen_stripX","cen_stripX",NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_stripX);
   TH2F* cen_multX =  new TH2F("cen_multX","cen_multX",NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_multX);
+  TH2F* cen_betaX =  new TH2F("cen_betaX","cen_betaX",200,0.50,0.52,2000,0,4000);hlist->Add(cen_betaX);
+  TH2F* cen_F5X =  new TH2F("cen_F5X","cen_F5X",200,-100,100,2000,0,4000);hlist->Add(cen_F5X);
+  TH2F* cen_betamul1X =  new TH2F("cen_betamul1X","cen_betamul1X",200,0.50,0.52,2000,0,4000);hlist->Add(cen_betamul1X);
+  TH2F* cen_F5mul1X =  new TH2F("cen_F5mul1X","cen_F5mul1X",200,-100,100,2000,0,4000);hlist->Add(cen_F5mul1X);
+  TH2F* cen_F7X =  new TH2F("cen_F7X","cen_F7X",200,-100,100,2000,0,4000);hlist->Add(cen_F7X);
   TH2F* cen_F11X =  new TH2F("cen_F11X","cen_F11X",200,-100,100,2000,0,4000);hlist->Add(cen_F11X);
   TH2F* cen_stripABX =  new TH2F("cen_stripABX","cen_stripABX",NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_stripABX);
   TH2F* cen_multABX =  new TH2F("cen_multABX","cen_multABX",NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_multABX);
+  TH2F* cen_betaABX =  new TH2F("cen_betaABX","cen_betaABX",200,0.50,0.52,2000,0,4000);hlist->Add(cen_betaABX);
+  TH2F* cen_F5ABX =  new TH2F("cen_F5ABX","cen_F5ABX",200,-100,100,2000,0,4000);hlist->Add(cen_F5ABX);
+  TH2F* cen_F7ABX =  new TH2F("cen_F7ABX","cen_F7ABX",200,-100,100,2000,0,4000);hlist->Add(cen_F7ABX);
   TH2F* cen_F11ABX =  new TH2F("cen_F11ABX","cen_F11ABX",200,-100,100,2000,0,4000);hlist->Add(cen_F11ABX);
 
   vector<TH2F*> cen_stripX_cut;
   vector<TH2F*> cen_multX_cut;
+  vector<TH2F*> cen_betaX_cut;	  
+  vector<TH2F*> cen_F5X_cut;	  
+  vector<TH2F*> cen_betamul1X_cut;	  
+  vector<TH2F*> cen_F5mul1X_cut;	  
+  vector<TH2F*> cen_F7X_cut;	  
   vector<TH2F*> cen_F11X_cut;	  
   vector<TH2F*> cen_stripABX_cut;
   vector<TH2F*> cen_multABX_cut;
+  vector<TH2F*> cen_betaABX_cut;	  
+  vector<TH2F*> cen_F5ABX_cut;	  
+  vector<TH2F*> cen_F7ABX_cut;	  
   vector<TH2F*> cen_F11ABX_cut;	  
   cen_stripX_cut.resize(PartCut.size());
   cen_multX_cut.resize(PartCut.size());
+  cen_betaX_cut.resize(PartCut.size());
+  cen_F5X_cut.resize(PartCut.size());
+  cen_betamul1X_cut.resize(PartCut.size());
+  cen_F5mul1X_cut.resize(PartCut.size());
+  cen_F7X_cut.resize(PartCut.size());
   cen_F11X_cut.resize(PartCut.size());
   cen_stripABX_cut.resize(PartCut.size());
   cen_multABX_cut.resize(PartCut.size());
+  cen_betaABX_cut.resize(PartCut.size());
+  cen_F5ABX_cut.resize(PartCut.size());
+  cen_F7ABX_cut.resize(PartCut.size());
   cen_F11ABX_cut.resize(PartCut.size());
   for(unsigned short j=0; j<PartCut.size();j++){
     cen_stripX_cut[j] =  new TH2F(Form("cen_stripX_%s",PartCut[j]->GetName()),Form("cen_stripX_%s",PartCut[j]->GetName()),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_stripX_cut[j]);
     cen_multX_cut[j] =  new TH2F(Form("cen_multX_%s",PartCut[j]->GetName()),Form("cen_multX_%s",PartCut[j]->GetName()),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_multX_cut[j]);
+    cen_betaX_cut[j] =  new TH2F(Form("cen_betaX_%s",PartCut[j]->GetName()),Form("cen_betaX_%s",PartCut[j]->GetName()),200,0.50,0.52,2000,0,4000);hlist->Add(cen_betaX_cut[j]);
+    cen_F5X_cut[j] =  new TH2F(Form("cen_F5X_%s",PartCut[j]->GetName()),Form("cen_F5X_%s",PartCut[j]->GetName()),200,-100,100,2000,0,4000);hlist->Add(cen_F5X_cut[j]);
+    cen_betamul1X_cut[j] =  new TH2F(Form("cen_betamul1X_%s",PartCut[j]->GetName()),Form("cen_betamul1X_%s",PartCut[j]->GetName()),200,0.50,0.52,2000,0,4000);hlist->Add(cen_betamul1X_cut[j]);
+    cen_F5mul1X_cut[j] =  new TH2F(Form("cen_F5mul1X_%s",PartCut[j]->GetName()),Form("cen_F5mul1X_%s",PartCut[j]->GetName()),200,-100,100,2000,0,4000);hlist->Add(cen_F5mul1X_cut[j]);
+    cen_F7X_cut[j] =  new TH2F(Form("cen_F7X_%s",PartCut[j]->GetName()),Form("cen_F7X_%s",PartCut[j]->GetName()),200,-100,100,2000,0,4000);hlist->Add(cen_F7X_cut[j]);
     cen_F11X_cut[j] =  new TH2F(Form("cen_F11X_%s",PartCut[j]->GetName()),Form("cen_F11X_%s",PartCut[j]->GetName()),200,-100,100,2000,0,4000);hlist->Add(cen_F11X_cut[j]);
     cen_stripABX_cut[j] =  new TH2F(Form("cen_stripABX_%s",PartCut[j]->GetName()),Form("cen_stripABX_%s",PartCut[j]->GetName()),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_stripABX_cut[j]);
     cen_multABX_cut[j] =  new TH2F(Form("cen_multABX_%s",PartCut[j]->GetName()),Form("cen_multABX_%s",PartCut[j]->GetName()),NXSTRIPS,0,NXSTRIPS,2000,0,4000);hlist->Add(cen_multABX_cut[j]);
+    cen_betaABX_cut[j] =  new TH2F(Form("cen_betaABX_%s",PartCut[j]->GetName()),Form("cen_betaABX_%s",PartCut[j]->GetName()),200,0.50,0.52,2000,0,4000);hlist->Add(cen_betaABX_cut[j]);
+    cen_F5ABX_cut[j] =  new TH2F(Form("cen_F5ABX_%s",PartCut[j]->GetName()),Form("cen_F5ABX_%s",PartCut[j]->GetName()),200,-100,100,2000,0,4000);hlist->Add(cen_F5ABX_cut[j]);
+    cen_F7ABX_cut[j] =  new TH2F(Form("cen_F7ABX_%s",PartCut[j]->GetName()),Form("cen_F7ABX_%s",PartCut[j]->GetName()),200,-100,100,2000,0,4000);hlist->Add(cen_F7ABX_cut[j]);
     cen_F11ABX_cut[j] =  new TH2F(Form("cen_F11ABX_%s",PartCut[j]->GetName()),Form("cen_F11ABX_%s",PartCut[j]->GetName()),200,-100,100,2000,0,4000);hlist->Add(cen_F11ABX_cut[j]);
   }
 
-
+  TH2F* test = new TH2F("test","test",2000,0,1000,2000,0,1000);hlist->Add(test);
 
   Double_t nentries = tr->GetEntries();
   cout << nentries << " entries in tree" << endl;
@@ -335,6 +401,19 @@ int main(int argc, char* argv[]){
 	tdcoffset->Fill((*hit)->GetTDC()*NTDCCH+(*hit)->GetChan(),(*hit)->GetVal().at(v));
       }
     }
+
+    // DSSSD *dsssd1 = wasabi->GetDSSSD(1);
+    // DSSSD *dsssd2 = wasabi->GetDSSSD(2);
+    // vector<WASABIHit*> hits1 = dsssd1->GetHitsX();
+    // vector<WASABIHit*> hits2 = dsssd2->GetHitsX();
+    // double average2=0;
+    // for(vector<WASABIHit*>::iterator hit=hits2.begin(); hit!=hits2.end(); hit++){
+    //   average2 += (*hit)->GetEn();
+    // }
+    // average2 /= hits2.size();
+    // for(vector<WASABIHit*>::iterator hit=hits1.begin(); hit!=hits1.end(); hit++){
+    //   test->Fill((*hit)->GetEn(), average2);
+    // }
     
     for(int d=0;d<NDSSSD;d++){
       DSSSD *dsssd = wasabi->GetDSSSD(d);
@@ -391,6 +470,13 @@ int main(int argc, char* argv[]){
 	  if(!vetoX && PartCut[j]->IsInside(beam->GetAQ(1),beam->GetZ(1))){
 	    en_stripX_cut[d][j]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
 	    en_multX_cut[d][j]->Fill(dsssd->GetMultX(), (*hit)->GetEn());
+	    en_betaX_cut[d][j]->Fill(beam->GetBeta(1), (*hit)->GetEn());
+	    en_F5X_cut[d][j]->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+	    if(dsssd->GetMultX() == 1){
+	      en_betamul1X_cut[d][j]->Fill(beam->GetBeta(1), (*hit)->GetEn());
+	      en_F5mul1X_cut[d][j]->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+	    }
+	    en_F7X_cut[d][j]->Fill(fp[fpNr(7)]->GetTrack()->GetX(), (*hit)->GetEn());
 	    en_F11X_cut[d][j]->Fill(fp[fpNr(11)]->GetTrack()->GetX(), (*hit)->GetEn());
 	  }
 	}
@@ -416,6 +502,9 @@ int main(int argc, char* argv[]){
 	  if(!vetoX && PartCut[j]->IsInside(beam->GetAQ(1),beam->GetZ(1))){
 	    en_stripABX_cut[d][j]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
 	    en_multABX_cut[d][j]->Fill(dsssd->GetMultABX(), (*hit)->GetEn());
+	    en_betaABX_cut[d][j]->Fill(beam->GetBeta(1), (*hit)->GetEn());
+	    en_F5ABX_cut[d][j]->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+	    en_F7ABX_cut[d][j]->Fill(fp[fpNr(7)]->GetTrack()->GetX(), (*hit)->GetEn());
 	    en_F11ABX_cut[d][j]->Fill(fp[fpNr(11)]->GetTrack()->GetX(), (*hit)->GetEn());
 	  }
 	}
@@ -469,6 +558,8 @@ int main(int argc, char* argv[]){
     vector<WASABIHit*> output;
     output.clear();
     for(vector<WASABIHit*>::iterator hit=hitsX.begin(); hit!=hitsX.end(); hit++){
+      // correct energy
+      (*hit)->SetEn((*hit)->GetEn()-baselineoffset);
       // search for the iterator of given string in set
       set<int>::iterator it = badstrips.find((*hit)->GetStrip());
       if(it == badstrips.end())
@@ -483,11 +574,21 @@ int main(int argc, char* argv[]){
     for(vector<WASABIHit*>::iterator hit=chitsX.begin(); hit!=chitsX.end(); hit++){
       cen_stripX->Fill((*hit)->GetStrip(), (*hit)->GetEn());
       cen_multX->Fill(wasabi->GetDSSSD(1)->GetMultX(), (*hit)->GetEn());
+      cen_betaX->Fill(beam->GetBeta(1), (*hit)->GetEn());
+      cen_F5X->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+      if(wasabi->GetDSSSD(1)->GetMultX() == 1){
+	cen_betamul1X->Fill(beam->GetBeta(1), (*hit)->GetEn());
+	cen_F5mul1X->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+      }
+      cen_F7X->Fill(fp[fpNr(7)]->GetTrack()->GetX(), (*hit)->GetEn());
       cen_F11X->Fill(fp[fpNr(11)]->GetTrack()->GetX(), (*hit)->GetEn());
     }
     for(vector<WASABIHit*>::iterator hit=chitsABX.begin(); hit!=chitsABX.end(); hit++){
       cen_stripABX->Fill((*hit)->GetStrip(), (*hit)->GetEn());
       cen_multABX->Fill(wasabi->GetDSSSD(1)->GetMultABX(), (*hit)->GetEn());
+      cen_betaABX->Fill(beam->GetBeta(1), (*hit)->GetEn());
+      cen_F5ABX->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+      cen_F7ABX->Fill(fp[fpNr(7)]->GetTrack()->GetX(), (*hit)->GetEn());
       cen_F11ABX->Fill(fp[fpNr(11)]->GetTrack()->GetX(), (*hit)->GetEn());
     }
       
@@ -497,11 +598,21 @@ int main(int argc, char* argv[]){
 	  for(vector<WASABIHit*>::iterator hit=chitsX.begin(); hit!=chitsX.end(); hit++){
 	    cen_stripX_cut[j]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
 	    cen_multX_cut[j]->Fill(wasabi->GetDSSSD(1)->GetMultX(), (*hit)->GetEn());
+	    cen_betaX_cut[j]->Fill(beam->GetBeta(1), (*hit)->GetEn());
+	    cen_F5X_cut[j]->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+	    if(wasabi->GetDSSSD(1)->GetMultX() == 1){
+	      cen_betamul1X_cut[j]->Fill(beam->GetBeta(1), (*hit)->GetEn());
+	      cen_F5mul1X_cut[j]->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+	    }
+	    cen_F7X_cut[j]->Fill(fp[fpNr(7)]->GetTrack()->GetX(), (*hit)->GetEn());
 	    cen_F11X_cut[j]->Fill(fp[fpNr(11)]->GetTrack()->GetX(), (*hit)->GetEn());
 	  }
 	  for(vector<WASABIHit*>::iterator hit=chitsABX.begin(); hit!=chitsABX.end(); hit++){
 	    cen_stripABX_cut[j]->Fill((*hit)->GetStrip(), (*hit)->GetEn());
 	    cen_multABX_cut[j]->Fill(wasabi->GetDSSSD(1)->GetMultABX(), (*hit)->GetEn());
+	    cen_betaABX_cut[j]->Fill(beam->GetBeta(1), (*hit)->GetEn());
+	    cen_F5ABX_cut[j]->Fill(fp[fpNr(5)]->GetTrack()->GetX(), (*hit)->GetEn());
+	    cen_F7ABX_cut[j]->Fill(fp[fpNr(7)]->GetTrack()->GetX(), (*hit)->GetEn());
 	    cen_F11ABX_cut[j]->Fill(fp[fpNr(11)]->GetTrack()->GetX(), (*hit)->GetEn());
 	  }
 	}

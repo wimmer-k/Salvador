@@ -246,6 +246,9 @@ public:
     fiscal = false;
     fhitsadded = 0;
   }
+  //! Set the energy
+  void SetEn(double en){ fen = en;}
+  
   //! Set the time
   void SetTime(double timeval){ ftime.push_back(timeval);}
   

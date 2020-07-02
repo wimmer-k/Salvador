@@ -19,6 +19,8 @@
 #include "Reconstruction.hh"
 #include "Globaldefs.h"
 
+int DALIIDS = 300;
+
 using namespace TMath;
 using namespace std;
 bool signal_received = false;
@@ -255,13 +257,13 @@ int main(int argc, char* argv[]){
   TH2F* egamegamAB_IDgate_multAB[10];
   TH2F* egamegamABdc_IDgate_multAB[10];
 
-  egamID_mult[0] = new TH2F("egamID","egamID",200,0,200,bins,0,bins);hlist->Add(egamID_mult[0]);
-  egamdcID_mult[0] = new TH2F("egamdcID","egamdcID",200,0,200,bins,0,bins);hlist->Add(egamdcID_mult[0]);
+  egamID_mult[0] = new TH2F("egamID","egamID",DALIIDS,0,DALIIDS,bins,0,bins);hlist->Add(egamID_mult[0]);
+  egamdcID_mult[0] = new TH2F("egamdcID","egamdcID",DALIIDS,0,DALIIDS,bins,0,bins);hlist->Add(egamdcID_mult[0]);
   egamdctrig_mult[0] = new TH2F("egamdctrig","egamdctrig",10,0,10,bins,0,bins);hlist->Add(egamdctrig_mult[0]);
   egamdctheta_mult[0] = new TH2F("egamdctheta","egamdctheta",200,0,4,400,0,bins);hlist->Add(egamdctheta_mult[0]);
   egamdcphi_mult[0] = new TH2F("egamdcphi","egamdcphi",200,-4,4,400,0,bins);hlist->Add(egamdcphi_mult[0]);
-  egamABID_mult[0] = new TH2F("egamABID","egamABID",200,0,200,bins,0,bins);hlist->Add(egamABID_mult[0]);
-  egamABdcID_mult[0] = new TH2F("egamABdcID","egamABdcID",200,0,200,bins,0,bins);hlist->Add(egamABdcID_mult[0]);
+  egamABID_mult[0] = new TH2F("egamABID","egamABID",DALIIDS,0,DALIIDS,bins,0,bins);hlist->Add(egamABID_mult[0]);
+  egamABdcID_mult[0] = new TH2F("egamABdcID","egamABdcID",DALIIDS,0,DALIIDS,bins,0,bins);hlist->Add(egamABdcID_mult[0]);
   egamABdctrig_mult[0] = new TH2F("egamABdctrig","egamABdctrig",10,0,10,bins,0,bins);hlist->Add(egamABdctrig_mult[0]);
   for(int t=0;t<10;t++){
     egamdctrigmult_theta[t][0] = new TH2F(Form("egamdctrig%d_theta",t),Form("egamdctrig%d_theta",t),100,0,5,bins,0,bins);hlist->Add(egamdctrigmult_theta[t][0]);
@@ -277,15 +279,15 @@ int main(int argc, char* argv[]){
   egamegamAB_IDgate_mult[0] = new TH2F("egamegamAB_IDgate","egamegamAB_IDgate",200,0,4000,200,0,4000);hlist->Add(egamegamAB_IDgate_mult[0]);
   egamegamABdc_IDgate_mult[0] = new TH2F("egamegamABdc_IDgate","egamegamABdc_IDgate",200,0,4000,200,0,4000);hlist->Add(egamegamABdc_IDgate_mult[0]);
   for(int m=1;m<10;m++){
-    egamID_mult[m] = new TH2F(Form("egamIDmult%d",m),Form("egamIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamID_mult[m]);
-    egamdcID_mult[m] = new TH2F(Form("egamdcIDmult%d",m),Form("egamdcIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamdcID_mult[m]);
+    egamID_mult[m] = new TH2F(Form("egamIDmult%d",m),Form("egamIDmult%d",m),DALIIDS,0,DALIIDS,400,0,4000);hlist->Add(egamID_mult[m]);
+    egamdcID_mult[m] = new TH2F(Form("egamdcIDmult%d",m),Form("egamdcIDmult%d",m),DALIIDS,0,DALIIDS,400,0,4000);hlist->Add(egamdcID_mult[m]);
     egamdctrig_mult[m] = new TH2F(Form("egamdctrigmult%d",m),Form("egamdctrigmult%d",m),10,0,10,400,0,4000);hlist->Add(egamdctrig_mult[m]);
     egamdctheta_mult[m] = new TH2F(Form("egamdcthetamult%d",m),Form("egamdcthetamult%d",m),200,0,4,400,0,4000);hlist->Add(egamdctheta_mult[m]);
     egamdcphi_mult[m] = new TH2F(Form("egamdcphimult%d",m),Form("egamdcphimult%d",m),200,-4,4,400,0,4000);hlist->Add(egamdcphi_mult[m]);
-    egamABID_mult[m] = new TH2F(Form("egamABIDmult%d",m),Form("egamABIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamABID_mult[m]);
-    egamABID_multAB[m] = new TH2F(Form("egamABIDmultAB%d",m),Form("egamABIDmultAB%d",m),200,0,200,400,0,4000);hlist->Add(egamABID_multAB[m]);
-    egamABdcID_mult[m] = new TH2F(Form("egamABdcIDmult%d",m),Form("egamABdcIDmult%d",m),200,0,200,400,0,4000);hlist->Add(egamABdcID_mult[m]);
-    egamABdcID_multAB[m] = new TH2F(Form("egamABdcIDmultAB%d",m),Form("egamABdcIDmultAB%d",m),200,0,200,400,0,4000);hlist->Add(egamABdcID_multAB[m]);
+    egamABID_mult[m] = new TH2F(Form("egamABIDmult%d",m),Form("egamABIDmult%d",m),DALIIDS,0,DALIIDS,400,0,4000);hlist->Add(egamABID_mult[m]);
+    egamABID_multAB[m] = new TH2F(Form("egamABIDmultAB%d",m),Form("egamABIDmultAB%d",m),DALIIDS,0,DALIIDS,400,0,4000);hlist->Add(egamABID_multAB[m]);
+    egamABdcID_mult[m] = new TH2F(Form("egamABdcIDmult%d",m),Form("egamABdcIDmult%d",m),DALIIDS,0,DALIIDS,400,0,4000);hlist->Add(egamABdcID_mult[m]);
+    egamABdcID_multAB[m] = new TH2F(Form("egamABdcIDmultAB%d",m),Form("egamABdcIDmultAB%d",m),DALIIDS,0,DALIIDS,400,0,4000);hlist->Add(egamABdcID_multAB[m]);
     egamABdctrig_mult[m] = new TH2F(Form("egamABdctrigmult%d",m),Form("egamABdctrigmult%d",m),10,0,10,400,0,4000);hlist->Add(egamABdctrig_mult[m]);
     egamABdctrig_multAB[m] = new TH2F(Form("egamABdctrigmultAB%d",m),Form("egamABdctrigmultAB%d",m),10,0,10,400,0,4000);hlist->Add(egamABdctrig_multAB[m]);
     for(int t=0;t<10;t++){
