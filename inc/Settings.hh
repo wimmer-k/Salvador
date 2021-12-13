@@ -58,6 +58,11 @@ public:
   //! Do the recalibration
   bool DoReCalibration(){return fdorecal;}
 
+  //! The file containing the time dependent corrections
+  const char* TimeCorFile(){return fTimeCorFile.c_str();}
+  //! The file containing the events numbers at which each run starts
+  const char* EvtNrFile(){return fEvtNrFile.c_str();}
+  
   //! Get the overflow energy
   double Overflow(){return foverflow;}
   //! Get the underflow energy
@@ -103,6 +108,31 @@ public:
   //! Get the gate on the change in delta for charge changes
   double DeltaGate(int i){return fdeltagate[i];}
 
+  double GetAoQCorrection(int sp, int fp, int tr){return faoq_corr[sp][fp][tr];}
+  double GetBRAoQCorrection_F3X(){return faoq_corr[0][0][0];}
+  double GetBRAoQCorrection_F3A(){return faoq_corr[0][0][1];}
+  double GetBRAoQCorrection_F3Q(){return faoq_corr[0][0][2];}
+  double GetBRAoQCorrection_F5X(){return faoq_corr[0][1][0];}
+  double GetBRAoQCorrection_F5A(){return faoq_corr[0][1][1];}
+  double GetBRAoQCorrection_F5Q(){return faoq_corr[0][1][2];}
+  double GetBRAoQCorrection_F7X(){return faoq_corr[0][2][0];}
+  double GetBRAoQCorrection_F7A(){return faoq_corr[0][2][1];}
+  double GetBRAoQCorrection_F7Q(){return faoq_corr[0][2][2];}
+  double GetZDAoQCorrection_F8X(){return faoq_corr[1][0][0];}
+  double GetZDAoQCorrection_F8A(){return faoq_corr[1][0][1];}
+  double GetZDAoQCorrection_F8Q(){return faoq_corr[1][0][2];}
+  double GetZDAoQCorrection_F9X(){return faoq_corr[1][1][0];}
+  double GetZDAoQCorrection_F9A(){return faoq_corr[1][1][1];}
+  double GetZDAoQCorrection_F9Q(){return faoq_corr[1][1][2];}
+  double GetZDAoQCorrection_F11X(){return faoq_corr[1][2][0];}
+  double GetZDAoQCorrection_F11A(){return faoq_corr[1][2][1];}
+  double GetZDAoQCorrection_F11Q(){return faoq_corr[1][2][2];}
+
+  double GetBRAoQCorrection_gain(){return faoq_lin[0][0];}
+  double GetBRAoQCorrection_offs(){return faoq_lin[0][1];}
+  double GetZDAoQCorrection_gain(){return faoq_lin[1][0];}
+  double GetZDAoQCorrection_offs(){return faoq_lin[1][1];}
+  
 private:
   //! filename of the settings file
   string finputfile;
@@ -126,6 +156,12 @@ private:
   double ftoffset[6];
   //! DALI calibration file
   string fDALIfile;
+
+  //! Time dependent corrections for IC
+  string fTimeCorFile;
+  //! Event numbers
+  string fEvtNrFile;
+  
   
   //! DALI bad channels file
   string fDALIbadfile;
@@ -168,5 +204,9 @@ private:
   double ff5xgate[2];
   //! gate on the delta change
   double fdeltagate[4];
+
+  double faoq_corr[2][3][3];  // BR/ZD, focal plane, x,angle,q
+
+  double faoq_lin[2][2]; // BR/ZD, gain,off
 };
 #endif

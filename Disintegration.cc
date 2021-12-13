@@ -32,13 +32,17 @@ int main(int argc, char* argv[]){
   char* InputFile = NULL;
   char* OutFile = NULL;
   char* CutFile = NULL;
+  int br = 2;
+  int zd = 5;
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input file", &InputFile);
   interface->Add("-o", "output file", &OutFile);    
   interface->Add("-c", "cutfile", &CutFile);
   interface->Add("-le", "last event to be read", &LastEvent);  
-  interface->Add("-v", "verbose level", &Verbose);  
+  interface->Add("-v", "verbose level", &Verbose);
+  interface->Add("-b", "cut on this BigRIPS PIC", &br);
+  interface->Add("-z", "cut on this ZeroDeg PIC", &zd);
   interface->CheckFlags(argc, argv);
   //Complain about missing mandatory arguments
   if(InputFile == NULL){
@@ -72,6 +76,10 @@ int main(int argc, char* argv[]){
   tr->SetBranchAddress("beam",&beam);
   DALI* dali = new DALI;
   tr->SetBranchAddress("dali",&dali);
+  int eventnumber = 0;
+  tr->SetBranchAddress("eventnumber",&eventnumber);
+  int toteventnumber = 0;
+  tr->SetBranchAddress("toteventnumber",&toteventnumber);
 
   cout<<"output file: "<<OutFile<< endl;
 
@@ -125,6 +133,8 @@ int main(int argc, char* argv[]){
       splittree[in][ou]->Branch("ppacs",&ppac,320000);
       splittree[in][ou]->Branch("beam",&beam,320000);
       splittree[in][ou]->Branch("dali",&dali,320000);
+      splittree[in][ou]->Branch("eventnumber",&eventnumber,"eventnumber/I");
+      splittree[in][ou]->Branch("toteventnumber",&toteventnumber,"toteventnumber/I");
     }
   }
 
@@ -160,13 +170,12 @@ int main(int argc, char* argv[]){
       return 6;
     }
     nbytes += status;
-    
     //start analysis
     for(UShort_t in=0;in<InPartCut.size();in++){ // loop over incoming cuts
-      if(InPartCut[in]->IsInside(beam->GetAQ(1),beam->GetZ(1))){
+      if(InPartCut[in]->IsInside(beam->GetAQ(br),beam->GetZ(br))){
 	splittree[in][OutPartCut[in].size()]->Fill();
 	for(UShort_t ou=0;ou<OutPartCut[in].size();ou++){ // loop over outgoing cuts
-	  if(OutPartCut[in][ou]->IsInside(beam->GetAQ(5),beam->GetZ(5))){
+	  if(OutPartCut[in][ou]->IsInside(beam->GetAQ(zd),beam->GetZ(zd))){
 	    splittree[in][ou]->Fill();
 	  }
 	}//outpartcuts

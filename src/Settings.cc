@@ -13,6 +13,7 @@ Settings::Settings(char *settings){
   Read in the settings from the fie
 */
 void Settings::ReadSettings(){
+
   TEnv *set = new TEnv(finputfile.c_str());
   fverbose = set->GetValue("VerboseLevel",0);
   
@@ -32,6 +33,9 @@ void Settings::ReadSettings(){
   fmatrixfile[2] = set->GetValue("Matrix.89.File","/home/wimmer/ribf94/matrix/F8F9_LargeAccAchr.mat");
   fmatrixfile[3] = set->GetValue("Matrix.911.File","/home/wimmer/ribf94/matrix/F9F11_LargeAccAchr.mat");
 
+  fTimeCorFile = set->GetValue("Time.Corrections.File","settings.dat");
+  fEvtNrFile = set->GetValue("Event.Number.File","settings.dat");
+  
   fdorecal = false;
   if(set->GetValue("Do.ReCalibration",0)>0){
     fdorecal = true;
@@ -51,8 +55,8 @@ void Settings::ReadSettings(){
   faddbacktdiff[0] = set->GetValue("Addback.TimeDiff.Low",-50.);
   faddbacktdiff[1] = set->GetValue("Addback.TimeDiff.High",20.);
 
-  ftimegate[0] = set->GetValue("Timing.Gate.Low", 20.);
-  ftimegate[1] = set->GetValue("Timing.Gate.High",30.);
+  ftimegate[0] = set->GetValue("Timing.Gate.Low", -1000.);
+  ftimegate[1] = set->GetValue("Timing.Gate.High",1000.);
 
   fDALIposfile = set->GetValue("InteractionPoints",(char*)"settings/iponts.dat");
   fDALIbadfile = set->GetValue("Bad.Channels",(char*)"settings/baddali.dat");
@@ -62,6 +66,7 @@ void Settings::ReadSettings(){
   fppac3align[2] = set->GetValue("PPAC3.Align.X1",0.0);
   fppac3align[3] = set->GetValue("PPAC3.Align.Y1",0.0);
   ftargetposition = set->GetValue("Target.Position",129.5);
+
   ff5xgate[0] = set->GetValue("F5X.Gate.Low", -200.);
   ff5xgate[1] = set->GetValue("F5X.Gate.High", 200.);
   fdeltagate[2] = set->GetValue("Delta.Gate.Low", -999.);
@@ -69,6 +74,32 @@ void Settings::ReadSettings(){
   fdeltagate[0] = set->GetValue("Delta.Gate.BR.Low", -999.);
   fdeltagate[1] = set->GetValue("Delta.Gate.BR.High", 999.);
 
+  faoq_corr[0][0][0] = set->GetValue("BigRIPS.AoQCorr_F3X",0.0);
+  faoq_corr[0][0][1] = set->GetValue("BigRIPS.AoQCorr_F3A",0.0);
+  faoq_corr[0][0][2] = set->GetValue("BigRIPS.AoQCorr_F3Q",0.0);
+  faoq_corr[0][1][0] = set->GetValue("BigRIPS.AoQCorr_F5X",0.0);
+  faoq_corr[0][1][1] = set->GetValue("BigRIPS.AoQCorr_F5A",0.0);
+  faoq_corr[0][1][2] = set->GetValue("BigRIPS.AoQCorr_F5Q",0.0);
+  faoq_corr[0][2][0] = set->GetValue("BigRIPS.AoQCorr_F7X",0.0);
+  faoq_corr[0][2][1] = set->GetValue("BigRIPS.AoQCorr_F7A",0.0);
+  faoq_corr[0][2][2] = set->GetValue("BigRIPS.AoQCorr_F7Q",0.0);
+
+  faoq_corr[1][0][0] = set->GetValue("ZeroDeg.AoQCorr_F8X",0.0);
+  faoq_corr[1][0][1] = set->GetValue("ZeroDeg.AoQCorr_F8A",0.0);
+  faoq_corr[1][0][2] = set->GetValue("ZeroDeg.AoQCorr_F8Q",0.0);
+  faoq_corr[1][1][0] = set->GetValue("ZeroDeg.AoQCorr_F9X",0.0);
+  faoq_corr[1][1][1] = set->GetValue("ZeroDeg.AoQCorr_F9A",0.0);
+  faoq_corr[1][1][2] = set->GetValue("ZeroDeg.AoQCorr_F9Q",0.0);
+  faoq_corr[1][2][0] = set->GetValue("ZeroDeg.AoQCorr_F11X",0.0);
+  faoq_corr[1][2][1] = set->GetValue("ZeroDeg.AoQCorr_F11A",0.0);
+  faoq_corr[1][2][2] = set->GetValue("ZeroDeg.AoQCorr_F11Q",0.0);
+
+  faoq_lin[0][0] = set->GetValue("BigRIPS.AoQCorr_Gain",1.0);
+  faoq_lin[0][1] = set->GetValue("BigRIPS.AoQCorr_Offs",0.0);
+
+  faoq_lin[1][0] = set->GetValue("ZeroDeg.AoQCorr_Gain",1.0);
+  faoq_lin[1][1] = set->GetValue("ZeroDeg.AoQCorr_Offs",0.0);
+  
   if(fverbose>0)
     PrintSettings();
 }
@@ -116,6 +147,19 @@ void Settings::PrintSettings(){
   cout << "gate on F5X position\t" <<ff5xgate[0] << " to " << ff5xgate[1] << endl;
   cout << "gate on delta for charge changes BR\t" <<fdeltagate[0] << " to " << fdeltagate[1] << endl;
   cout << "gate on delta for charge changes ZD\t" <<fdeltagate[2] << " to " << fdeltagate[3] << endl;
+
+  cout << "BigRIPS.AoQCorr_F3X\t" << faoq_corr[0][0][0] << endl;
+  cout << "BigRIPS.AoQCorr_F3A\t" << faoq_corr[0][0][1] << endl;
+  cout << "BigRIPS.AoQCorr_F5X\t" << faoq_corr[0][1][0] << endl;
+  cout << "BigRIPS.AoQCorr_F5A\t" << faoq_corr[0][1][1] << endl;
+  cout << "BigRIPS.AoQCorr_F7X\t" << faoq_corr[0][2][0] << endl;
+  cout << "BigRIPS.AoQCorr_F7A\t" << faoq_corr[0][2][1] << endl;
+  cout << "ZeroDeg.AoQCorr_F8X\t" << faoq_corr[1][0][0] << endl;
+  cout << "ZeroDeg.AoQCorr_F8A\t" << faoq_corr[1][0][1] << endl;
+  cout << "ZeroDeg.AoQCorr_F9X\t" << faoq_corr[1][1][0] << endl;
+  cout << "ZeroDeg.AoQCorr_F9A\t" << faoq_corr[1][1][1] << endl;
+  cout << "ZeroDeg.AoQCorr_F11X\t" << faoq_corr[1][2][0] << endl;
+  cout << "ZeroDeg.AoQCorr_F11A\t" << faoq_corr[1][2][1] << endl;
 
 }
 

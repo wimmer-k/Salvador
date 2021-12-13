@@ -6,7 +6,7 @@
 #include <signal.h>
 #include "TArtStoreManager.hh"
 #include "TArtEventStore.hh"
-#include "TArtEventInfo.hh"
+//#include "TArtEventInfo.hh"
 #include "TArtBigRIPSParameters.hh"
 #include "TArtDALIParameters.hh"
 #include "TArtCalibPID.hh"
@@ -30,6 +30,7 @@
 #include "TArtDALINaI.hh"
 
 #include "TFile.h"
+#include "TH1F.h"
 #include "TTree.h"
 #include "TStopwatch.h"
 
@@ -99,6 +100,57 @@ int main(int argc, char* argv[]){
   estore->SetInterrupt(&signal_received); 
   estore->Open(InputFile);
   std::cout<<"estore ->"<< InputFile <<std::endl;
+  TString * rn = estore->GetRunInfo()->GetRunNumber();
+  std::cout<<"Runnumber "<< rn->Atoi() <<std::endl;
+
+
+
+  TEnv *evtnumbers = new TEnv(set->EvtNrFile());
+  int startevent = evtnumbers->GetValue(Form("Start.Event.Number.%d",rn->Atoi()),0);
+  cout << "run number " <<rn->Atoi() << " starts with event nr " << startevent << endl;
+  
+
+
+  /// load time dependent corrections
+  TFile *cor = new TFile(set->TimeCorFile());
+  TH1F* f7_cor[2];
+  TH1F* f11_cor[2];
+  TH1F* br_cor[2];
+  TH1F* zd_cor[2];
+  if(cor->IsZombie()){
+    cerr << "ignore previous warning!!" << endl;
+    cerr << "File " << set->TimeCorFile() << " not existing, cannot perform time dependent corrections!" << endl;
+    f7_cor[0] = NULL;
+    f7_cor[1] = NULL;
+    f11_cor[0] = NULL;
+    f11_cor[1] = NULL;
+    br_cor[0] = NULL;
+    br_cor[1] = NULL;
+    zd_cor[0] = NULL;
+    zd_cor[1] = NULL;
+  }
+  else{
+    f7_cor[0] = (TH1F*)cor->Get("hoffsF7");
+    f7_cor[1] = (TH1F*)cor->Get("hgainF7");
+    f11_cor[0] = (TH1F*)cor->Get("hoffsF11");
+    f11_cor[1] = (TH1F*)cor->Get("hgainF11");
+    br_cor[0] = (TH1F*)cor->Get("hoffsBR");
+    br_cor[1] = (TH1F*)cor->Get("hgainBR");
+    zd_cor[0] = (TH1F*)cor->Get("hoffsZD");
+    zd_cor[1] = (TH1F*)cor->Get("hgainZD");
+
+    outfile->cd();
+    for(int i=0;i<2;i++){
+      f7_cor[i]->Write(); 
+      f11_cor[i]->Write(); 
+      br_cor[i]->Write(); 
+      zd_cor[i]->Write(); 
+    }
+  }
+  outfile->cd();
+  
+  int event = startevent;
+
 
   // Create BigRIPSParameters to get Plastics, PPACs, ICs and FocalPlanes parameters from ".xml" files
   //--------------------------------------------------------------------------------------------------	
@@ -183,6 +235,8 @@ int main(int argc, char* argv[]){
   //branch for original event number
   int eventnumber = 0;
   tr->Branch("eventnumber",&eventnumber,"eventnumber/I");
+  int toteventnumber = 0;
+  tr->Branch("toteventnumber",&toteventnumber,"toteventnumber/I");
   //branch for timestamp
   unsigned long long int timestamp = 0;
   //if(!set->WithDALI())
@@ -212,6 +266,7 @@ int main(int argc, char* argv[]){
     trigbit = 0;
     timestamp = 0;
     eventnumber++;
+    toteventnumber = event;
     for(int f=0;f<NFPLANES;f++){
       fp[f]->Clear();
     }
@@ -391,25 +446,54 @@ int main(int argc, char* argv[]){
     beam->SetTOFBeta(0,recotof[2]->GetTOF(),recotof[2]->GetBeta());
     beam->SetTOFBeta(1,recotof[5]->GetTOF(),recotof[5]->GetBeta());
     beam->SetTOFBeta(2,tof7to8->GetTOF(),tof7to8->GetBeta());
-    
-    for(unsigned short b=0;b<6;b++)
-      beam->SetAQZ(b,recobeam[b]->GetAoQ(),recobeam[b]->GetZet());
 
-    if(set->WithDALI()){
-      beam->CorrectAQ(1, +0.00034002 *fp[fpNr(5)]->GetTrack()->GetA()
-		         -6.089e-05  *fp[fpNr(5)]->GetTrack()->GetX()
-			 +0.000413889*fp[fpNr(7)]->GetTrack()->GetA() 
-			 +0.000460512*fp[fpNr(7)]->GetTrack()->GetX());
-	
-      beam->CorrectAQ(5, +8.53643e-05*fp[fpNr(5)]->GetTrack()->GetA()
-			 -6.57149e-05*fp[fpNr(5)]->GetTrack()->GetX()
-			 +0.000158604*fp[fpNr(7)]->GetTrack()->GetA() 
-			 +0.000212333*fp[fpNr(7)]->GetTrack()->GetX()
-			 -9.46977e-05*fp[fpNr(9)]->GetTrack()->GetA()
-			 +1.46503e-06*fp[fpNr(9)]->GetTrack()->GetX()
-			 -2.54913e-06*fp[fpNr(11)]->GetTrack()->GetA() 
-			 -0.00010038 *fp[fpNr(11)]->GetTrack()->GetX());
+
+        
+    for(unsigned short b=0;b<6;b++){
+      double z = recobeam[b]->GetZet();
+      double gz = 1;
+      double oz = 0;
+      if(b<3 && f7_cor[0]!=NULL && f7_cor[1]!=NULL){
+	gz = f7_cor[1]->GetBinContent(event/10000+1);
+	oz = f7_cor[0]->GetBinContent(event/10000+1);
+      }
+      if(b>2 && f11_cor[0]!=NULL && f11_cor[1]!=NULL){
+	gz = f11_cor[1]->GetBinContent(event/10000+1);
+	oz = f11_cor[0]->GetBinContent(event/10000+1);
+      }
+      double a = recobeam[b]->GetAoQ();
+      double ga = 1;
+      double oa = 0;
+      if(b<3 && br_cor[0]!=NULL && br_cor[1]!=NULL){
+	ga = br_cor[1]->GetBinContent(event/10000+1);
+	oa = br_cor[0]->GetBinContent(event/10000+1);
+      }
+      if(b>2 && zd_cor[0]!=NULL && zd_cor[1]!=NULL){
+	ga = zd_cor[1]->GetBinContent(event/10000+1);
+	oa = zd_cor[0]->GetBinContent(event/10000+1);
+      }
+      z = z*gz+oz;
+      a = a*ga+oa;
+
+      //cout << z << "\t" << event << "\t" << o << "\t" << g << "\t" << z*g+o << endl;
+      
+      beam->SetAQZ(b,a,z);
     }
+    // if(set->WithDALI()){
+    //   beam->CorrectAQ(1, +0.00034002 *fp[fpNr(5)]->GetTrack()->GetA()
+    // 		         -6.089e-05  *fp[fpNr(5)]->GetTrack()->GetX()
+    // 			 +0.000413889*fp[fpNr(7)]->GetTrack()->GetA() 
+    // 			 +0.000460512*fp[fpNr(7)]->GetTrack()->GetX());
+	
+    //   beam->CorrectAQ(5, +8.53643e-05*fp[fpNr(5)]->GetTrack()->GetA()
+    // 			 -6.57149e-05*fp[fpNr(5)]->GetTrack()->GetX()
+    // 			 +0.000158604*fp[fpNr(7)]->GetTrack()->GetA() 
+    // 			 +0.000212333*fp[fpNr(7)]->GetTrack()->GetX()
+    // 			 -9.46977e-05*fp[fpNr(9)]->GetTrack()->GetA()
+    // 			 +1.46503e-06*fp[fpNr(9)]->GetTrack()->GetX()
+    // 			 -2.54913e-06*fp[fpNr(11)]->GetTrack()->GetA() 
+    // 			 -0.00010038 *fp[fpNr(11)]->GetTrack()->GetX());
+    // }
     for(unsigned short b=0;b<4;b++)
       beam->SetDelta(b ,recorips[b]->GetDelta());
     
@@ -449,7 +533,8 @@ int main(int argc, char* argv[]){
       tr->AutoSave();
     }
     ctr++;
-
+    event++;
+    
     if(nmax>0 && ctr>nmax-1)
       break;
   }

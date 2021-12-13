@@ -64,9 +64,14 @@ int main(int argc, char* argv[]){
   TH2F* tsumy_id = new TH2F("tsumy_id","tsumy_id",NPPACS,0,NPPACS,2500,0,250);hlist->Add(tsumy_id);
   TH1F* tsumx[NPPACS];
   TH1F* tsumy[NPPACS];
+  TH2F* ppacx_vs_time[NPPACS];
+  TH2F* ppacy_vs_time[NPPACS];
+  
   for(unsigned short p=0;p<NPPACS;p++){
     tsumx[p] = new TH1F(Form("tsumx_%d",p),Form("tsumx_%d",p),1000,-200,800);hlist->Add(tsumx[p]);
     tsumy[p] = new TH1F(Form("tsumy_%d",p),Form("tsumy_%d",p),1000,-200,800);hlist->Add(tsumy[p]);
+    ppacx_vs_time[p] = new TH2F(Form("ppacx_vs_time_%d",p),Form("ppacx_vs_time_%d",p),10000,0,100e6,500,-100,100);hlist->Add(ppacx_vs_time[p]);
+    ppacy_vs_time[p] = new TH2F(Form("ppacy_vs_time_%d",p),Form("ppacy_vs_time_%d",p),10000,0,100e6,500,-100,100);hlist->Add(ppacy_vs_time[p]);
   }
   //focal planes
   TH2F* dT_vs_logQ[NFPLANES];
@@ -88,12 +93,13 @@ int main(int argc, char* argv[]){
   }
 
   //dali
-  TH2F* adc_id = new TH2F("adc_id","adc_id",200,0,200,5000,0,5000);hlist->Add(adc_id);
-  TH2F* en_id = new TH2F("en_id","en_id",200,0,200,500,0,2000);hlist->Add(en_id);
-  TH2F* enDC_id = new TH2F("enDC_id","enDC_id",200,0,200,500,0,2000);hlist->Add(enDC_id);
-  TH2F* time_id = new TH2F("time_id","time_id",200,0,200,2000,-2000,0);hlist->Add(time_id);
-  TH2F* time_id_g = new TH2F("time_id_g","time_id_g",200,0,200,2000,-2000,0);hlist->Add(time_id_g);
-  TH2F* toffset_id = new TH2F("toffset_id","toffset_id",200,0,200,1000,-200,800);hlist->Add(toffset_id);
+  TH2F* adc_id = new TH2F("adc_id","adc_id",250,0,250,5000,0,5000);hlist->Add(adc_id);
+  TH2F* en_id = new TH2F("en_id","en_id",250,0,250,500,0,2000);hlist->Add(en_id);
+  TH2F* enF_id = new TH2F("enF_id","enF_id",250,0,250,2000,0,2000);hlist->Add(enF_id);
+  TH2F* enDC_id = new TH2F("enDC_id","enDC_id",250,0,250,500,0,2000);hlist->Add(enDC_id);
+  TH2F* time_id = new TH2F("time_id","time_id",250,0,250,2000,-2000,0);hlist->Add(time_id);
+  TH2F* time_id_g = new TH2F("time_id_g","time_id_g",250,0,250,2000,-2000,0);hlist->Add(time_id_g);
+  TH2F* toffset_id = new TH2F("toffset_id","toffset_id",250,0,250,1000,-200,800);hlist->Add(toffset_id);
 
   //PID
   TH2F* z_vs_aoq[6];
@@ -102,6 +108,13 @@ int main(int argc, char* argv[]){
   TH2F* euz_vs_aoqc[6];
   TH2F* euaoq_vs_time[6];
   TH2F* euz_vs_time[6];
+  TH2F* gez_vs_aoq[6];
+  TH2F* gez_vs_aoqc[6];
+  TH2F* gezraw_vs_aoq[6];
+  TH2F* gezraw_vs_aoqc[6];
+  TH2F* geaoq_vs_time[6];
+  TH2F* gez_vs_time[6];
+  TH2F* gezraw_vs_time[6];
    for(unsigned short f=0;f<6;f++){
     z_vs_aoq[f] = new TH2F(Form("z_vs_aoq_%d",f),Form("z_vs_aoq_%d",f),1000,1.8,2.2,1000,30,40);hlist->Add(z_vs_aoq[f]);
     z_vs_aoqc[f] = new TH2F(Form("z_vs_aoqc_%d",f),Form("z_vs_aoqc_%d",f),1000,1.8,2.2,1000,30,40);hlist->Add(z_vs_aoqc[f]);
@@ -109,6 +122,13 @@ int main(int argc, char* argv[]){
     euz_vs_aoqc[f] = new TH2F(Form("euz_vs_aoqc_%d",f),Form("euz_vs_aoqc_%d",f),1000,2.5,3.5,1000,15,30);hlist->Add(euz_vs_aoqc[f]);
     euaoq_vs_time[f] = new TH2F(Form("euaoq_vs_time_%d",f),Form("euaoq_vs_time_%d",f),5000,0,50e6,1000,2.5,3.0);hlist->Add(euaoq_vs_time[f]);
     euz_vs_time[f] = new TH2F(Form("euz_vs_time_%d",f),Form("euz_vs_time_%d",f),5000,0,50e6,1000,15,30);hlist->Add(euz_vs_time[f]);
+    gez_vs_aoq[f] = new TH2F(Form("gez_vs_aoq_%d",f),Form("gez_vs_aoq_%d",f),1000,1.8,2.2,1000,20,40);hlist->Add(gez_vs_aoq[f]);
+    gez_vs_aoqc[f] = new TH2F(Form("gez_vs_aoqc_%d",f),Form("gez_vs_aoqc_%d",f),1000,1.8,2.2,1000,20,40);hlist->Add(gez_vs_aoqc[f]);
+    gezraw_vs_aoq[f] = new TH2F(Form("gezraw_vs_aoq_%d",f),Form("gezraw_vs_aoq_%d",f),1000,1.8,2.2,1000,1,5);hlist->Add(gezraw_vs_aoq[f]);
+    gezraw_vs_aoqc[f] = new TH2F(Form("gezraw_vs_aoqc_%d",f),Form("gezraw_vs_aoqc_%d",f),1000,1.8,2.2,1000,1,5);hlist->Add(gezraw_vs_aoqc[f]);
+    geaoq_vs_time[f] = new TH2F(Form("geaoq_vs_time_%d",f),Form("geaoq_vs_time_%d",f),10000,0,100e6,1000,1.8,2.2);hlist->Add(geaoq_vs_time[f]);
+    gez_vs_time[f] = new TH2F(Form("gez_vs_time_%d",f),Form("gez_vs_time_%d",f),10000,0,100e6,1000,10,50);hlist->Add(gez_vs_time[f]);
+    gezraw_vs_time[f] = new TH2F(Form("gezraw_vs_time_%d",f),Form("gezraw_vs_time_%d",f),10000,0,100e6,1000,1,5);hlist->Add(gezraw_vs_time[f]);
 
   
   } 
@@ -136,6 +156,11 @@ int main(int argc, char* argv[]){
   tr->SetBranchAddress("beam",&beam);
   DALI* dali = new DALI;
   tr->SetBranchAddress("dali",&dali);
+  int eventnumber = 0;
+  tr->SetBranchAddress("eventnumber",&eventnumber);
+  int toteventnumber = 0;
+  tr->SetBranchAddress("toteventnumber",&toteventnumber);
+
   Double_t nentries = tr->GetEntries();
   cout << nentries << " entries in tree" << endl;
   if(nentries<1)
@@ -166,7 +191,7 @@ int main(int argc, char* argv[]){
       return 6;
     }
     nbytes += status;
-    
+
     //start analysis
 
     //ppacs
@@ -178,6 +203,10 @@ int main(int argc, char* argv[]){
 	tsumx[sp->GetID()]->Fill(sp->GetTsumX());
 	tsumy[sp->GetID()]->Fill(sp->GetTsumY());
       }
+      ppacx_vs_time[sp->GetID()]->Fill(i,sp->GetX());
+      ppacy_vs_time[sp->GetID()]->Fill(i,sp->GetY());
+
+      
     }
     //dali
     for(unsigned short g=0;g<dali->GetMult();g++){
@@ -185,6 +214,7 @@ int main(int argc, char* argv[]){
       short id = hit->GetID();
       adc_id->Fill(id,hit->GetADC());
       en_id->Fill(id,hit->GetEnergy());
+      enF_id->Fill(id,hit->GetEnergy());
       enDC_id->Fill(id,hit->GetDCEnergy());
       time_id->Fill(id,hit->GetTime());
       if(hit->GetEnergy()>500){
@@ -212,6 +242,13 @@ int main(int argc, char* argv[]){
       euz_vs_aoqc[f]->Fill(beam->GetCorrAQ(f),beam->GetZ(f));
       euaoq_vs_time[f]->Fill(i,beam->GetAQ(f));
       euz_vs_time[f]->Fill(i,beam->GetZ(f));
+      gez_vs_aoq[f]->Fill(beam->GetAQ(f),beam->GetZ(f));
+      gez_vs_aoqc[f]->Fill(beam->GetCorrAQ(f),beam->GetZ(f));
+      gezraw_vs_aoq[f]->Fill(beam->GetAQ(f),beam->GetZ(f));
+      gezraw_vs_aoqc[f]->Fill(beam->GetCorrAQ(f),beam->GetZ(f));
+      geaoq_vs_time[f]->Fill(i,beam->GetAQ(f));
+      gez_vs_time[f]->Fill(i,beam->GetZ(f));
+      gezraw_vs_time[f]->Fill(i,beam->GetZ(f));
     }
     if(i%10000 == 0){
       double time_end = get_time();

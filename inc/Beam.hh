@@ -115,7 +115,11 @@ public:
     if(j<0 || j>5) return;
     faoqc[j] = faoq[j] + corr;
   }
-
+  //! Scale and shift A/Q
+  void ScaleAQ(unsigned short j, double gain, double offs){
+    if(j<0 || j>5) return;
+    faoqc[j] = gain*faoqc[j] + offs;
+  }
   //! Get the A/Q ratio
   double GetAQ(unsigned short j){
     if(j<0 || j>5) return sqrt(-1.);

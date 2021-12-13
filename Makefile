@@ -34,7 +34,7 @@ O_FILES = build/Reconstruction.o build/Settings.o
 
 W_FILES = build/Calibration.o build/BuildEvents.o build/WASABISettings.o
 
-all: Metamorphosis FriedBacon BurningGiraffe Disintegration Persistence
+all: Metamorphosis FriedBacon BurningGiraffe Disintegration Persistence $(LIB_DIR)/libSalvador.so
 
 Metamorphosis: Metamorphosis.cc $(LIB_DIR)/libSalvador.so build/Settings.o
 	@echo "Compiling $@"
@@ -53,6 +53,10 @@ Disintegration: Disintegration.cc $(LIB_DIR)/libSalvador.so
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) -o $(BIN_DIR)/$@ 
 
 Persistence: Persistence.cc $(LIB_DIR)/libSalvador.so $(O_FILES)
+	@echo "Compiling $@"
+	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
+
+Machine: Machine.cc $(LIB_DIR)/libSalvador.so $(O_FILES)
 	@echo "Compiling $@"
 	@$(CPP) $(CFLAGS) $(INCLUDES) $< $(LIBS) $(O_FILES) -o $(BIN_DIR)/$@ 
 

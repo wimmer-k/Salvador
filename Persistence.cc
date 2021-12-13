@@ -44,6 +44,8 @@ int main(int argc, char* argv[]){
   int writeTree = 1;
   double beta =0;
   int minID = 79;
+  int br = 2;
+  int zd = 5;
   //Read in the command line arguments
   CommandLineInterface* interface = new CommandLineInterface();
   interface->Add("-i", "input files", &InputFiles);
@@ -55,6 +57,8 @@ int main(int argc, char* argv[]){
   interface->Add("-wt", "write tree", &writeTree);  
   interface->Add("-b", "beta (overrides settings file)", &beta);
   interface->Add("-id", "minimum DALI ID for additional gamma-gamma spectra", &minID);
+  interface->Add("-br", "cut on this BigRIPS PIC", &br);
+  interface->Add("-zd", "cut on this ZeroDeg PIC", &zd);
 
   interface->CheckFlags(argc, argv);
   //Complain about missing mandatory arguments
@@ -119,15 +123,15 @@ int main(int argc, char* argv[]){
 
   //histograms
   TH1F* trigger = new TH1F("trigger","trigger",10,0,10);hlist->Add(trigger);
-  TH2F* bigrips = new TH2F("bigrips","bigrips",1000,1.8,2.2,1000,30,40);hlist->Add(bigrips);
-  TH2F* zerodeg = new TH2F("zerodeg","zerodeg",1000,1.8,2.2,1000,30,40);hlist->Add(zerodeg);
+  TH2F* bigrips = new TH2F("bigrips","bigrips",1000,1.8,2.3,1000,20,40);hlist->Add(bigrips);
+  TH2F* zerodeg = new TH2F("zerodeg","zerodeg",1000,1.8,2.3,1000,20,40);hlist->Add(zerodeg);
   TH2F* bigrips_tr[10];
   TH2F* zerodeg_tr[10];
   TH1F* f5X_tr[10];
   for(int i=0;i<10;i++){
-    bigrips_tr[i] = new TH2F(Form("bigrips_tr%d",i),Form("bigrips_tr%d",i),1000,1.8,2.2,1000,30,40);hlist->Add(bigrips_tr[i]);
-    zerodeg_tr[i] = new TH2F(Form("zerodeg_tr%d",i),Form("zerodeg_tr%d",i),1000,1.8,2.2,1000,30,40);hlist->Add(zerodeg_tr[i]);
-    f5X_tr[i] = new TH1F(Form("f5X_tr%d",i),Form("f5X_tr%d",i),300,-150,150);hlist->Add(f5X_tr[i]);
+    bigrips_tr[i] = new TH2F(Form("bigrips_tr%d",i),Form("bigrips_tr%d",i),1000,1.8,2.3,1000,20,40);hlist->Add(bigrips_tr[i]);
+    zerodeg_tr[i] = new TH2F(Form("zerodeg_tr%d",i),Form("zerodeg_tr%d",i),1000,1.8,2.3,1000,20,40);hlist->Add(zerodeg_tr[i]);
+    f5X_tr[i] = new TH1F(Form("f5X_tr%d",i),Form("f5X_tr%d",i),3000,-150,150);hlist->Add(f5X_tr[i]);
   }
 
   TH1F* f8ppacX[6];
@@ -168,7 +172,7 @@ int main(int argc, char* argv[]){
   }
   TH1F* bbeta[3];
   for(unsigned short b=0;b<3;b++){
-    bbeta[b] = new TH1F(Form("bbeta_%d",b),Form("bbeta_%d",b),1000,0,1);hlist->Add(bbeta[b]);
+    bbeta[b] = new TH1F(Form("bbeta_%d",b),Form("bbeta_%d",b),10000,0,1);hlist->Add(bbeta[b]);
   }
   TH1F* delta[4];
   for(unsigned short b=0;b<4;b++){
@@ -202,6 +206,7 @@ int main(int argc, char* argv[]){
   int bins = 8000;
   
   TH2F* triggertgam = new TH2F("triggertgam","triggertgam",1000,-500,500,10,0,10);hlist->Add(triggertgam);
+  TH2F* ID_theta  = new TH2F("ID_theta","ID_theta",250,0,250,180,0,180);hlist->Add(ID_theta);
   TH1F* mult = new TH1F("mult","mult",50,0,50);hlist->Add(mult);
   TH2F* multtrig = new TH2F("multtrig","multtrig",20,0,20,50,0,50);hlist->Add(multtrig);
   TH1F* egam = new TH1F("egam","egam",bins,0,bins);hlist->Add(egam);
@@ -446,11 +451,11 @@ int main(int argc, char* argv[]){
     
     //histos
     trigger->Fill(trigbit);
-    bigrips->Fill(beam->GetAQ(1),beam->GetZ(1));
-    zerodeg->Fill(beam->GetAQ(5),beam->GetZ(5));
+    bigrips->Fill(beam->GetAQ(br),beam->GetZ(br));
+    zerodeg->Fill(beam->GetAQ(zd),beam->GetZ(zd));
     if(trigbit>-1 && trigbit<10){
-      bigrips_tr[trigbit]->Fill(beam->GetAQ(1),beam->GetZ(1));
-      zerodeg_tr[trigbit]->Fill(beam->GetAQ(5),beam->GetZ(5));
+      bigrips_tr[trigbit]->Fill(beam->GetAQ(br),beam->GetZ(br));
+      zerodeg_tr[trigbit]->Fill(beam->GetAQ(zd),beam->GetZ(zd));
       f5X_tr[trigbit]->Fill(fp[fpNr(5)]->GetTrack()->GetX());
       thetaphi_tr[trigbit]->Fill(beam->GetPhi(),beam->GetTheta()*1000);
       thetaphideg_tr[trigbit]->Fill(beam->GetPhi()*rad2deg,beam->GetTheta()*rad2deg);
@@ -523,6 +528,7 @@ int main(int argc, char* argv[]){
     mult->Fill(dali->GetMult());
     multtrig->Fill(trigbit,dali->GetMult());
     for(unsigned short k=0;k<dali->GetMult();k++){
+      ID_theta->Fill(dali->GetHit(k)->GetID(),dali->GetHit(k)->GetPos().Theta()*180/TMath::Pi());
       egam->Fill(dali->GetHit(k)->GetEnergy());
       egamdc->Fill(dali->GetHit(k)->GetDCEnergy()); 
       triggertgam->Fill(dali->GetHit(k)->GetTOffset(),trigbit);

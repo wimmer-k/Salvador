@@ -26,9 +26,9 @@ Reconstruction::Reconstruction(char* settings){
       cout << i << "\t" << fpositions[i][0]<< "\t" << fpositions[i][1]<< "\t" << fpositions[i][2]<<endl;
     }
     if(fset->DoReCalibration())
-    for(unsigned short i=0;i<frecal.size();i++){
-      cout << i << "\t" << frecal[i][0]<< "\t" << frecal[i][1]<< "\t" << frecal[i][2]<<endl;
-    }
+      for(unsigned short i=0;i<frecal.size();i++){
+	cout << i << "\t" << frecal[i][0]<< "\t" << frecal[i][1]<< "\t" << frecal[i][2]<<endl;
+      }
   }
 }
 
@@ -383,7 +383,7 @@ bool Reconstruction::F5XGate(double f5xpos){
   \return changes in charge state
 */
 bool Reconstruction::ChargeChangeBR(double delta0, double delta1){
-  if(fset->DeltaGate(0)<100)//no gate set
+  if(fset->DeltaGate(0)<-998)//no gate set
     return false;
   if((delta0-delta1) < fset->DeltaGate(0) || (delta0-delta1) > fset->DeltaGate(1))
       return true;
@@ -394,7 +394,7 @@ bool Reconstruction::ChargeChangeBR(double delta0, double delta1){
   \return changes in charge state
 */
 bool Reconstruction::ChargeChangeZD(double delta2, double delta3){
-  if(fset->DeltaGate(0)<100)//no gate set
+  if(fset->DeltaGate(2)<-998)//no gate set
     return false;
   if((delta2-delta3) < fset->DeltaGate(2) || (delta2-delta3) > fset->DeltaGate(3))
       return true;
